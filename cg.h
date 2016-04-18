@@ -27,6 +27,7 @@ void Compute_Linked_List(gsl_matrix * Micro, gsl_vector * List, gsl_vector * Lis
 void Compute_NeighborCells(int cell, gsl_vector * neighbors);
 void Compute_NeighborMatrix(gsl_matrix * Neighbors);
 int FindParticle(gsl_matrix * Micro, int TestParticle);
-int Compute_VerletList(gsl_matrix * Micro, int TestParticle, gsl_vector * NeighboringCells, int TestCell, gsl_vector * LinkedHead, gsl_vector * LinkedList, int * Verlet);
+int Compute_VerletList(gsl_matrix * Micro, int TestParticle, gsl_vector * NeighboringCells,
+                       int TestCell, gsl_vector * LinkedHead, gsl_vector * LinkedList, int * Verlet);
 
 void DrawSim(gsl_matrix * Micro, int TestParticle, int TestCell, gsl_vector * NeighboringCells, int * Verlet, int NumberOfNeighbors);
