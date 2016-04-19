@@ -12,6 +12,8 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
+#include <unistd.h>
+#include <omp.h>
 
 #define NParticles 23406
 #define NNodes        64

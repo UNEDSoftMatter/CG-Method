@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 19 abr 2016 12:34:39 CEST
+ * Modified   : mar 19 abr 2016 13:54:08 CEST
  *
  * Author     : jatorre
  *
@@ -227,83 +227,89 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
 
   // printf("epsilon = %f, sigma = %f\n", epsilon, sigma);
 
-  double xi, yi, zi, xj, yj, zj, dx, dy, dz, r2, r2i, r6i, ff;
-
-  gsl_vector * NeighboringCells = gsl_vector_calloc(27);
-  int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz));
- 
   gsl_matrix_scale(Forces,0.0);
 
-  for (int i=0;i<NParticles;i++)
+  #pragma omp parallel
   {
-    // printf("[%s]\tComputing Verlet list for particle %d...\n",__TIME__,i);
-    int iCell = FindParticle(Positions,i);
-    gsl_matrix_get_row(NeighboringCells, Neighbors, iCell);
-         
-    xi = gsl_matrix_get(Positions,i,1);    
-    yi = gsl_matrix_get(Positions,i,2);    
-    zi = gsl_matrix_get(Positions,i,3);    
- 
-    // Checkpoint: Print particles inside a cell and neighboring cells
-    //   printf("Particle %d (type %d) at (%f, %f, %f) is in Cell %d\n", i, ((int) gsl_matrix_get(Positions,i,0)), xi, yi, zi, iCell);
-    //   printf("Neighboring cells of cell %d are (", iCell);
-    //   for (int nu=0;nu<27;nu++)
-    //       printf("%d, ",((int) gsl_vector_get(NeighboringCells,nu)));
-    //   printf(")\n");
-    
-    Verlet = realloc(Verlet, 27 * NParticles * sizeof(int) / (Mx * My * Mz));
-    int NumberOfNeighbors = Compute_VerletList(Positions, i, NeighboringCells, iCell, ListHead, List, Verlet);
-    Verlet = realloc(Verlet, NumberOfNeighbors * sizeof(int));
- 
-    // Checkpoint: Print Verlet list of a particle
-    //   printf("Particle %d has %d neighbors\n", i, NumberOfNeighbors);
-    //   for (int i=0;i<NumberOfNeighbors;i++)
-    //     printf("%d, ", Verlet[i]);
-    //   printf(")\n");
-
-    for (int j=0;j<NumberOfNeighbors;j++)
+    #pragma omp for
+    for (int i=0;i<NParticles;i++)
     {
-       if (( ((int) gsl_matrix_get(Positions,i,0)) == type1)&&(((int) gsl_matrix_get(Positions,Verlet[j],0) == type2)))
-       {
-         xj = gsl_matrix_get(Positions,Verlet[j],1);    
-         yj = gsl_matrix_get(Positions,Verlet[j],2);    
-         zj = gsl_matrix_get(Positions,Verlet[j],3);    
+      // TEST to check the performance of a parallel thread
+      // nanosleep((const struct timespec[]){{0, 200000L}}, NULL);
 
-         dx = (xi - xj);
-         dx -= Lx*round(dx/Lx);
-       
-         dy = (yi - yj);
-         dy -= Ly*round(dy/Ly);
-       
-         dz = (zi - zj);
-         dz -= Lz*round(dz/Lz);
- 
-         r2 = dx*dx + dy*dy + dz*dz;
+      double xi, yi, zi, xj, yj, zj, dx, dy, dz, r2, r2i, r6i, ff;
+      gsl_vector * NeighboringCells = gsl_vector_calloc(27);
+      int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz));
 
-         if (r2 <= Rcut*Rcut)
-         {
-           r2i = sigma*sigma/r2;
-           r6i = pow(r2i,3);
-           ff  = 48.0*epsilon*r2i*r6i*(r6i-0.5);
+      // printf("[%s]\tComputing Verlet list for particle %d...\n",__TIME__,i);
+      int iCell = FindParticle(Positions,i);
+      gsl_matrix_get_row(NeighboringCells, Neighbors, iCell);
            
-           // printf("Force calculation for particles %d and %d at distance %f\n", i, j, sqrt(r2)); 
-           // printf("Force calculation gives r2i %f, r6i %f, ff %f\n", r2i, r6i, ff);
-         
-           Forces->data[i*Forces->tda + 0] += ff*dx;
-           Forces->data[i*Forces->tda + 1] += ff*dy;
-           Forces->data[i*Forces->tda + 2] += ff*dz;
-       
-           Forces->data[Verlet[j]*Forces->tda + 0] -= ff*dx;
-           Forces->data[Verlet[j]*Forces->tda + 1] -= ff*dy;
-           Forces->data[Verlet[j]*Forces->tda + 2] -= ff*dz;
+      xi = gsl_matrix_get(Positions,i,1);    
+      yi = gsl_matrix_get(Positions,i,2);    
+      zi = gsl_matrix_get(Positions,i,3);    
+ 
+      // Checkpoint: Print particles inside a cell and neighboring cells
+      //   printf("Particle %d (type %d) at (%f, %f, %f) is in Cell %d\n", i, ((int) gsl_matrix_get(Positions,i,0)), xi, yi, zi, iCell);
+      //   printf("Neighboring cells of cell %d are (", iCell);
+      //   for (int nu=0;nu<27;nu++)
+      //       printf("%d, ",((int) gsl_vector_get(NeighboringCells,nu)));
+      //   printf(")\n");
+      
+      Verlet = realloc(Verlet, 27 * NParticles * sizeof(int) / (Mx * My * Mz));
+      int NumberOfNeighbors = Compute_VerletList(Positions, i, NeighboringCells, iCell, ListHead, List, Verlet);
+      Verlet = realloc(Verlet, NumberOfNeighbors * sizeof(int));
+ 
+      // Checkpoint: Print Verlet list of a particle
+      //   printf("Particle %d has %d neighbors\n", i, NumberOfNeighbors);
+      //   for (int i=0;i<NumberOfNeighbors;i++)
+      //     printf("%d, ", Verlet[i]);
+      //   printf(")\n");
 
-           //  printf("Force calculation gives fx %f, fy %f, fz %f\n", ff*dx, ff*dy, ff*dz);
-           //  printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", Verlet[j], 
-           //      gsl_matrix_get(Forces,Verlet[j],0), gsl_matrix_get(Forces,Verlet[j],1), gsl_matrix_get(Forces,Verlet[j],2));
-           //  printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", i, 
-           //      gsl_matrix_get(Forces,i,0), gsl_matrix_get(Forces,i,1), gsl_matrix_get(Forces,i,2));
+      for (int j=0;j<NumberOfNeighbors;j++)
+      {
+         if (( ((int) gsl_matrix_get(Positions,i,0)) == type1)&&(((int) gsl_matrix_get(Positions,Verlet[j],0) == type2)))
+         {
+           xj = gsl_matrix_get(Positions,Verlet[j],1);    
+           yj = gsl_matrix_get(Positions,Verlet[j],2);    
+           zj = gsl_matrix_get(Positions,Verlet[j],3);    
+
+           dx = (xi - xj);
+           dx -= Lx*round(dx/Lx);
+         
+           dy = (yi - yj);
+           dy -= Ly*round(dy/Ly);
+         
+           dz = (zi - zj);
+           dz -= Lz*round(dz/Lz);
+ 
+           r2 = dx*dx + dy*dy + dz*dz;
+
+           if (r2 <= Rcut*Rcut)
+           {
+             r2i = sigma*sigma/r2;
+             r6i = pow(r2i,3);
+             ff  = 48.0*epsilon*r2i*r6i*(r6i-0.5);
+             
+             // printf("Force calculation for particles %d and %d at distance %f\n", i, j, sqrt(r2)); 
+             // printf("Force calculation gives r2i %f, r6i %f, ff %f\n", r2i, r6i, ff);
+           
+             Forces->data[i*Forces->tda + 0] += ff*dx;
+             Forces->data[i*Forces->tda + 1] += ff*dy;
+             Forces->data[i*Forces->tda + 2] += ff*dz;
+         
+             Forces->data[Verlet[j]*Forces->tda + 0] -= ff*dx;
+             Forces->data[Verlet[j]*Forces->tda + 1] -= ff*dy;
+             Forces->data[Verlet[j]*Forces->tda + 2] -= ff*dz;
+
+             //  printf("Force calculation gives fx %f, fy %f, fz %f\n", ff*dx, ff*dy, ff*dz);
+             //  printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", Verlet[j], 
+             //      gsl_matrix_get(Forces,Verlet[j],0), gsl_matrix_get(Forces,Verlet[j],1), gsl_matrix_get(Forces,Verlet[j],2));
+             //  printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", i, 
+             //      gsl_matrix_get(Forces,i,0), gsl_matrix_get(Forces,i,1), gsl_matrix_get(Forces,i,2));
+           }
          }
-       }
+      }
     }
   }
 }

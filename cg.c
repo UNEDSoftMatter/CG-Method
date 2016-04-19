@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 19 abr 2016 12:59:05 CEST
+ * Modified   : mar 19 abr 2016 13:37:05 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -117,6 +117,14 @@ int main (void) {
     //         }
     //       }
     //     }
+
+    //  Checkpoint: Print the force exerted on type1 particles 
+    //
+        for (int i=0;i<NParticles;i++)
+        {
+          if (gsl_matrix_get(Positions,i,0) == 1.0) 
+            printf("%6.2f\t%8.2f\n", gsl_matrix_get(Positions,i,3), gsl_matrix_get(Forces,i,2));
+        }
 
     // Checkpoint: Find the neighboring cells of the cell in which a TestParticle is into
     //
