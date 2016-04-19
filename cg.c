@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 19 abr 2016 12:36:54 CEST
+ * Modified   : mar 19 abr 2016 12:59:05 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -201,6 +201,6 @@ int main (void) {
     gsl_matrix_free(Neighbors);
     gsl_matrix_free(Forces);
 
-    PrintMsg("EOF");
+    PrintMsg("EOF. Have a nice day.");
     return 0;
 }

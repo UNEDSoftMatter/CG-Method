@@ -1,4 +1,5 @@
 // Add a comment
+// This is a second comment
 
 #include <stdio.h>
 #include <stdlib.h>
