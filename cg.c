@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 15 abr 2016 19:08:19 CEST
+ * Modified   : lun 18 abr 2016 21:10:27 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -15,20 +15,20 @@
 int main (void) {
 
     printf("This program computes mesoscopic variables from microscopic configurations\n");
-    printf("INIT: %s \t %s\n", __DATE__, __TIME__);
+    PrintMsg("INIT");
 
     printf("[%s]\tReading microscopic positions from file %s...\n", __TIME__, iFilePosStr);
-    gsl_matrix * Micro = gsl_matrix_calloc (NParticles,3);
+    gsl_matrix * Positions = gsl_matrix_calloc (NParticles,4);
     FILE *iFile;
     iFile = fopen(iFilePosStr, "r");
-    gsl_matrix_fscanf(iFile, Micro);
+    gsl_matrix_fscanf(iFile, Positions);
     fclose(iFile);
 
 //     printf("[%s]\tReading microscopic velocities from file %s...\n", __TIME__, iFileVelStr);
-//     gsl_matrix * MicroVel = gsl_matrix_calloc (NParticles,3);
+//     gsl_matrix * Velocities = gsl_matrix_calloc (NParticles,3);
 //     FILE *iFile2;
 //     iFile2 = fopen(iFileVelStr, "r");
-//     gsl_matrix_fscanf(iFile2, MicroVel);
+//     gsl_matrix_fscanf(iFile2, Velocities);
 //     fclose(iFile2);
 
     printf("[%s]\tObtaining linked list...\n", __TIME__);
@@ -44,7 +44,7 @@ int main (void) {
     printf("Components of List:     \t%zu\n", List->size);
     printf("Components of ListHead: \t%zu\n", ListHead->size);
     
-    Compute_Linked_List(Micro, List, ListHead);
+    Compute_Linked_List(Positions, List, ListHead);
     
     printf("[%s]\tObtaining Neighboring Matrix...\n", __TIME__);
     gsl_matrix * Neighbors = gsl_matrix_calloc (Mx*My*Mz,27);
@@ -59,57 +59,74 @@ int main (void) {
     //     printf("\n");
     //     gsl_vector_free(neighbors);
 
-//     // Checkpoint
-//     for (int i=0;i<NParticles;i++)
-//       printf("List(%d) = %f\n", i, gsl_vector_get(List,i));
+    //     // Checkpoint
+    //     for (int i=0;i<NParticles;i++)
+    //       printf("List(%d) = %f\n", i, gsl_vector_get(List,i));
+    // 
+    //     // Checkpoint
+    //     printf("Compute neighbors of cell %d:\n", TestCell);
+    //     int TestCell = 60;
+    //     gsl_vector * neighbors = gsl_vector_calloc (27);
+    //     Compute_NeighborCells(TestCell, neighbors, Mx, My, Mz);
+    //     for (int i=0; i<27; i++)
+    //         printf("%f, ", gsl_vector_get(neighbors,i));
+    //     printf("\n");
+    //     // jatorre@12apr16
+    //     // In FORTRAN the loop is done while j != 0. Here, there exists
+    //     // a particle labelled with a zero index, so we need to perform
+    //     // the loop including that particle
+    //     //
+    //     int j = gsl_vector_get(ListHead,TestCell);
+    //     while (j >= 0)
+    //     {
+    //      printf("Particle %d is in cell %d\n", j, TestCell);
+    //      j = gsl_vector_get(List,j);
+    //     } 
+    //
+
+    printf("[%s]\tComputing forces...\n", __TIME__);
+    gsl_matrix * Forces = gsl_matrix_calloc (NParticles,3);
+    Compute_Forces(Positions, Neighbors, ListHead, List, 1, 2, Forces);
+
+    for (int i=0;i<NParticles;i++)
+    {
+      if (gsl_matrix_get(Positions,i,0) == 1.0) 
+      {
+        double distance1 = gsl_matrix_get(Positions,i,3)-2.0;
+        double distance2 = 18.0-gsl_matrix_get(Positions,i,3);
+        double distance = distance1;
+        (distance > distance2) ? distance = distance2 : distance;
+        printf("The wall exerts on particle %d (at %f to the nearest wall)) the following force: (%f,%f,%f)\n", i, distance,
+        gsl_matrix_get(Forces,i,0), gsl_matrix_get(Forces,i,1), gsl_matrix_get(Forces,i,2));
+      }
+    }
+//     printf("[%s]\tCompute Verlet list...\n",__TIME__);
+//     //int TestParticle = 172;
+//     int TestParticle = 533;
+//     // int TestParticle = 1068;
+//     int TestCell = FindParticle(Micro,TestParticle);
+//     gsl_vector * NeighboringCells = gsl_vector_calloc(27);
+//         
+//     gsl_matrix_get_row(NeighboringCells, Neighbors, TestCell);
+//     
+//     printf("Particle %d is in Cell %d\n", TestParticle, TestCell);
+//     printf("Neighboring cells of cell %d are (", TestCell);
+//     for (int i=0;i<27;i++)
+//         printf("%d, ",((int) gsl_vector_get(NeighboringCells,i)));
+//     printf(")\n");
+//  
+//     int *Verlet;
+//     
+//     Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
+//     int NumberOfNeighbors = Compute_VerletList(Micro, TestParticle, NeighboringCells, TestCell, ListHead, List, Verlet);
+//     Verlet = realloc(Verlet, NumberOfNeighbors * sizeof(int));
+//     
+//     printf("Particle %d has %d neighbors\n", TestParticle, NumberOfNeighbors);
+//     for (int i=0;i<NumberOfNeighbors;i++)
+//         printf("%d, ", Verlet[i]);
+//     printf(")\n");
 // 
-//     // Checkpoint
-//     printf("Compute neighbors of cell %d:\n", TestCell);
-//     int TestCell = 60;
-//     gsl_vector * neighbors = gsl_vector_calloc (27);
-//     Compute_NeighborCells(TestCell, neighbors, Mx, My, Mz);
-//     for (int i=0; i<27; i++)
-//         printf("%f, ", gsl_vector_get(neighbors,i));
-//     printf("\n");
-//     // jatorre@12apr16
-//     // In FORTRAN the loop is done while j != 0. Here, there exists
-//     // a particle labelled with a zero index, so we need to perform
-//     // the loop including that particle
-//     //
-//     int j = gsl_vector_get(ListHead,TestCell);
-//     while (j >= 0)
-//     {
-//      printf("Particle %d is in cell %d\n", j, TestCell);
-//      j = gsl_vector_get(List,j);
-//     } 
-
-    printf("[%s]\tCompute Verlet list...\n",__TIME__);
-    //int TestParticle = 172;
-    int TestParticle = 533;
-    // int TestParticle = 1068;
-    int TestCell = FindParticle(Micro,TestParticle);
-    gsl_vector * NeighboringCells = gsl_vector_calloc(27);
-        
-    gsl_matrix_get_row(NeighboringCells, Neighbors, TestCell);
-    
-    printf("Particle %d is in Cell %d\n", TestParticle, TestCell);
-    printf("Neighboring cells of cell %d are (", TestCell);
-    for (int i=0;i<27;i++)
-        printf("%d, ",((int) gsl_vector_get(NeighboringCells,i)));
-    printf(")\n");
- 
-    int *Verlet;
-    
-    Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
-    int NumberOfNeighbors = Compute_VerletList(Micro, TestParticle, NeighboringCells, TestCell, ListHead, List, Verlet);
-    Verlet = realloc(Verlet, NumberOfNeighbors * sizeof(int));
-    
-    printf("Particle %d has %d neighbors\n", TestParticle, NumberOfNeighbors);
-    for (int i=0;i<NumberOfNeighbors;i++)
-        printf("%d, ", Verlet[i]);
-    printf(")\n");
-
-    DrawSim(Micro, TestParticle, TestCell, NeighboringCells, Verlet, NumberOfNeighbors);
+//     DrawSim(Micro, TestParticle, TestCell, NeighboringCells, Verlet, NumberOfNeighbors);
 
 //     printf("[%s]\tGenerating node positions...\n",__TIME__);
 //     gsl_vector * z     = gsl_vector_calloc(NNodes);
@@ -130,9 +147,11 @@ int main (void) {
     gsl_vector_free(List);
     gsl_vector_free(ListHead);
 //    gsl_vector_free(n);
-    gsl_matrix_free(Micro);
+    gsl_matrix_free(Positions);
+//     gsl_matrix_free(Velocities);
     gsl_matrix_free(Neighbors);
+    gsl_matrix_free(Forces);
 
-    printf("EOF: %s \t %s\n", __DATE__, __TIME__);
+    PrintMsg("EOF");
     return 0;
 }
