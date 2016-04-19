@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 19 abr 2016 13:37:05 CEST
+ * Modified   : mar 19 abr 2016 18:11:14 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -53,16 +53,6 @@ int main (void) {
     gsl_matrix * Neighbors = gsl_matrix_calloc (Mx*My*Mz,27);
     Compute_NeighborMatrix(Neighbors);
 
-    // Checkpoint: Compute neighbors of cell 60
-    //
-    //     printf("Compute neighbors of cell 60:\n");
-    //     gsl_vector * neighbors = gsl_vector_calloc (27);
-    //     gsl_matrix_get_row (neighbors, Neighbors, 60);
-    //     for (int i=0; i<27; i++)
-    //         printf("%f, ", gsl_vector_get(neighbors,i));
-    //     printf("\n");
-    //     gsl_vector_free(neighbors);
-
     // Checkpoint: Compute neighbors of a TestCell
     //     int TestCell = 60;
     //     printf("Compute neighbors of cell %d:\n", TestCell);
@@ -91,40 +81,14 @@ int main (void) {
     gsl_matrix * Forces = gsl_matrix_calloc (NParticles,3);
     Compute_Forces(Positions, Neighbors, ListHead, List, 1, 2, Forces);
 
-    //  Checkpoint: Print the force exerted on a type1-particle near the wall
-    //
-    //     for (int i=0;i<NParticles;i++)
-    //     {
-    //       if (gsl_matrix_get(Positions,i,0) == 1.0) 
-    //       {
-    //         double distance1 = gsl_matrix_get(Positions,i,3)-2.0;
-    //         double distance2 = 16.0-gsl_matrix_get(Positions,i,3);
-    //         if (distance1 <= distance2)
-    //         {
-    //           if (distance1 <= Rcut)
-    //           printf("Wall exerts on particle %05d (at (%6.2f,%6.2f,%6.2f), %3.2f to the BOT wall) force: (%7.2f,%7.2f,%7.2f)\n", 
-    //                   i, gsl_matrix_get(Positions,i,1), gsl_matrix_get(Positions,i,2), 
-    //                   gsl_matrix_get(Positions,i,3), distance1, gsl_matrix_get(Forces,i,0), gsl_matrix_get(Forces,i,1),
-    //                   gsl_matrix_get(Forces,i,2));
-    //         }
-    //         else
-    //         {
-    //           if (distance2 <= Rcut)
-    //           printf("Wall exerts on particle %05d (at (%6.2f,%6.2f,%6.2f), %3.2f to the TOP wall) force: (%7.2f,%7.2f,%7.2f)\n", 
-    //                   i, gsl_matrix_get(Positions,i,1), gsl_matrix_get(Positions,i,2), 
-    //                   gsl_matrix_get(Positions,i,3), distance2, gsl_matrix_get(Forces,i,0), gsl_matrix_get(Forces,i,1),
-    //                   gsl_matrix_get(Forces,i,2));
-    //         }
-    //       }
-    //     }
-
     //  Checkpoint: Print the force exerted on type1 particles 
-    //
-        for (int i=0;i<NParticles;i++)
-        {
-          if (gsl_matrix_get(Positions,i,0) == 1.0) 
-            printf("%6.2f\t%8.2f\n", gsl_matrix_get(Positions,i,3), gsl_matrix_get(Forces,i,2));
-        }
+    gsl_vector * zPart  = gsl_vector_calloc(NParticles);
+    gsl_vector * FzPart = gsl_vector_calloc(NParticles);
+    gsl_matrix_get_col( zPart, Positions, 3);
+    gsl_matrix_get_col(FzPart, Forces, 2);
+    SaveVectorWithIndex(zPart, FzPart, "MicrozForce.dat");
+    gsl_vector_free (zPart);
+    gsl_vector_free (FzPart);
 
     // Checkpoint: Find the neighboring cells of the cell in which a TestParticle is into
     //
@@ -185,29 +149,33 @@ int main (void) {
     // 
     //    DrawSim(Micro, TestParticle, TestCell, NeighboringCells, Verlet, NumberOfNeighbors);
 
-    //    printf("[%s]\tGenerating node positions...\n",__TIME__);
-    //    gsl_vector * z     = gsl_vector_calloc(NNodes);
-    //    Compute_Node_Positions(z);
+    PrintMsg("Generating node positions...");
+    gsl_vector * z     = gsl_vector_calloc(NNodes);
+    Compute_Node_Positions(z);
 
     // Checkpoint
-    //    for (int i=0;i<NNodes;i++)
-    //      printf("z(%d) = %f\n", i, gsl_vector_get(z,i));
+    for (int i=0;i<NNodes;i++)
+      printf("z(%d) = %f\n", i, gsl_vector_get(z,i));
 
-    //      printf("[%s]\tObtaining node densities...\n",__TIME__);
-    //      gsl_vector * n = gsl_vector_calloc (NNodes);
-    //     Compute_Meso_Density(Micro,z,n);
+    PrintMsg("Obtaining node densities...");
+    gsl_vector * MesoDensity = gsl_vector_calloc (NNodes);
+    Compute_Meso_Density(Positions,z,MesoDensity);
+    SaveVectorWithIndex(z, MesoDensity, "MesoDensity.dat");
+
+    PrintMsg("Obtaining node forces...");
+    gsl_matrix * MesoForce = gsl_matrix_calloc (NNodes,3);
+    Compute_Meso_Force(Positions, Forces, z, MesoForce);
+    SaveMatrixWithIndex(z, MesoForce, "MesoForce.dat");
  
-    // Checkpoint
-    //   for (int i=0;i<NNodes;i++)
-    //      printf("n(%d) = %f, at z = %f\n", i, gsl_vector_get(n,i), gsl_vector_get(z,i));
-
     gsl_vector_free(List);
     gsl_vector_free(ListHead);
-    // gsl_vector_free(n);
+    gsl_vector_free(MesoDensity);
+    gsl_vector_free(z);
     gsl_matrix_free(Positions);
     // gsl_matrix_free(Velocities);
     gsl_matrix_free(Neighbors);
     gsl_matrix_free(Forces);
+    gsl_matrix_free(MesoForce);
 
     PrintMsg("EOF. Have a nice day.");
     return 0;

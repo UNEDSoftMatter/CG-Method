@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 19 abr 2016 13:54:08 CEST
+ * Modified   : mar 19 abr 2016 17:22:43 CEST
  *
  * Author     : jatorre
  *
@@ -15,31 +15,38 @@
 void Compute_Node_Positions(gsl_vector * z)
 {
     for (int mu=0;mu<NNodes;mu++)
-        gsl_vector_set(z,mu,(double) (mu+1)*Lz/NNodes);
+        gsl_vector_set(z,mu,(double) (mu+1)*RealLz/NNodes);
 }
 
 void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, gsl_vector * n)
 {
-    double dv = Lx * Ly * Lz / NNodes;
+    double dv = ((float) Lx * Ly * RealLz) / NNodes;
+    double dz = ((float) RealLz) / NNodes;
     double zi;
     int muRight, muLeft;
 
     for (int i=0;i<NParticles;i++)
     {
         zi      = gsl_matrix_get(Micro,i,3);
-        muRight = (int) floor(zi*NNodes/Lz);        
+        muRight = (int) floor(zi*NNodes/RealLz);        
         muLeft  = muRight-1;
         if (muLeft < 0) 
         {
-            n->data[muRight*n->stride] += zi/dv;
-            n->data[ NNodes*n->stride] += (gsl_vector_get(z,muRight) - zi)/dv;
+            n->data[muRight*n->stride] += zi/dz;
+            n->data[ NNodes*n->stride] += (gsl_vector_get(z,muRight) - zi)/dz;
         
-        } else {
-            n->data[muRight*n->stride] += (zi -  gsl_vector_get(z,muLeft))/dv;
-            n->data[ muLeft*n->stride] += (gsl_vector_get(z,muRight) - zi)/dv;
+        } 
+        else if (muRight == NNodes)
+        {
+            n->data[ NNodes*n->stride] += 1.0/dz;
+        }
+        else 
+        {
+            n->data[muRight*n->stride] += (zi -  gsl_vector_get(z,muLeft))/dz;
+            n->data[ muLeft*n->stride] += (gsl_vector_get(z,muRight) - zi)/dz;
         }
     }
-    gsl_vector_scale(n,dv);
+    gsl_vector_scale(n,1.0/dv);
 }
     
 void Compute_Linked_List(gsl_matrix * Micro, gsl_vector * List, gsl_vector * ListHead)
@@ -298,9 +305,9 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
              Forces->data[i*Forces->tda + 1] += ff*dy;
              Forces->data[i*Forces->tda + 2] += ff*dz;
          
-             Forces->data[Verlet[j]*Forces->tda + 0] -= ff*dx;
-             Forces->data[Verlet[j]*Forces->tda + 1] -= ff*dy;
-             Forces->data[Verlet[j]*Forces->tda + 2] -= ff*dz;
+             //Forces->data[Verlet[j]*Forces->tda + 0] -= ff*dx;
+             //Forces->data[Verlet[j]*Forces->tda + 1] -= ff*dy;
+             //Forces->data[Verlet[j]*Forces->tda + 2] -= ff*dz;
 
              //  printf("Force calculation gives fx %f, fy %f, fz %f\n", ff*dx, ff*dy, ff*dz);
              //  printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", Verlet[j], 
@@ -356,13 +363,48 @@ double GetLJsigma(int type1, int type2)
   return sigma;
 }
 
-void PrintMsg(char *msg)
+void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector * z, gsl_matrix * MesoForce)
 {
-  time_t rawtime;
-  struct tm * timeinfo;
-  time (&rawtime);
-  timeinfo = localtime (&rawtime);
-  char * timestamp = asctime(timeinfo);
-  timestamp[strlen(timestamp)-1] = '\0';
-  printf("[%s]\t%s\n", timestamp, msg);
+  double dv = ((float) Lx * Ly * RealLz) / NNodes ;
+  double dz = ((float) RealLz) / NNodes;
+  double zi, fx, fy, fz;
+  int muRight, muLeft;
+
+  for (int i=0;i<NParticles;i++)
+  {
+      zi      = gsl_matrix_get(Positions,i,3);
+      fx      = gsl_matrix_get(Forces,i,0);
+      fy      = gsl_matrix_get(Forces,i,1);
+      fz      = gsl_matrix_get(Forces,i,2);
+
+      muRight = (int) floor(zi*NNodes/RealLz);        
+      muLeft  = muRight-1;
+
+      if (muLeft < 0) 
+      {
+          MesoForce->data[muRight*MesoForce->tda+0] += fx * zi/dz;
+          MesoForce->data[ muLeft*MesoForce->tda+0] += fx * (gsl_vector_get(z,muRight) - zi)/dz;
+          MesoForce->data[muRight*MesoForce->tda+1] += fy * zi/dz;
+          MesoForce->data[ muLeft*MesoForce->tda+1] += fy * (gsl_vector_get(z,muRight) - zi)/dz;
+          MesoForce->data[muRight*MesoForce->tda+2] += fz * zi/dz;
+          MesoForce->data[ muLeft*MesoForce->tda+2] += fz * (gsl_vector_get(z,muRight) - zi)/dz;
+      
+      } 
+      else if (muRight == NNodes)
+      {
+          MesoForce->data[ NNodes*MesoForce->tda+0] += fx/dz;
+          MesoForce->data[ NNodes*MesoForce->tda+1] += fy/dz;
+          MesoForce->data[ NNodes*MesoForce->tda+2] += fz/dz;
+      }
+      else 
+      {
+          MesoForce->data[muRight*MesoForce->tda+0] += fx * (zi -  gsl_vector_get(z,muLeft))/dz;
+          MesoForce->data[ muLeft*MesoForce->tda+0] += fx * (gsl_vector_get(z,muRight) - zi)/dz;
+          MesoForce->data[muRight*MesoForce->tda+1] += fy * (zi -  gsl_vector_get(z,muLeft))/dz;
+          MesoForce->data[ muLeft*MesoForce->tda+1] += fy * (gsl_vector_get(z,muRight) - zi)/dz;
+          MesoForce->data[muRight*MesoForce->tda+2] += fz * (zi -  gsl_vector_get(z,muLeft))/dz;
+          MesoForce->data[ muLeft*MesoForce->tda+2] += fz * (gsl_vector_get(z,muRight) - zi)/dz;
+      }
+  }
+  gsl_matrix_scale(MesoForce,1.0/dv);
 }

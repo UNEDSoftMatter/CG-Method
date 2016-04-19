@@ -1,10 +1,9 @@
-// Add a comment
-// This is a second comment
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <unistd.h>
+#include <omp.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_mode.h>
 #include <gsl/gsl_errno.h>
@@ -12,8 +11,6 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
-#include <unistd.h>
-#include <omp.h>
 
 #define NParticles 23406
 #define NNodes        64
@@ -24,6 +21,7 @@
 #define Mx     (int) (Lx/Rcut)
 #define My     (int) (Ly/Rcut)
 #define Mz     (int) (Lz/Rcut)
+#define RealLz        18
 
 #define e1             5.2895
 #define e2             1.0
@@ -38,7 +36,6 @@
 #define iFilePosStr  "data/Positions.sort.3col.dat"
 #define iFileVelStr "data/Velocities.sort.3col.dat"
 
-void   Compute_Meso_Density   (gsl_matrix * Micro, gsl_vector * z, gsl_vector * n);
 void   Compute_Node_Positions (gsl_vector * z);
 void   Compute_Linked_List    (gsl_matrix * Micro, gsl_vector * List, gsl_vector * ListHead);
 void   Compute_NeighborCells  (int cell, gsl_vector * neighbors);
@@ -52,4 +49,10 @@ void   Compute_Forces         (gsl_matrix * Positions, gsl_matrix * Neighbors, g
                                gsl_vector * List, int type1, int type2, gsl_matrix * Forces);
 double GetLJsigma             (int type1, int type2);
 double GetLJepsilon           (int type1, int type2);
+
+void   Compute_Meso_Density   (gsl_matrix * Positions, gsl_vector * z, gsl_vector * MesoDensity);
+void   Compute_Meso_Force     (gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector * n, gsl_matrix * MesoForce);
+
+void   SaveMatrixWithIndex    (gsl_vector * z, gsl_matrix * Matrix, char * File);
+void   SaveVectorWithIndex    (gsl_vector * z, gsl_vector * Vector, char * File);
 void   PrintMsg               (char *msg);
