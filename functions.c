@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 18 abr 2016 20:50:15 CEST
+ * Modified   : mar 19 abr 2016 12:34:39 CEST
  *
  * Author     : jatorre
  *
@@ -64,7 +64,7 @@ void Compute_Linked_List(gsl_matrix * Micro, gsl_vector * List, gsl_vector * Lis
         // ListHead->data[iCell*ListHead->stride] = (i+1);
 
         iCell = floor(xi*Mx/Lx) + floor(yi*My/Ly)*Mx + floor(zi*Mz/Lz)*Mx*My; 
-//         printf("Particle %d  at (%f, %f, %f) assigned to iCell %d\n", i, xi, yi, zi, iCell);
+        // printf("Particle %d  at (%f, %f, %f) assigned to iCell %d\n", i, xi, yi, zi, iCell);
         List->data[i*List->stride] = ListHead->data[iCell*ListHead->stride];
         ListHead->data[iCell*ListHead->stride] = i;
     }
@@ -93,7 +93,6 @@ void Compute_NeighborCells(int cell, gsl_vector * neighbors)
     // if (k == 3) zip = -48;
     
     int i = (cell%(My*Mz))%Mx;
-    // int j = floor((cell%(Mx*Mz))/My);
     int j = floor((cell%(Mx*My))/My);
     int k = floor(cell/(Mx*My));
     
@@ -174,7 +173,8 @@ int FindParticle(gsl_matrix * Micro,int TestParticle)
     return Cell;
 }
 
-int Compute_VerletList(gsl_matrix * Micro, int TestParticle, gsl_vector * NeighboringCells, int TestCell, gsl_vector * ListHead, gsl_vector * LinkedList, int * Verlet)
+int Compute_VerletList(gsl_matrix * Micro, int TestParticle, gsl_vector * NeighboringCells, 
+                       int TestCell, gsl_vector * ListHead, gsl_vector * LinkedList, int * Verlet)
 {
     int NumberOfNeighbors = 0;
     int    icell;
@@ -225,7 +225,7 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
   double epsilon = GetLJepsilon(type1, type2);
   double sigma   = GetLJsigma(type1, type2);
 
-  printf("epsilon = %f, sigma = %f\n", epsilon, sigma);
+  // printf("epsilon = %f, sigma = %f\n", epsilon, sigma);
 
   double xi, yi, zi, xj, yj, zj, dx, dy, dz, r2, r2i, r6i, ff;
 
@@ -244,22 +244,22 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
     yi = gsl_matrix_get(Positions,i,2);    
     zi = gsl_matrix_get(Positions,i,3);    
  
-    //  Checkpoint
-//         printf("Particle %d (type %d) at (%f, %f, %f) is in Cell %d\n", i, ((int) gsl_matrix_get(Positions,i,0)), xi, yi, zi, iCell);
-//         printf("Neighboring cells of cell %d are (", iCell);
-//         for (int nu=0;nu<27;nu++)
-//             printf("%d, ",((int) gsl_vector_get(NeighboringCells,nu)));
-//         printf(")\n");
+    // Checkpoint: Print particles inside a cell and neighboring cells
+    //   printf("Particle %d (type %d) at (%f, %f, %f) is in Cell %d\n", i, ((int) gsl_matrix_get(Positions,i,0)), xi, yi, zi, iCell);
+    //   printf("Neighboring cells of cell %d are (", iCell);
+    //   for (int nu=0;nu<27;nu++)
+    //       printf("%d, ",((int) gsl_vector_get(NeighboringCells,nu)));
+    //   printf(")\n");
     
     Verlet = realloc(Verlet, 27 * NParticles * sizeof(int) / (Mx * My * Mz));
     int NumberOfNeighbors = Compute_VerletList(Positions, i, NeighboringCells, iCell, ListHead, List, Verlet);
     Verlet = realloc(Verlet, NumberOfNeighbors * sizeof(int));
  
-    // Checkpoint
-//        printf("Particle %d has %d neighbors\n", i, NumberOfNeighbors);
-//        for (int i=0;i<NumberOfNeighbors;i++)
-//          printf("%d, ", Verlet[i]);
-//        printf(")\n");
+    // Checkpoint: Print Verlet list of a particle
+    //   printf("Particle %d has %d neighbors\n", i, NumberOfNeighbors);
+    //   for (int i=0;i<NumberOfNeighbors;i++)
+    //     printf("%d, ", Verlet[i]);
+    //   printf(")\n");
 
     for (int j=0;j<NumberOfNeighbors;j++)
     {
@@ -285,17 +285,10 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
            r2i = sigma*sigma/r2;
            r6i = pow(r2i,3);
            ff  = 48.0*epsilon*r2i*r6i*(r6i-0.5);
-//            printf("Force calculation for particles %d and %d at distance %f\n", i, j, sqrt(r2)); 
-//            printf("Force calculation gives r2i %f, r6i %f, ff %f\n", r2i, r6i, ff);
-
-//            gsl_matrix_set(Forces,i,0,gsl_matrix_get(Forces,i,0) + ff*dx);
-//            gsl_matrix_set(Forces,i,1,gsl_matrix_get(Forces,i,1) + ff*dy);
-//            gsl_matrix_set(Forces,i,2,gsl_matrix_get(Forces,i,2) + ff*dz);
-//           
-//            gsl_matrix_set(Forces,Verlet[j],0,gsl_matrix_get(Forces,Verlet[j],0) - ff*dx);
-//            gsl_matrix_set(Forces,Verlet[j],1,gsl_matrix_get(Forces,Verlet[j],1) - ff*dy);
-//            gsl_matrix_set(Forces,Verlet[j],2,gsl_matrix_get(Forces,Verlet[j],2) - ff*dz);
-          
+           
+           // printf("Force calculation for particles %d and %d at distance %f\n", i, j, sqrt(r2)); 
+           // printf("Force calculation gives r2i %f, r6i %f, ff %f\n", r2i, r6i, ff);
+         
            Forces->data[i*Forces->tda + 0] += ff*dx;
            Forces->data[i*Forces->tda + 1] += ff*dy;
            Forces->data[i*Forces->tda + 2] += ff*dz;
@@ -303,14 +296,14 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
            Forces->data[Verlet[j]*Forces->tda + 0] -= ff*dx;
            Forces->data[Verlet[j]*Forces->tda + 1] -= ff*dy;
            Forces->data[Verlet[j]*Forces->tda + 2] -= ff*dz;
-//            printf("Force calculation gives fx %f, fy %f, fz %f\n", ff*dx, ff*dy, ff*dz);
-//            printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", Verlet[j], 
-//                gsl_matrix_get(Forces,Verlet[j],0), gsl_matrix_get(Forces,Verlet[j],1), gsl_matrix_get(Forces,Verlet[j],2));
-//            printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", i, 
-//                gsl_matrix_get(Forces,i,0), gsl_matrix_get(Forces,i,1), gsl_matrix_get(Forces,i,2));
+
+           //  printf("Force calculation gives fx %f, fy %f, fz %f\n", ff*dx, ff*dy, ff*dz);
+           //  printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", Verlet[j], 
+           //      gsl_matrix_get(Forces,Verlet[j],0), gsl_matrix_get(Forces,Verlet[j],1), gsl_matrix_get(Forces,Verlet[j],2));
+           //  printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", i, 
+           //      gsl_matrix_get(Forces,i,0), gsl_matrix_get(Forces,i,1), gsl_matrix_get(Forces,i,2));
          }
        }
-//     gsl_matrix_scale(Forces,48.0*epsilon);
     }
   }
 }
