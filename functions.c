@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 22 abr 2016 16:49:45 CEST
+ * Modified   : vie 22 abr 2016 16:52:14 CEST
  *
  * Author     : jatorre
  *
@@ -333,13 +333,8 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector 
 {
   double zi, fx, fy, fz;
   int muRight, muLeft;
-<<<<<<< HEAD
-    double dv = ((float) Lx * Ly * RealLz) / NNodes;
-    double dz = ((float) RealLz) / NNodes;
-=======
   double dv = ((float) Lx * Ly * RealLz) / NNodes;
   double dz = ((float) RealLz) / NNodes;
->>>>>>> VirialStressTensor
 
   for (int i=0;i<NParticles;i++)
   {
