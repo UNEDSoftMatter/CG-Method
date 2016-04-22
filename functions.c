@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 22 abr 2016 13:10:29 CEST
+ * Modified   : vie 22 abr 2016 16:42:11 CEST
  *
  * Author     : jatorre
  *
@@ -20,8 +20,8 @@ void Compute_Node_Positions(gsl_vector * z)
 
 void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, gsl_vector * n)
 {
-    // double dv = ((float) Lx * Ly * RealLz) / NNodes;
-    // double dz = ((float) RealLz) / NNodes;
+    double dv = ((float) Lx * Ly * RealLz) / NNodes;
+    double dz = ((float) RealLz) / NNodes;
     double zi;
     int muRight, muLeft;
 
@@ -370,6 +370,8 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector 
 {
   double zi, fx, fy, fz;
   int muRight, muLeft;
+    double dv = ((float) Lx * Ly * RealLz) / NNodes;
+    double dz = ((float) RealLz) / NNodes;
 
   for (int i=0;i<NParticles;i++)
   {
@@ -415,6 +417,8 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_m
   int mu = 0;
   double mass = 0.0;
   gsl_matrix_scale(MesoSigma1, 0.0);
+    double dv = ((float) Lx * Ly * RealLz) / NNodes;
+    double dz = ((float) RealLz) / NNodes;
 
   for (int i=0;i<NParticles;i++)
   {

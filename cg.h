@@ -22,8 +22,6 @@
 #define My     (int) (Ly/Rcut)
 #define Mz     (int) (Lz/Rcut)
 #define RealLz        18
-#define dv            (float) (Lx * Ly * RealLz)/NNodes
-#define dz            (float) (RealLz)/NNodes
 
 #define e1             5.2895
 #define e2             1.0
