@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 19 abr 2016 18:11:14 CEST
+ * Modified   : vie 22 abr 2016 13:09:43 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -26,12 +26,13 @@ int main (void) {
     gsl_matrix_fscanf(iFile, Positions);
     fclose(iFile);
 
-//     printf("[%s]\tReading microscopic velocities from file %s...\n", __TIME__, iFileVelStr);
-//     gsl_matrix * Velocities = gsl_matrix_calloc (NParticles,3);
-//     FILE *iFile2;
-//     iFile2 = fopen(iFileVelStr, "r");
-//     gsl_matrix_fscanf(iFile2, Velocities);
-//     fclose(iFile2);
+    PrintMsg("Reading microscopic velocities");
+    printf("\tInput file: %s\n", iFileVelStr);
+    gsl_matrix * Velocities = gsl_matrix_calloc (NParticles,3);
+    FILE *iFile2;
+    iFile2 = fopen(iFileVelStr, "r");
+    gsl_matrix_fscanf(iFile2, Velocities);
+    fclose(iFile2);
 
     PrintMsg("Obtaining linked list...");
 
@@ -76,10 +77,18 @@ int main (void) {
     //      j = gsl_vector_get(List,j);
     //     } 
     //
+    
+    clock_t t1, t2;
+    long elapsed;
 
+    t1 = clock();
     PrintMsg("Computing forces...");
     gsl_matrix * Forces = gsl_matrix_calloc (NParticles,3);
     Compute_Forces(Positions, Neighbors, ListHead, List, 1, 2, Forces);
+    t2 = clock();
+    
+    elapsed = timediff(t1, t2);
+    printf("Time elapsed computing forces: %ld ms\n", elapsed);
 
     //  Checkpoint: Print the force exerted on type1 particles 
     gsl_vector * zPart  = gsl_vector_calloc(NParticles);
@@ -166,6 +175,11 @@ int main (void) {
     gsl_matrix * MesoForce = gsl_matrix_calloc (NNodes,3);
     Compute_Meso_Force(Positions, Forces, z, MesoForce);
     SaveMatrixWithIndex(z, MesoForce, "MesoForce.dat");
+    
+    PrintMsg("Obtaining node stress tensor...");
+    gsl_matrix * MesoSigma1 = gsl_matrix_calloc (NNodes,3);
+    Compute_Meso_Sigma1(Positions, Velocities, MesoSigma1);
+    SaveMatrixWithIndex(z, MesoSigma1, "MesoSigma1.dat");
  
     gsl_vector_free(List);
     gsl_vector_free(ListHead);

@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mar 19 abr 2016 18:07:20 CEST
+ * Modified   : vie 22 abr 2016 12:10:45 CEST
  *
  * Author     : jatorre
  *
@@ -47,4 +47,11 @@ void SaveVectorWithIndex(gsl_vector * z, gsl_vector * Vector, char * File)
       fprintf(iFile, "%8.6f\t %8.6f\n",gsl_vector_get(z,i), gsl_vector_get(Vector,i));
 
     fclose(iFile);
+}
+
+long timediff(clock_t t1, clock_t t2)
+{
+  long elapsed;
+  elapsed = ((double)t2 -t1) / CLOCKS_PER_SEC * 1000;
+  return elapsed;
 }

@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 19 abr 2016 17:22:43 CEST
+ * Modified   : vie 22 abr 2016 13:10:29 CEST
  *
  * Author     : jatorre
  *
@@ -20,8 +20,8 @@ void Compute_Node_Positions(gsl_vector * z)
 
 void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, gsl_vector * n)
 {
-    double dv = ((float) Lx * Ly * RealLz) / NNodes;
-    double dz = ((float) RealLz) / NNodes;
+    // double dv = ((float) Lx * Ly * RealLz) / NNodes;
+    // double dz = ((float) RealLz) / NNodes;
     double zi;
     int muRight, muLeft;
 
@@ -187,7 +187,7 @@ int Compute_VerletList(gsl_matrix * Micro, int TestParticle, gsl_vector * Neighb
     int    icell;
     int    j;
     double x0,y0,z0,x1,y1,z1,r;
-    double dx, dy, dz;
+    double deltax, deltay, deltaz;
 
     x0 = gsl_matrix_get(Micro,TestParticle,1);
     y0 = gsl_matrix_get(Micro,TestParticle,2);
@@ -199,19 +199,22 @@ int Compute_VerletList(gsl_matrix * Micro, int TestParticle, gsl_vector * Neighb
         j     = gsl_vector_get(ListHead,icell);
         while (j >= 0)
         {
-            x1 = gsl_matrix_get(Micro,j,1);
-            dx = x1 - x0;
-            (dx > Lx/2) ? dx-= Lx : dx;
+            x1      = gsl_matrix_get(Micro,j,1);
+            deltax  = x1 - x0;
+            deltax -= Lx*round(deltax/Lx);
+            // (dx > Lx/2) ? dx-= Lx : dx;
 
-            y1 = gsl_matrix_get(Micro,j,2);
-            dy = y1 - y0;
-            (dy > Ly/2) ? dy-= Ly : dy;
+            y1      = gsl_matrix_get(Micro,j,2);
+            deltay  = y1 - y0;
+            deltay -= Ly*round(deltay/Ly);
+            // (dy > Ly/2) ? dy-= Ly : dy;
 
-            z1 = gsl_matrix_get(Micro,j,3);
-            dz = z1 - z0;
-            (dz > Lz/2) ? dz-= Lz : dz;
+            z1      = gsl_matrix_get(Micro,j,3);
+            deltaz  = z1 - z0;
+            deltaz -= Lz*round(deltaz/Lz);
+            // (dz > Lz/2) ? dz-= Lz : dz;
 
-            r  = sqrt(dx*dx + dy*dy + dz*dz);
+            r  = sqrt(deltax*deltax + deltay*deltay + deltaz*deltaz);
 
             if (r <= Rcut)
             { 
@@ -244,7 +247,7 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
       // TEST to check the performance of a parallel thread
       // nanosleep((const struct timespec[]){{0, 200000L}}, NULL);
 
-      double xi, yi, zi, xj, yj, zj, dx, dy, dz, r2, r2i, r6i, ff;
+      double xi, yi, zi, xj, yj, zj, deltax, deltay, deltaz, r2, r2i, r6i, ff;
       gsl_vector * NeighboringCells = gsl_vector_calloc(27);
       int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz));
 
@@ -281,16 +284,16 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
            yj = gsl_matrix_get(Positions,Verlet[j],2);    
            zj = gsl_matrix_get(Positions,Verlet[j],3);    
 
-           dx = (xi - xj);
-           dx -= Lx*round(dx/Lx);
+           deltax = (xi - xj);
+           deltax -= Lx*round(deltax/Lx);
          
-           dy = (yi - yj);
-           dy -= Ly*round(dy/Ly);
+           deltay = (yi - yj);
+           deltay -= Ly*round(deltay/Ly);
          
-           dz = (zi - zj);
-           dz -= Lz*round(dz/Lz);
+           deltaz = (zi - zj);
+           deltaz -= Lz*round(deltaz/Lz);
  
-           r2 = dx*dx + dy*dy + dz*dz;
+           r2 = deltax*deltax + deltay*deltay + deltaz*deltaz;
 
            if (r2 <= Rcut*Rcut)
            {
@@ -301,9 +304,9 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
              // printf("Force calculation for particles %d and %d at distance %f\n", i, j, sqrt(r2)); 
              // printf("Force calculation gives r2i %f, r6i %f, ff %f\n", r2i, r6i, ff);
            
-             Forces->data[i*Forces->tda + 0] += ff*dx;
-             Forces->data[i*Forces->tda + 1] += ff*dy;
-             Forces->data[i*Forces->tda + 2] += ff*dz;
+             Forces->data[i*Forces->tda + 0] += ff*deltax;
+             Forces->data[i*Forces->tda + 1] += ff*deltay;
+             Forces->data[i*Forces->tda + 2] += ff*deltaz;
          
              //Forces->data[Verlet[j]*Forces->tda + 0] -= ff*dx;
              //Forces->data[Verlet[j]*Forces->tda + 1] -= ff*dy;
@@ -365,8 +368,6 @@ double GetLJsigma(int type1, int type2)
 
 void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector * z, gsl_matrix * MesoForce)
 {
-  double dv = ((float) Lx * Ly * RealLz) / NNodes ;
-  double dz = ((float) RealLz) / NNodes;
   double zi, fx, fy, fz;
   int muRight, muLeft;
 
@@ -408,3 +409,25 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector 
   }
   gsl_matrix_scale(MesoForce,1.0/dv);
 }
+
+void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * MesoSigma1)
+{
+  int mu = 0;
+  double mass = 0.0;
+  gsl_matrix_scale(MesoSigma1, 0.0);
+
+  for (int i=0;i<NParticles;i++)
+  {
+    mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/RealLz) - 1;
+    ( mu == -1 ) ? mu = NNodes-1 : mu ;
+    mass = ( gsl_matrix_get(Positions,i,0) == 1 ? m1 : m2 );
+
+    MesoSigma1->data[mu*MesoSigma1->tda+0] += mass * pow(gsl_matrix_get(Velocities,i,0),2);
+    MesoSigma1->data[mu*MesoSigma1->tda+1] += mass * pow(gsl_matrix_get(Velocities,i,1),2);
+    MesoSigma1->data[mu*MesoSigma1->tda+2] += mass * pow(gsl_matrix_get(Velocities,i,2),2);
+  
+  }
+  gsl_matrix_scale(MesoSigma1,1.0/dv);
+
+}
+    
