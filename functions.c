@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 22 abr 2016 16:20:15 CEST
+ * Modified   : vie 22 abr 2016 16:48:16 CEST
  *
  * Author     : jatorre
  *
@@ -20,8 +20,8 @@ void Compute_Node_Positions(gsl_vector * z)
 
 void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, gsl_vector * n)
 {
-    // double dv = ((float) Lx * Ly * RealLz) / NNodes;
-    // double dz = ((float) RealLz) / NNodes;
+    double dv = ((float) Lx * Ly * RealLz) / NNodes;
+    double dz = ((float) RealLz) / NNodes;
     double zi;
     int muRight, muLeft;
 
@@ -333,6 +333,8 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector 
 {
   double zi, fx, fy, fz;
   int muRight, muLeft;
+  double dv = ((float) Lx * Ly * RealLz) / NNodes;
+  double dz = ((float) RealLz) / NNodes;
 
   for (int i=0;i<NParticles;i++)
   {
@@ -341,13 +343,9 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector 
       fy      = gsl_matrix_get(Forces,i,1);
       fz      = gsl_matrix_get(Forces,i,2);
       
-      printf("fx %f, fy %f, fz %f\n", fx, fy, fz);
-
       muRight = (int) floor(zi*NNodes/RealLz);        
       muLeft  = muRight-1;
       
-      printf("We are on node %d\n", muLeft);
-
       if (muLeft < 0) 
       {
           MesoForce->data[muRight*MesoForce->tda+0] += fx * zi/dz;
@@ -373,8 +371,6 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector 
           MesoForce->data[muRight*MesoForce->tda+2] += fz * (zi -  gsl_vector_get(z,muLeft))/dz;
           MesoForce->data[ muLeft*MesoForce->tda+2] += fz * (gsl_vector_get(z,muRight) - zi)/dz;
       }
-  printf("zForce on node %d: %f\n", muLeft, gsl_matrix_get(MesoForce,muLeft,2));
-  printf("dz: %f (inverse %f), dv: %f (inverse %f)\n", dz, dv, 1.0/dz, 1.0/dv);
   }
   gsl_matrix_scale(MesoForce,1.0/dv);
 }
@@ -384,7 +380,8 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_m
   int mu = 0;
   double mass = 0.0;
   gsl_matrix_scale(MesoSigma1, 0.0);
-
+  double dv = ((float) Lx * Ly * RealLz) / NNodes;
+    
   for (int i=0;i<NParticles;i++)
   {
     mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/RealLz) - 1;
@@ -404,6 +401,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
 {
 
 
+  double dv = ((float) Lx * Ly * RealLz) / NNodes;
 
   gsl_matrix_scale(MesoSigma2,0.5/dv);
 }
@@ -432,8 +430,6 @@ double * Compute_Force_ij (gsl_matrix * Positions, int * Verlet, double sigma, d
      force[2] = ff*deltaz;  
    }
 
-   printf("Force between %d and %d: %f, %f, %f\n", i, j, force[0], force[1], force[2]);
-   
    return force;
 }
     
