@@ -53,8 +53,12 @@ double GetLJepsilon           (int type1, int type2);
 void   Compute_Meso_Density   (gsl_matrix * Positions, gsl_vector * z, gsl_vector * MesoDensity);
 void   Compute_Meso_Force     (gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector * n, gsl_matrix * MesoForce);
 void   Compute_Meso_Sigma1    (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * MesoSigma1);
+void   Compute_Meso_Sigma2    (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead, 
+                               gsl_vector * List, gsl_matrix * MesoSigma2);
+double * Compute_Force_ij     (gsl_matrix * Positions, int * Verlet, double sigma, double epsilon, int i, int j);
 
 void   SaveMatrixWithIndex    (gsl_vector * z, gsl_matrix * Matrix, char * File);
 void   SaveVectorWithIndex    (gsl_vector * z, gsl_vector * Vector, char * File);
+void   SaveVectorWithoutIndex (gsl_vector * z, char * File);
 void   PrintMsg               (char *msg);
 long   timediff               (clock_t t1, clock_t t2);
