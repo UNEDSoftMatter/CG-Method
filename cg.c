@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 22 abr 2016 16:46:57 CEST
+ * Modified   : vie 22 abr 2016 19:44:30 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -82,11 +82,11 @@ int main (void) {
     long elapsed;
 
     t1 = clock();
-    PrintMsg("Computing forces...");
-    gsl_matrix * Forces = gsl_matrix_calloc (NParticles,3);
-    Compute_Forces(Positions, Neighbors, ListHead, List, 1, 2, Forces);
+    PrintMsg("Computing forces due to the wall...");
+    gsl_matrix * Force  = gsl_matrix_calloc (NParticles,3);
+    gsl_vector * Energy = gsl_vector_calloc (NParticles);
+    Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 1, 2, Force, Energy);
     t2 = clock();
-    
     elapsed = timediff(t1, t2);
     printf("Time elapsed computing forces: %ld ms\n", elapsed);
 
@@ -94,8 +94,9 @@ int main (void) {
     gsl_vector * zPart  = gsl_vector_calloc(NParticles);
     gsl_vector * FzPart = gsl_vector_calloc(NParticles);
     gsl_matrix_get_col( zPart, Positions, 3);
-    gsl_matrix_get_col(FzPart, Forces, 2);
+    gsl_matrix_get_col(FzPart, Force, 2);
     SaveVectorWithIndex(zPart, FzPart, "MicrozForce.dat");
+    SaveVectorWithIndex(zPart, Energy, "MicroEnergy.dat");
     gsl_vector_free (zPart);
     gsl_vector_free (FzPart);
 
@@ -170,30 +171,38 @@ int main (void) {
 
     PrintMsg("Obtaining node forces...");
     gsl_matrix * MesoForce = gsl_matrix_calloc (NNodes,3);
-    Compute_Meso_Force(Positions, Forces, z, MesoForce);
+    Compute_Meso_Force(Positions, Force, z, MesoForce);
     SaveMatrixWithIndex(z, MesoForce, "MesoForce.dat");
     
-//     PrintMsg("Obtaining node kinetic stress tensor...");
-//     gsl_matrix * MesoSigma1 = gsl_matrix_calloc (NNodes,3);
-//     Compute_Meso_Sigma1(Positions, Velocities, MesoSigma1);
-//     SaveMatrixWithIndex(z, MesoSigma1, "MesoKineticStress.dat");
-//     
-//     PrintMsg("Obtaining node virial stress tensor...");
-//     gsl_matrix * MesoSigma2 = gsl_matrix_calloc (NNodes,3);
-//     Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, MesoSigma2);
-//     SaveMatrixWithIndex(z, MesoSigma2, "MesoVirialStress.dat");
+    PrintMsg("Obtaining node energies...");
+    gsl_vector * MesoEnergy = gsl_vector_calloc (NNodes);
+    Compute_Meso_Energy(Positions, Energy, z, MesoEnergy);
+    SaveVectorWithIndex(z, MesoEnergy, "MesoEnergy.dat");
+    
+    // PrintMsg("Obtaining node kinetic stress tensor...");
+    // gsl_matrix * MesoSigma1 = gsl_matrix_calloc (NNodes,3);
+    // Compute_Meso_Sigma1(Positions, Velocities, MesoSigma1);
+    // SaveMatrixWithIndex(z, MesoSigma1, "MesoKineticStress.dat");
+    // 
+    // PrintMsg("Obtaining node virial stress tensor...");
+    // gsl_matrix * MesoSigma2 = gsl_matrix_calloc (NNodes,3);
+    // Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, MesoSigma2);
+    // SaveMatrixWithIndex(z, MesoSigma2, "MesoVirialStress.dat");
  
     gsl_vector_free(List);
     gsl_vector_free(ListHead);
-    gsl_vector_free(MesoDensity);
     gsl_vector_free(z);
+    gsl_vector_free(Energy);
     gsl_matrix_free(Positions);
     gsl_matrix_free(Velocities);
     gsl_matrix_free(Neighbors);
-    gsl_matrix_free(Forces);
+    gsl_matrix_free(Force);
     gsl_matrix_free(MesoForce);
-//     gsl_matrix_free(MesoSigma1);
-//     gsl_matrix_free(MesoSigma2);
+    gsl_vector_free(MesoEnergy);
+    gsl_vector_free(MesoDensity);
+    
+    // gsl_matrix_free(MesoSigma1);
+    // gsl_matrix_free(MesoSigma2);
 
     PrintMsg("EOF. Have a nice day.");
     return 0;

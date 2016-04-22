@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : vie 22 abr 2016 16:21:24 CEST
+ * Modified   : vie 22 abr 2016 19:43:16 CEST
  *
  * Author     : jatorre
  *
@@ -40,13 +40,12 @@ void SaveMatrixWithIndex(gsl_vector * z, gsl_matrix * Matrix, char * File)
 
 void SaveVectorWithIndex(gsl_vector * z, gsl_vector * Vector, char * File)
 {
-    FILE *iFile;
-    iFile = fopen(File, "w");
-    int Nrows = Vector->size;
-    for (int i=0;i<Nrows;i++)
-      fprintf(iFile, "%8.6f\t %20.15f\n",gsl_vector_get(z,i), gsl_vector_get(Vector,i));
-
-    fclose(iFile);
+  FILE *iFile;
+  iFile = fopen(File, "w+");
+  int Nrows = Vector->size;
+  for (int i=0;i<Nrows;i++)
+    fprintf(iFile, "%8.6f\t %20.15f\n",gsl_vector_get(z,i), gsl_vector_get(Vector,i));
+  fclose(iFile);
 }
 
 void SaveVectorWithoutIndex(gsl_vector * z, char * File)
