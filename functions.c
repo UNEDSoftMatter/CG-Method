@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 22 abr 2016 13:10:29 CEST
+ * Modified   : vie 22 abr 2016 16:20:15 CEST
  *
  * Author     : jatorre
  *
@@ -232,8 +232,8 @@ int Compute_VerletList(gsl_matrix * Micro, int TestParticle, gsl_vector * Neighb
 void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead, 
                     gsl_vector * List, int type1, int type2, gsl_matrix * Forces)
 {
-  double epsilon = GetLJepsilon(type1, type2);
-  double sigma   = GetLJsigma(type1, type2);
+//   double epsilon = GetLJepsilon(type1, type2);
+//   double sigma   = GetLJsigma(type1, type2);
 
   // printf("epsilon = %f, sigma = %f\n", epsilon, sigma);
 
@@ -247,7 +247,8 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
       // TEST to check the performance of a parallel thread
       // nanosleep((const struct timespec[]){{0, 200000L}}, NULL);
 
-      double xi, yi, zi, xj, yj, zj, deltax, deltay, deltaz, r2, r2i, r6i, ff;
+      double * fij = malloc(3*sizeof(double));
+      
       gsl_vector * NeighboringCells = gsl_vector_calloc(27);
       int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz));
 
@@ -255,10 +256,6 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
       int iCell = FindParticle(Positions,i);
       gsl_matrix_get_row(NeighboringCells, Neighbors, iCell);
            
-      xi = gsl_matrix_get(Positions,i,1);    
-      yi = gsl_matrix_get(Positions,i,2);    
-      zi = gsl_matrix_get(Positions,i,3);    
- 
       // Checkpoint: Print particles inside a cell and neighboring cells
       //   printf("Particle %d (type %d) at (%f, %f, %f) is in Cell %d\n", i, ((int) gsl_matrix_get(Positions,i,0)), xi, yi, zi, iCell);
       //   printf("Neighboring cells of cell %d are (", iCell);
@@ -280,44 +277,10 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector *
       {
          if (( ((int) gsl_matrix_get(Positions,i,0)) == type1)&&(((int) gsl_matrix_get(Positions,Verlet[j],0) == type2)))
          {
-           xj = gsl_matrix_get(Positions,Verlet[j],1);    
-           yj = gsl_matrix_get(Positions,Verlet[j],2);    
-           zj = gsl_matrix_get(Positions,Verlet[j],3);    
-
-           deltax = (xi - xj);
-           deltax -= Lx*round(deltax/Lx);
-         
-           deltay = (yi - yj);
-           deltay -= Ly*round(deltay/Ly);
-         
-           deltaz = (zi - zj);
-           deltaz -= Lz*round(deltaz/Lz);
- 
-           r2 = deltax*deltax + deltay*deltay + deltaz*deltaz;
-
-           if (r2 <= Rcut*Rcut)
-           {
-             r2i = sigma*sigma/r2;
-             r6i = pow(r2i,3);
-             ff  = 48.0*epsilon*r2i*r6i*(r6i-0.5);
-             
-             // printf("Force calculation for particles %d and %d at distance %f\n", i, j, sqrt(r2)); 
-             // printf("Force calculation gives r2i %f, r6i %f, ff %f\n", r2i, r6i, ff);
-           
-             Forces->data[i*Forces->tda + 0] += ff*deltax;
-             Forces->data[i*Forces->tda + 1] += ff*deltay;
-             Forces->data[i*Forces->tda + 2] += ff*deltaz;
-         
-             //Forces->data[Verlet[j]*Forces->tda + 0] -= ff*dx;
-             //Forces->data[Verlet[j]*Forces->tda + 1] -= ff*dy;
-             //Forces->data[Verlet[j]*Forces->tda + 2] -= ff*dz;
-
-             //  printf("Force calculation gives fx %f, fy %f, fz %f\n", ff*dx, ff*dy, ff*dz);
-             //  printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", Verlet[j], 
-             //      gsl_matrix_get(Forces,Verlet[j],0), gsl_matrix_get(Forces,Verlet[j],1), gsl_matrix_get(Forces,Verlet[j],2));
-             //  printf("Force calculation on %d gives fx %f, fy %f, fz %f\n", i, 
-             //      gsl_matrix_get(Forces,i,0), gsl_matrix_get(Forces,i,1), gsl_matrix_get(Forces,i,2));
-           }
+           fij = Compute_Force_ij(Positions, Verlet, s12, e12, i, j);
+           Forces->data[i*Forces->tda + 0] += fij[0];
+           Forces->data[i*Forces->tda + 1] += fij[1];
+           Forces->data[i*Forces->tda + 2] += fij[2];
          }
       }
     }
@@ -377,9 +340,13 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector 
       fx      = gsl_matrix_get(Forces,i,0);
       fy      = gsl_matrix_get(Forces,i,1);
       fz      = gsl_matrix_get(Forces,i,2);
+      
+      printf("fx %f, fy %f, fz %f\n", fx, fy, fz);
 
       muRight = (int) floor(zi*NNodes/RealLz);        
       muLeft  = muRight-1;
+      
+      printf("We are on node %d\n", muLeft);
 
       if (muLeft < 0) 
       {
@@ -406,6 +373,8 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector 
           MesoForce->data[muRight*MesoForce->tda+2] += fz * (zi -  gsl_vector_get(z,muLeft))/dz;
           MesoForce->data[ muLeft*MesoForce->tda+2] += fz * (gsl_vector_get(z,muRight) - zi)/dz;
       }
+  printf("zForce on node %d: %f\n", muLeft, gsl_matrix_get(MesoForce,muLeft,2));
+  printf("dz: %f (inverse %f), dv: %f (inverse %f)\n", dz, dv, 1.0/dz, 1.0/dv);
   }
   gsl_matrix_scale(MesoForce,1.0/dv);
 }
@@ -429,5 +398,42 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_m
   }
   gsl_matrix_scale(MesoSigma1,1.0/dv);
 
+}
+
+void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead, gsl_vector * List, gsl_matrix * MesoSigma2)
+{
+
+
+
+  gsl_matrix_scale(MesoSigma2,0.5/dv);
+}
+          
+double * Compute_Force_ij (gsl_matrix * Positions, int * Verlet, double sigma, double epsilon, int i, int j)
+{
+   double r2i, r6i, ff;
+   double * force = malloc(3*sizeof(double));
+
+   double deltax  = Positions->data[i*Positions->tda + 1] - Positions->data[Verlet[j]*Positions->tda + 1];
+          deltax -= Lx*round(deltax/Lx);
+   double deltay  = Positions->data[i*Positions->tda + 2] - Positions->data[Verlet[j]*Positions->tda + 2];
+          deltay -= Ly*round(deltax/Ly);
+   double deltaz  = Positions->data[i*Positions->tda + 3] - Positions->data[Verlet[j]*Positions->tda + 3];
+          deltaz -= RealLz*round(deltaz/RealLz);
+
+   double r2 = deltax*deltax + deltay*deltay + deltaz*deltaz;
+
+   if (r2 <= Rcut*Rcut)
+   {
+     r2i      = sigma*sigma/r2;
+     r6i      = pow(r2i,3);
+     ff       = 48.0*epsilon*r2i*r6i*(r6i-0.5);
+     force[0] = ff*deltax;  
+     force[1] = ff*deltay;  
+     force[2] = ff*deltaz;  
+   }
+
+   printf("Force between %d and %d: %f, %f, %f\n", i, j, force[0], force[1], force[2]);
+   
+   return force;
 }
     
