@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 22 abr 2016 19:44:30 CEST
+ * Modified   : lun 25 abr 2016 12:37:59 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -97,8 +97,18 @@ int main (void) {
     gsl_matrix_get_col(FzPart, Force, 2);
     SaveVectorWithIndex(zPart, FzPart, "MicrozForce.dat");
     SaveVectorWithIndex(zPart, Energy, "MicroEnergy.dat");
+    
+    PrintMsg("Computing velocities...");
+    gsl_vector * Vmod = Compute_Velocity_Module(Velocities);
+    SaveVectorWithIndex(zPart, Vmod, "MicroVmodule.dat"); 
     gsl_vector_free (zPart);
+    
     gsl_vector_free (FzPart);
+
+    PrintMsg("Drawing velocities...");
+    gsl_vector * vr = RescaleVector (Vmod);
+    DrawTemperature (Positions,vr);
+    gsl_vector_free(vr);
 
     // Checkpoint: Find the neighboring cells of the cell in which a TestParticle is into
     //

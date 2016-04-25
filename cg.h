@@ -69,3 +69,9 @@ void   PrintMsg               (char *msg);
 long   timediff               (clock_t t1, clock_t t2);
 
 double KineticEnergy          (gsl_vector * i, int type);
+gsl_vector * Compute_Velocity_Module  (gsl_matrix * Velocities);
+
+double MaxVector (gsl_vector * v);
+double MinVector (gsl_vector * v);
+gsl_vector * RescaleVector (gsl_vector * v);
+void DrawTemperature (gsl_matrix * Micro, gsl_vector * Velocity);

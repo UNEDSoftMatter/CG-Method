@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 22 abr 2016 19:21:34 CEST
+ * Modified   : lun 25 abr 2016 11:49:07 CEST
  *
  * Author     : jatorre
  *
@@ -320,4 +320,21 @@ void Compute_Meso_Energy(gsl_matrix * Micro, gsl_vector * MicroEnergy, gsl_vecto
         }
     }
     gsl_vector_scale(MesoEnergy,1.0/dv);
+}
+
+gsl_vector * Compute_Velocity_Module (gsl_matrix * Velocities)
+{
+  gsl_vector * vel = gsl_vector_calloc (NParticles);
+
+  double vx, vy, vz;
+  for (int i=0;i<NParticles;i++)
+  {
+    vx = gsl_matrix_get(Velocities,i,0);
+    vy = gsl_matrix_get(Velocities,i,1);
+    vz = gsl_matrix_get(Velocities,i,2);
+
+    gsl_vector_set(vel,i,sqrt(vx*vx+vy*vy+vz*vz));
+  }
+
+  return vel;
 }

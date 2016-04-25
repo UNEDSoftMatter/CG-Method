@@ -3,7 +3,7 @@
  *
  * Created    : 13.04.2016
  *
- * Modified   : mié 13 abr 2016 19:49:59 CEST
+ * Modified   : lun 25 abr 2016 12:57:03 CEST
  *
  * Author     : jatorre
  *
@@ -130,5 +130,31 @@ fprintf(iFile, "union{\n");
 
   fclose(iFile);
 
+}
+
+void DrawTemperature (gsl_matrix * Micro, gsl_vector * Velocity)
+{
+
+  FILE *iFile;
+  iFile = fopen("povray/temperature.inc", "w");
+
+  fprintf(iFile, "#declare TempParticles = \n");
+  fprintf(iFile, "union{\n");
+
+    double ix, iy, iz, iv;
+
+    for (int i=0;i<NParticles;i++)
+    {
+      ix = gsl_matrix_get(Micro,i,1);
+      iy = gsl_matrix_get(Micro,i,2);
+      iz = gsl_matrix_get(Micro,i,3);
+      iv = gsl_vector_get(Velocity,i);
+
+      fprintf(iFile, "  sphere{<%f,%f,%f>,%f texture{pigment {color rgb <%.2f,0,%.2f> filter 0.8 }finish{phong .7}}}\n", iy, iz, ix, 0.5, iv, (1.0-iv));
+    }
+ 
+  fprintf(iFile, "  }\n\n");
+  
+  fclose(iFile);
 }
 
