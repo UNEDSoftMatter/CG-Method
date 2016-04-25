@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 25 abr 2016 12:37:59 CEST
+ * Modified   : lun 25 abr 2016 14:05:12 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -109,6 +109,7 @@ int main (void) {
     gsl_vector * vr = RescaleVector (Vmod);
     DrawTemperature (Positions,vr);
     gsl_vector_free(vr);
+    gsl_vector_free(Vmod);
 
     // Checkpoint: Find the neighboring cells of the cell in which a TestParticle is into
     //

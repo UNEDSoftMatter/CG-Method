@@ -21,7 +21,7 @@ global_settings{ assumed_gamma 1.0 }
                             //location  <0.7 , 0.6 ,-0.7>
                             // location  <0.5 , 0.6 ,-0.65>
                             //location  <20 , 30 ,30>
-                            location  <50 , 40 ,80>
+                            location  <50 , 30 ,80>
                             right     x*image_width/image_height
                             //look_at   < 0.15 , 0.0 , -0.135>}
                             look_at   < 0.15 , 0.15 , -0.135>}
