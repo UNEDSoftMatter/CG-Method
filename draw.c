@@ -3,7 +3,7 @@
  *
  * Created    : 13.04.2016
  *
- * Modified   : lun 25 abr 2016 13:01:45 CEST
+ * Modified   : mar 26 abr 2016 14:29:57 CEST
  *
  * Author     : jatorre
  *
@@ -132,11 +132,11 @@ fprintf(iFile, "union{\n");
 
 }
 
-void DrawTemperature (gsl_matrix * Micro, gsl_vector * Velocity)
+void DrawTemperature (gsl_matrix * Micro, gsl_vector * Velocity, char * str)
 {
 
   FILE *iFile;
-  iFile = fopen("povray/temperature.inc", "w");
+  iFile = fopen(str, "w");
 
   fprintf(iFile, "#declare TempParticles = \n");
   fprintf(iFile, "union{\n");

@@ -16,28 +16,28 @@
 #  Parameters of the simulation 
 ############################################################################# */
 
-#define NParticles 23406
+#define NParticles 12530
 #define NNodes        64
-#define Lx            40
-#define Ly            40
-#define Lz            20
+#define Lx           100
+#define Ly           100
+#define Lz           200
 #define Rcut           2.5
 #define Mx     (int) (Lx/Rcut)
 #define My     (int) (Ly/Rcut)
 #define Mz     (int) (Lz/Rcut)
-#define RealLz        18
+#define RealLz       200 
 
-#define e1             5.2895
+#define e1             1000.0
 #define e2             1.0
-#define e12            2.2998
-#define s1             1.1205 
+#define e12            1.0
+#define s1             1.0 
 #define s2             1.0
-#define s12            1.0602
+#define s12            1.0
 #define ecut1          ((double)  4.0*e1*(pow( s1/Rcut,12)-pow( s1/Rcut,6)))
 #define ecut2          ((double)  4.0*e2*(pow( s2/Rcut,12)-pow( s2/Rcut,6)))
 #define ecut12         ((double) 4.0*e12*(pow(s12/Rcut,12)-pow(s12/Rcut,6)))
 
-#define m1             1.34
+#define m1             1.0
 #define m2             1.0
 
 #define iFilePosStr  "data/Positions.sort.3col.dat"
@@ -80,7 +80,7 @@ gsl_vector * RescaleVector (gsl_vector * v); // Rescale a vector between 0 and 1
 //  Draw the  position of  each particle  in Micro  and color  from blue  to red
 // according to its Velocity
 
-void DrawTemperature (gsl_matrix * Micro, gsl_vector * Velocity); 
+void DrawTemperature (gsl_matrix * Micro, gsl_vector * Velocity, char * str); 
 
 // Draw all the particles in Micro,  focus on TestParticle and draw its Verlet's
 // list.  Also draw the neighboring cells
@@ -144,6 +144,10 @@ void PrintMsg (char *msg);
 // Compute time differences
 
 long timediff (clock_t t1, clock_t t2);
+
+// Show initial info about the program
+
+void PrintInitInfo(void);
 
 /* #############################################################################
 #  Mesoscopic functions in functions.c 

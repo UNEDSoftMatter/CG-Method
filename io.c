@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mar 26 abr 2016 12:07:20 CEST
+ * Modified   : mar 26 abr 2016 16:16:02 CEST
  *
  * Author     : jatorre
  *
@@ -66,4 +66,35 @@ long timediff(clock_t t1, clock_t t2)
   long elapsed;
   elapsed = ((double)t2 -t1) / CLOCKS_PER_SEC * 1000;
   return elapsed;
+}
+    
+void PrintInitInfo(void) 
+{
+  printf("##############################################################################\n");
+  printf("#                                                                            #\n");
+  printf("# CG-METHOD                                                                  #\n");
+  printf("#                                                                            #\n");
+  printf("# This program computes mesoscopic variables from microscopic configurations #\n");
+  printf("#                                                                            #\n");
+  printf("##############################################################################\n");
+  printf("#                                                                            #\n");
+  printf("# The positions of the particles should be in data/$1.pos in matrixform      #\n");
+  printf("#                                                                            #\n");
+  printf("# TYPE  x   y   z                                                            #\n");
+  printf("#                                                                            #\n");
+  printf("# The velocities of the particles should be in data/$1.vel in matrixform     #\n");
+  printf("#                                                                            #\n");
+  printf("# vx    vy  vz                                                               #\n");
+  printf("#                                                                            #\n");
+  printf("# (See preprocess.sh to know how to format a lammps dump file)               #\n");
+  printf("#                                                                            #\n");
+  printf("##############################################################################\n");
+  printf("#                                                                            #\n");
+  printf("# Mesoscopic profiles will be stored in ./output/                            #\n");
+  printf("#                                                                            #\n");
+  printf("# Microscopic visualization will be stored in ./povray/                      #\n");
+  printf("#                                                                            #\n");
+  printf("# Log files will be stored in ./log/                                         #\n");
+  printf("#                                                                            #\n");
+  printf("##############################################################################\n\n");
 }
