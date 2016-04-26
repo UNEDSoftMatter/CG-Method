@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 25 abr 2016 13:01:47 CEST
+ * Modified   : mar 26 abr 2016 12:09:42 CEST
  *
  * Author     : jatorre
  *
@@ -55,15 +55,21 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
 
   gsl_matrix_scale(Forces,0.0);
   gsl_vector_scale(Energy,0.0);
-  gsl_vector * vi = gsl_vector_calloc(3);
 
-  //pragma omp parallel
+  // Begin of parallel region
+  
+  int omp_get_thread_num();
+  int omp_get_max_threads();
+  int chunks = NParticles / omp_get_max_threads();
+
+  #pragma omp parallel
   {
-    //pragma omp for
+    #pragma omp for schedule (dynamic,chunks)
     for (int i=0;i<NParticles;i++)
     {
-      double * fij = malloc(3*sizeof(double));
+      gsl_vector * vi = gsl_vector_calloc(3);
       gsl_matrix_get_row(vi, Velocities,i);
+      double * fij = malloc(3*sizeof(double));
       double   eij = KineticEnergy(vi, (int) gsl_matrix_get(Positions,i,0));
       
       gsl_vector * NeighboringCells = gsl_vector_calloc(27);
@@ -72,6 +78,8 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
       gsl_matrix_get_row(NeighboringCells, Neighbors, iCell);
            
       int NNeighbors = Compute_VerletList(Positions, i, NeighboringCells, iCell, ListHead, List, Verlet);
+      gsl_vector_free(NeighboringCells);
+
       Verlet = realloc(Verlet, NNeighbors * sizeof(int));
  
       for (int j=0;j<NNeighbors;j++)
@@ -85,11 +93,16 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
           Energy->data[i*Energy->stride]  += eij;
         }
       }
-      
       Verlet = realloc(Verlet, 27 * NParticles * sizeof(int) / (Mx * My * Mz));
+      gsl_vector_free(vi);
+      free(fij);
     }
   }
+
+  // End of parallel region
+
   gsl_vector_scale(Energy,0.5);
+  
 }
 
 double *GetLJParams(double type1, double type2)
@@ -251,11 +264,12 @@ double Compute_Force_ij (gsl_matrix * Positions, int i, int j, double * fij)
 
    double r2      = deltax*deltax + deltay*deltay + deltaz*deltaz;
 
-   double * lj = malloc(3*sizeof(double));
+   double * lj = malloc(3*sizeof(float));
    lj = GetLJParams(gsl_matrix_get(Positions,i,0), gsl_matrix_get(Positions,j,0));
    double epsilon = lj[0];
    double sigma   = lj[1];
    double ecut    = lj[2];
+   free (lj);
 
    if (r2 <= Rcut*Rcut)
    {

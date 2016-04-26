@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 25 abr 2016 14:05:12 CEST
+ * Modified   : mar 26 abr 2016 12:08:45 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -79,37 +79,42 @@ int main (void) {
     //
     
     clock_t t1, t2;
-    long elapsed;
+  //  long elapsed;
 
     t1 = clock();
-    PrintMsg("Computing forces due to the wall...");
+    PrintMsg("Computing forces due to the wall and energy of each particle...");
     gsl_matrix * Force  = gsl_matrix_calloc (NParticles,3);
     gsl_vector * Energy = gsl_vector_calloc (NParticles);
     Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 1, 2, Force, Energy);
     t2 = clock();
-    elapsed = timediff(t1, t2);
-    printf("Time elapsed computing forces: %ld ms\n", elapsed);
+//    elapsed = timediff(t1, t2);
+    printf("Time elapsed computing forces and energies: %ld ms\n", timediff(t1,t2));
+    
+    gsl_vector_free(List);
+    gsl_vector_free(ListHead);
+    gsl_matrix_free(Neighbors);
 
-    //  Checkpoint: Print the force exerted on type1 particles 
+    //  Checkpoint: Print the force exerted on type1 particles
+    //              and the energy of all the particles
     gsl_vector * zPart  = gsl_vector_calloc(NParticles);
     gsl_vector * FzPart = gsl_vector_calloc(NParticles);
     gsl_matrix_get_col( zPart, Positions, 3);
     gsl_matrix_get_col(FzPart, Force, 2);
-    SaveVectorWithIndex(zPart, FzPart, "MicrozForce.dat");
-    SaveVectorWithIndex(zPart, Energy, "MicroEnergy.dat");
     
-    PrintMsg("Computing velocities...");
+    SaveVectorWithIndex(zPart, FzPart, NParticles, "MicrozForce.dat");
+    SaveVectorWithIndex(zPart, Energy, NParticles, "MicroEnergy.dat");
+    
+    PrintMsg("Computing the module of the veocity as a estimator of the temperature...");
     gsl_vector * Vmod = Compute_Velocity_Module(Velocities);
-    SaveVectorWithIndex(zPart, Vmod, "MicroVmodule.dat"); 
-    gsl_vector_free (zPart);
-    
-    gsl_vector_free (FzPart);
-
-    PrintMsg("Drawing velocities...");
+    SaveVectorWithIndex(zPart, Vmod, NParticles, "MicroVmodule.dat"); 
+    PrintMsg("Drawing the temperature of the particles...");
     gsl_vector * vr = RescaleVector (Vmod);
     DrawTemperature (Positions,vr);
-    gsl_vector_free(vr);
-    gsl_vector_free(Vmod);
+
+    gsl_vector_free (Vmod);
+    gsl_vector_free (vr);
+    gsl_vector_free (FzPart);
+    gsl_vector_free (zPart);
 
     // Checkpoint: Find the neighboring cells of the cell in which a TestParticle is into
     //
@@ -178,18 +183,26 @@ int main (void) {
     PrintMsg("Obtaining node densities...");
     gsl_vector * MesoDensity = gsl_vector_calloc (NNodes);
     Compute_Meso_Density(Positions,z,MesoDensity);
-    SaveVectorWithIndex(z, MesoDensity, "MesoDensity.dat");
+    SaveVectorWithIndex(z, MesoDensity, NNodes, "MesoDensity.dat");
+    
+    gsl_vector_free(MesoDensity);
 
     PrintMsg("Obtaining node forces...");
     gsl_matrix * MesoForce = gsl_matrix_calloc (NNodes,3);
     Compute_Meso_Force(Positions, Force, z, MesoForce);
     SaveMatrixWithIndex(z, MesoForce, "MesoForce.dat");
+     
+    gsl_matrix_free(MesoForce);
+    gsl_matrix_free(Force);
     
     PrintMsg("Obtaining node energies...");
     gsl_vector * MesoEnergy = gsl_vector_calloc (NNodes);
     Compute_Meso_Energy(Positions, Energy, z, MesoEnergy);
-    SaveVectorWithIndex(z, MesoEnergy, "MesoEnergy.dat");
+    SaveVectorWithIndex(z, MesoEnergy, NNodes, "MesoEnergy.dat");
     
+    gsl_vector_free(MesoEnergy);
+    gsl_vector_free(Energy);
+
     // PrintMsg("Obtaining node kinetic stress tensor...");
     // gsl_matrix * MesoSigma1 = gsl_matrix_calloc (NNodes,3);
     // Compute_Meso_Sigma1(Positions, Velocities, MesoSigma1);
@@ -200,17 +213,9 @@ int main (void) {
     // Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, MesoSigma2);
     // SaveMatrixWithIndex(z, MesoSigma2, "MesoVirialStress.dat");
  
-    gsl_vector_free(List);
-    gsl_vector_free(ListHead);
     gsl_vector_free(z);
-    gsl_vector_free(Energy);
     gsl_matrix_free(Positions);
     gsl_matrix_free(Velocities);
-    gsl_matrix_free(Neighbors);
-    gsl_matrix_free(Force);
-    gsl_matrix_free(MesoForce);
-    gsl_vector_free(MesoEnergy);
-    gsl_vector_free(MesoDensity);
     
     // gsl_matrix_free(MesoSigma1);
     // gsl_matrix_free(MesoSigma2);
