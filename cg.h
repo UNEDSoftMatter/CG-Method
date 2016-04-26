@@ -16,16 +16,16 @@
 #  Parameters of the simulation 
 ############################################################################# */
 
-#define NParticles 12530
+#define NParticles 12908
 #define NNodes        64
-#define Lx           100
-#define Ly           100
-#define Lz           200
+#define Lx            16.9154
+#define Ly            16.9154
+#define Lz           153.776 
 #define Rcut           2.5
 #define Mx     (int) (Lx/Rcut)
 #define My     (int) (Ly/Rcut)
 #define Mz     (int) (Lz/Rcut)
-#define RealLz       200 
+#define RealLz       153.776 
 
 #define e1             1000.0
 #define e2             1.0

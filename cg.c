@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 26 abr 2016 16:00:14 CEST
+ * Modified   : mar 26 abr 2016 18:18:22 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -30,7 +30,7 @@ int main (int argc, char *argv[]) {
     PrintMsg("INIT");
 
     PrintMsg("Reading microscopic positions");
-    str = strcpy (str, "./data/");
+    str = strcpy (str, "./data/positions/");
     str = strcat (str, basename);
     str = strcat (str, ".pos");
     printf("\tInput file: %s\n", str);
@@ -42,7 +42,7 @@ int main (int argc, char *argv[]) {
     fclose(iFile);
 
     PrintMsg("Reading microscopic velocities");
-    str = strcpy (str, "./data/");
+    str = strcpy (str, "./data/velocities/");
     str = strcat (str, basename);
     str = strcat (str, ".vel");
     printf("\tInput file: %s\n", str);
