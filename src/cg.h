@@ -40,9 +40,6 @@
 #define m1             1.0
 #define m2             1.0
 
-#define iFilePosStr  "data/Positions.sort.3col.dat"
-#define iFileVelStr "data/Velocities.sort.3col.dat"
-
 /* #############################################################################
 #  Microscopic functions 
 ############################################################################# */
