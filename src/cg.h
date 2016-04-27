@@ -165,7 +165,9 @@ void Compute_Meso_Force (gsl_matrix * Positions, gsl_matrix * Forces,
 void Compute_Meso_Temp(gsl_vector * MesoKinetic, gsl_vector * MesoDensity, 
                        gsl_vector * MesoTemp);
 
-//void Compute_Meso_Sigma1    (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * MesoSigma1);
+void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities,
+                          int idx1, int idx2, gsl_vector * MesoSigma1);
+
 //void Compute_Meso_Sigma2    (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead, 
 //                             gsl_vector * List, gsl_matrix * MesoSigma2);
 

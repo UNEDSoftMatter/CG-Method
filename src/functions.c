@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 27 abr 2016 18:14:42 CEST
+ * Modified   : mié 27 abr 2016 19:04:24 CEST
  *
  * Author     : jatorre
  *
@@ -224,25 +224,24 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, gsl_vector 
   gsl_matrix_scale(MesoForce,1.0/dv);
 }
 
-void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * MesoSigma1)
+void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, int idx1, int idx2, 
+                          gsl_vector * MesoSigma1)
 {
   int mu = 0;
   double mass = 0.0;
-  gsl_matrix_scale(MesoSigma1, 0.0);
   double dv = ((float) Lx * Ly * RealLz) / NNodes;
+  
+  gsl_vector_scale(MesoSigma1, 0.0);
+  
   for (int i=0;i<NParticles;i++)
   {
     mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/RealLz) - 1;
     ( mu == -1 ) ? mu = NNodes-1 : mu ;
     mass = ( gsl_matrix_get(Positions,i,0) == 1 ? m1 : m2 );
 
-    MesoSigma1->data[mu*MesoSigma1->tda+0] += mass * pow(gsl_matrix_get(Velocities,i,0),2);
-    MesoSigma1->data[mu*MesoSigma1->tda+1] += mass * pow(gsl_matrix_get(Velocities,i,1),2);
-    MesoSigma1->data[mu*MesoSigma1->tda+2] += mass * pow(gsl_matrix_get(Velocities,i,2),2);
-  
+    MesoSigma1->data[mu*MesoSigma1->stride] += mass * gsl_matrix_get(Velocities,i,idx1) * gsl_matrix_get(Velocities,i,idx2);
   }
-  gsl_matrix_scale(MesoSigma1,1.0/dv);
-
+  gsl_vector_scale(MesoSigma1,1.0/dv);
 }
 
 void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead, gsl_vector * List, gsl_matrix * MesoSigma2)

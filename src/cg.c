@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 27 abr 2016 18:38:48 CEST
+ * Modified   : mié 27 abr 2016 19:06:10 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -269,11 +269,19 @@ int main (int argc, char *argv[]) {
     gsl_vector_free(MesoKinetic);
     gsl_vector_free(Kinetic);
 
-    // PrintMsg("Obtaining node kinetic stress tensor...");
-    // gsl_matrix * MesoSigma1 = gsl_matrix_calloc (NNodes,3);
-    // Compute_Meso_Sigma1(Positions, Velocities, MesoSigma1);
-    // SaveMatrixWithIndex(z, MesoSigma1, "MesoKineticStress.dat");
-    // 
+    // Remember that positions are stored as following:
+    // TYPE X Y Z
+    // while velocities are stored as:
+    // VX VY VZ
+    PrintMsg("Obtaining node kinetic stress tensor...");
+    gsl_vector * MesoSigma1_xz = gsl_vector_calloc (NNodes);
+    // K_\mu^{xz} \propto v^x v^z = 0 2
+    Compute_Meso_Sigma1(Positions, Velocities, 0, 2, MesoSigma1_xz);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoKxz.dat");
+    SaveVectorWithIndex(z, MesoSigma1_xz, NNodes, str); 
+    
     // PrintMsg("Obtaining node virial stress tensor...");
     // gsl_matrix * MesoSigma2 = gsl_matrix_calloc (NNodes,3);
     // Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, MesoSigma2);
@@ -284,7 +292,7 @@ int main (int argc, char *argv[]) {
     gsl_matrix_free(Velocities);
     gsl_vector_free(MesoDensity);
     
-    // gsl_matrix_free(MesoSigma1);
+    gsl_vector_free(MesoSigma1_xz);
     // gsl_matrix_free(MesoSigma2);
 
     PrintMsg("EOF. Have a nice day.");
