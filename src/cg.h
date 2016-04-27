@@ -17,7 +17,7 @@
 ############################################################################# */
 
 #define NParticles 12908
-#define NNodes        64
+#define NNodes       128
 #define Lx            16.9154
 #define Ly            16.9154
 #define Lz           153.776 
@@ -161,6 +161,9 @@ void Compute_Meso_Density (gsl_matrix * Positions, gsl_vector * z,
 
 void Compute_Meso_Force (gsl_matrix * Positions, gsl_matrix * Forces, 
                          gsl_vector * n, gsl_matrix * MesoForce);
+
+void Compute_Meso_Temp(gsl_vector * MesoKinetic, gsl_vector * MesoDensity, 
+                       gsl_vector * MesoTemp);
 
 //void Compute_Meso_Sigma1    (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * MesoSigma1);
 //void Compute_Meso_Sigma2    (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead, 

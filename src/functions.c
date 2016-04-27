@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 27 abr 2016 13:47:27 CEST
+ * Modified   : mié 27 abr 2016 18:14:42 CEST
  *
  * Author     : jatorre
  *
@@ -354,4 +354,23 @@ gsl_vector * Compute_Velocity_Module (gsl_matrix * Velocities)
   }
 
   return vel;
+}
+    
+void Compute_Meso_Temp(gsl_vector * MesoKinetic, gsl_vector * MesoDensity, gsl_vector * MesoTemp)
+{
+  double val;
+
+  for (int mu=0;mu<NNodes;mu++)
+  {
+    if (gsl_vector_get(MesoDensity,mu) != 0)
+    {
+      val = gsl_vector_get(MesoKinetic,mu) / gsl_vector_get(MesoDensity,mu);
+    }
+    else
+    {
+      val = 0.0;
+    }
+    gsl_vector_set(MesoTemp,mu,val);
+  }
+  gsl_vector_scale(MesoTemp,2.0/3.0);
 }

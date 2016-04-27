@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 27 abr 2016 13:50:20 CEST
+ * Modified   : mié 27 abr 2016 18:38:48 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -34,11 +34,10 @@ int main (int argc, char *argv[]) {
     str = strcat (str, basename);
     str = strcat (str, ".pos");
     printf("\tInput file: %s\n", str);
-
     gsl_matrix * Positions = gsl_matrix_calloc (NParticles,4);
     FILE *iFile;
     iFile = fopen(str, "r");
-    gsl_matrix_fscanf(iFile, Positions);
+      gsl_matrix_fscanf(iFile, Positions);
     fclose(iFile);
 
     PrintMsg("Reading microscopic velocities");
@@ -49,13 +48,14 @@ int main (int argc, char *argv[]) {
     gsl_matrix * Velocities = gsl_matrix_calloc (NParticles,3);
     FILE *iFile2;
     iFile2 = fopen(str, "r");
-    gsl_matrix_fscanf(iFile2, Velocities);
+      gsl_matrix_fscanf(iFile2, Velocities);
     fclose(iFile2);
 
     PrintMsg("Obtaining linked list...");
 
     // jatorre@12apr16
-    // As C arrays begin at 0, we specify the end of a linked list with -1
+    // As C arrays goes from 0 to N-1,  we specify the end of a linked list with
+    // -1
     gsl_vector * List     = gsl_vector_calloc (NParticles);
     gsl_vector * ListHead = gsl_vector_calloc (Mx*My*Mz);
     
@@ -68,7 +68,6 @@ int main (int argc, char *argv[]) {
     Compute_Linked_List(Positions, List, ListHead);
     
     PrintMsg("Obtaining neighboring matrix...");
-
     gsl_matrix * Neighbors = gsl_matrix_calloc (Mx*My*Mz,27);
     Compute_NeighborMatrix(Neighbors);
 
@@ -97,7 +96,6 @@ int main (int argc, char *argv[]) {
     //
     
     clock_t t1, t2;
-  //  long elapsed;
 
     t1 = clock();
     PrintMsg("Computing forces due to the wall and energy of each particle...");
@@ -106,8 +104,7 @@ int main (int argc, char *argv[]) {
     gsl_vector * Kinetic = gsl_vector_calloc (NParticles);
     Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 1, 2, Force, Energy, Kinetic);
     t2 = clock();
-//    elapsed = timediff(t1, t2);
-    printf("Time elapsed computing forces and energies: %ld ms\n", timediff(t1,t2));
+    printf("\tTime elapsed computing forces and energies: %ld ms\n", timediff(t1,t2));
     
     gsl_vector_free(List);
     gsl_vector_free(ListHead);
@@ -229,8 +226,6 @@ int main (int argc, char *argv[]) {
     str = strcat (str, ".MesoDensity.dat");
     SaveVectorWithIndex(z, MesoDensity, NNodes, str);
     
-    gsl_vector_free(MesoDensity);
-
     PrintMsg("Obtaining node forces...");
     gsl_matrix * MesoForce = gsl_matrix_calloc (NNodes,3);
     Compute_Meso_Force(Positions, Force, z, MesoForce);
@@ -258,6 +253,16 @@ int main (int argc, char *argv[]) {
     str = strcat (str, ".MesoKinetic.dat");
     SaveVectorWithIndex(z, MesoKinetic, NNodes, str);
     
+    PrintMsg("Obtaining node temperature...");
+    gsl_vector * MesoTemp      = gsl_vector_calloc (NNodes);
+    Compute_Meso_Temp(MesoKinetic, MesoDensity, MesoTemp);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoTemp.dat");
+    SaveVectorWithIndex(z, MesoTemp, NNodes, str);
+    
+    gsl_vector_free(MesoTemp);
+   
     gsl_vector_free(MesoEnergy);
     gsl_vector_free(Energy);
     
@@ -277,6 +282,7 @@ int main (int argc, char *argv[]) {
     gsl_vector_free(z);
     gsl_matrix_free(Positions);
     gsl_matrix_free(Velocities);
+    gsl_vector_free(MesoDensity);
     
     // gsl_matrix_free(MesoSigma1);
     // gsl_matrix_free(MesoSigma2);
