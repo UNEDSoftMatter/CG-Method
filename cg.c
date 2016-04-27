@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 26 abr 2016 18:18:22 CEST
+ * Modified   : mié 27 abr 2016 13:50:20 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -101,9 +101,10 @@ int main (int argc, char *argv[]) {
 
     t1 = clock();
     PrintMsg("Computing forces due to the wall and energy of each particle...");
-    gsl_matrix * Force  = gsl_matrix_calloc (NParticles,3);
-    gsl_vector * Energy = gsl_vector_calloc (NParticles);
-    Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 1, 2, Force, Energy);
+    gsl_matrix * Force   = gsl_matrix_calloc (NParticles,3);
+    gsl_vector * Energy  = gsl_vector_calloc (NParticles);
+    gsl_vector * Kinetic = gsl_vector_calloc (NParticles);
+    Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 1, 2, Force, Energy, Kinetic);
     t2 = clock();
 //    elapsed = timediff(t1, t2);
     printf("Time elapsed computing forces and energies: %ld ms\n", timediff(t1,t2));
@@ -129,7 +130,12 @@ int main (int argc, char *argv[]) {
     str = strcat (str, ".MicroEnergy.dat");
     SaveVectorWithIndex(zPart, Energy, NParticles, str);
     
-    PrintMsg("Computing the module of the veocity as a estimator of the temperature...");
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MicroKinetic.dat");
+    SaveVectorWithIndex(zPart, Kinetic, NParticles, str);
+    
+    PrintMsg("Computing the module of the velocity as a estimator for the temperature...");
     gsl_vector * Vmod = Compute_Velocity_Module(Velocities);
     str = strcpy (str, "./output/");
     str = strcat (str, basename);
@@ -244,8 +250,19 @@ int main (int argc, char *argv[]) {
     str = strcat (str, ".MesoEnergy.dat");
     SaveVectorWithIndex(z, MesoEnergy, NNodes, str);
     
+    PrintMsg("Obtaining node kinetic energies...");
+    gsl_vector * MesoKinetic   = gsl_vector_calloc (NNodes);
+    Compute_Meso_Energy(Positions, Kinetic, z, MesoKinetic);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoKinetic.dat");
+    SaveVectorWithIndex(z, MesoKinetic, NNodes, str);
+    
     gsl_vector_free(MesoEnergy);
     gsl_vector_free(Energy);
+    
+    gsl_vector_free(MesoKinetic);
+    gsl_vector_free(Kinetic);
 
     // PrintMsg("Obtaining node kinetic stress tensor...");
     // gsl_matrix * MesoSigma1 = gsl_matrix_calloc (NNodes,3);

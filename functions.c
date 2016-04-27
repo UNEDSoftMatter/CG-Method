@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 26 abr 2016 12:09:42 CEST
+ * Modified   : mié 27 abr 2016 13:47:27 CEST
  *
  * Author     : jatorre
  *
@@ -50,7 +50,8 @@ void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, gsl_vector * n)
 }
 
 void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * Neighbors, gsl_vector * ListHead, 
-                    gsl_vector * List, int type1, int type2, gsl_matrix * Forces, gsl_vector * Energy)
+                    gsl_vector * List, int type1, int type2, gsl_matrix * Forces, gsl_vector * Energy,
+                    gsl_vector * Kinetic )
 {
 
   gsl_matrix_scale(Forces,0.0);
@@ -70,8 +71,10 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
       gsl_vector * vi = gsl_vector_calloc(3);
       gsl_matrix_get_row(vi, Velocities,i);
       double * fij = malloc(3*sizeof(double));
+
       double   eij = KineticEnergy(vi, (int) gsl_matrix_get(Positions,i,0));
-      
+      gsl_vector_set(Kinetic,i,eij);
+
       gsl_vector * NeighboringCells = gsl_vector_calloc(27);
       int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz));
       int iCell    = FindParticle(Positions,i);
@@ -288,9 +291,9 @@ double Compute_Force_ij (gsl_matrix * Positions, int i, int j, double * fij)
    return eij;
 }
 
-double KineticEnergy (gsl_vector * i, int type)
+double KineticEnergy (gsl_vector * v, int type)
 {
-  double K = pow(gsl_vector_get(i,0),2) + pow(gsl_vector_get(i,1),2) + pow(gsl_vector_get(i,2),2);
+  double K = pow(gsl_vector_get(v,0),2) + pow(gsl_vector_get(v,1),2) + pow(gsl_vector_get(v,2),2);
   
   if (type == 1)
   {

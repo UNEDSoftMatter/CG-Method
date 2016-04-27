@@ -52,7 +52,8 @@ double Compute_Force_ij (gsl_matrix * Positions, int i, int j, double * fij);
 void Compute_Forces (gsl_matrix * Positions, gsl_matrix * Velocities, 
                      gsl_matrix * Neighbors, gsl_vector * ListHead, 
                      gsl_vector * List, int type1, int type2, 
-                     gsl_matrix * Forces, gsl_vector * Energy);
+                     gsl_matrix * Forces, gsl_vector * Energy,
+                     gsl_vector * Kinetic);
 
 double * GetLJParams (double type1, double type2);
 
