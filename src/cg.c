@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 27 abr 2016 19:06:10 CEST
+ * Modified   : jue 28 abr 2016 13:28:03 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -14,6 +14,8 @@
 #include "cg.h"
 int main (int argc, char *argv[]) {
   
+    PrintInitInfo();
+
     if (argc != 2)
     {
       PrintMsg("ERROR");
@@ -23,9 +25,7 @@ int main (int argc, char *argv[]) {
     }
 
     char * basename = argv[1];
-    char * str = strcpy(str, basename);
-   
-    PrintInitInfo();
+    char * str;  //  = strcpy(str, basename);
 
     PrintMsg("INIT");
 
@@ -98,25 +98,24 @@ int main (int argc, char *argv[]) {
     clock_t t1, t2;
 
     t1 = clock();
-    PrintMsg("Computing forces due to the wall and energy of each particle...");
+    PrintMsg("Computing forces in the fluid (type 2 particles) due to the wall (type 1 particles)");
+    printf("\tNote that the energy of all the particles is also computed, regardless of the type of particle\n");
     gsl_matrix * Force   = gsl_matrix_calloc (NParticles,3);
     gsl_vector * Energy  = gsl_vector_calloc (NParticles);
     gsl_vector * Kinetic = gsl_vector_calloc (NParticles);
-    Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 1, 2, Force, Energy, Kinetic);
+    Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 2, 1, Force, Energy, Kinetic);
     t2 = clock();
     printf("\tTime elapsed computing forces and energies: %ld ms\n", timediff(t1,t2));
     
-    gsl_vector_free(List);
-    gsl_vector_free(ListHead);
-    gsl_matrix_free(Neighbors);
-
-    //  Checkpoint: Print the force exerted on type1 particles
+    //  Checkpoint: Print the force exerted on type2 particles
     //              and the energy of all the particles
     gsl_vector * zPart  = gsl_vector_calloc(NParticles);
     gsl_vector * FzPart = gsl_vector_calloc(NParticles);
+    // TODO: See if vector_view has a better performance than matrix_get_col
     gsl_matrix_get_col( zPart, Positions, 3);
     gsl_matrix_get_col(FzPart, Force, 2);
     
+    // Print microscopic information
     str = strcpy (str, "./output/");
     str = strcat (str, basename);
     str = strcat (str, ".MicrozForce.dat");
@@ -134,6 +133,8 @@ int main (int argc, char *argv[]) {
     
     PrintMsg("Computing the module of the velocity as a estimator for the temperature...");
     gsl_vector * Vmod = Compute_Velocity_Module(Velocities);
+
+    // Print more microscopic information
     str = strcpy (str, "./output/");
     str = strcat (str, basename);
     str = strcat (str, ".MicroVmodule.dat");
@@ -210,6 +211,9 @@ int main (int argc, char *argv[]) {
     // 
     //    DrawSim(Micro, TestParticle, TestCell, NeighboringCells, Verlet, NumberOfNeighbors);
 
+
+    // START WITH THE MESOSCOPIC INFORMATION
+
     PrintMsg("Generating node positions...");
     gsl_vector * z     = gsl_vector_calloc(NNodes);
     Compute_Node_Positions(z);
@@ -269,31 +273,71 @@ int main (int argc, char *argv[]) {
     gsl_vector_free(MesoKinetic);
     gsl_vector_free(Kinetic);
 
-    // Remember that positions are stored as following:
-    // TYPE X Y Z
-    // while velocities are stored as:
+    // Remember that velocities are stored as following:
     // VX VY VZ
-    PrintMsg("Obtaining node kinetic stress tensor...");
-    gsl_vector * MesoSigma1_xz = gsl_vector_calloc (NNodes);
+    // So
     // K_\mu^{xz} \propto v^x v^z = 0 2
+   
+    PrintMsg("Obtaining node kinetic stress tensors...");
+    
+    gsl_vector * MesoSigma1_xz = gsl_vector_calloc (NNodes);
     Compute_Meso_Sigma1(Positions, Velocities, 0, 2, MesoSigma1_xz);
     str = strcpy (str, "./output/");
     str = strcat (str, basename);
     str = strcat (str, ".MesoKxz.dat");
     SaveVectorWithIndex(z, MesoSigma1_xz, NNodes, str); 
+    gsl_vector_free(MesoSigma1_xz);
     
-    // PrintMsg("Obtaining node virial stress tensor...");
-    // gsl_matrix * MesoSigma2 = gsl_matrix_calloc (NNodes,3);
-    // Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, MesoSigma2);
-    // SaveMatrixWithIndex(z, MesoSigma2, "MesoVirialStress.dat");
- 
+    gsl_vector * MesoSigma1_xx = gsl_vector_calloc (NNodes);
+    Compute_Meso_Sigma1(Positions, Velocities, 0, 0, MesoSigma1_xx);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoKxx.dat");
+    SaveVectorWithIndex(z, MesoSigma1_xx, NNodes, str); 
+    gsl_vector_free(MesoSigma1_xx);
+    
+    gsl_vector * MesoSigma1_yy = gsl_vector_calloc (NNodes);
+    Compute_Meso_Sigma1(Positions, Velocities, 1, 1, MesoSigma1_yy);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoKyy.dat");
+    SaveVectorWithIndex(z, MesoSigma1_yy, NNodes, str); 
+    gsl_vector_free(MesoSigma1_yy);
+    
+    gsl_vector * MesoSigma1_zz = gsl_vector_calloc (NNodes);
+    Compute_Meso_Sigma1(Positions, Velocities, 2, 2, MesoSigma1_zz);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoKzz.dat");
+    SaveVectorWithIndex(z, MesoSigma1_zz, NNodes, str); 
+    gsl_vector_free(MesoSigma1_zz);
+    
+    gsl_vector * MesoSigma1_xy = gsl_vector_calloc (NNodes);
+    Compute_Meso_Sigma1(Positions, Velocities, 0, 1, MesoSigma1_xy);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoKxy.dat");
+    SaveVectorWithIndex(z, MesoSigma1_xy, NNodes, str); 
+    gsl_vector_free(MesoSigma1_xy);
+
+    PrintMsg("Obtaining node virial stress tensor...");
+    gsl_vector * MesoSigma2_xz = gsl_vector_calloc (NNodes);
+    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 2, MesoSigma2_xz, z);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoPxz.dat");
+    SaveVectorWithIndex(z, MesoSigma2_xz, NNodes, str);
+    gsl_vector_free(MesoSigma2_xz);
+
     gsl_vector_free(z);
     gsl_matrix_free(Positions);
     gsl_matrix_free(Velocities);
     gsl_vector_free(MesoDensity);
     
-    gsl_vector_free(MesoSigma1_xz);
-    // gsl_matrix_free(MesoSigma2);
+
+    gsl_vector_free(List);
+    gsl_vector_free(ListHead);
+    gsl_matrix_free(Neighbors);
 
     PrintMsg("EOF. Have a nice day.");
     return 0;

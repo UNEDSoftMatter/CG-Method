@@ -17,7 +17,7 @@
 ############################################################################# */
 
 #define NParticles 12908
-#define NNodes       128
+#define NNodes        64
 #define Lx            16.9154
 #define Ly            16.9154
 #define Lz           153.776 
@@ -44,7 +44,16 @@
 #  Microscopic functions 
 ############################################################################# */
 
-double Compute_Force_ij (gsl_matrix * Positions, int i, int j, double * fij);
+//  Compute the  force that  particle j  (type2) exerts  on particle  i (type1).
+// This function only computes the force  if particle j is of type2 and particle
+// i is of type1.  It will compute  the force between all the particles if type1
+// = type2 = 0 The energy will be always computed between all the particles.
+//
+// Note that,  provided a VerletList, the best performance is obtained computing
+// the interaction between i and VerletList[j].
+
+double Compute_Force_ij (gsl_matrix * Positions, int i, int j, int type1, 
+                         int type2, double * fij);
 
 void Compute_Forces (gsl_matrix * Positions, gsl_matrix * Velocities, 
                      gsl_matrix * Neighbors, gsl_vector * ListHead, 
@@ -168,6 +177,7 @@ void Compute_Meso_Temp(gsl_vector * MesoKinetic, gsl_vector * MesoDensity,
 void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities,
                           int idx1, int idx2, gsl_vector * MesoSigma1);
 
-//void Compute_Meso_Sigma2    (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead, 
-//                             gsl_vector * List, gsl_matrix * MesoSigma2);
-
+void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, 
+                          gsl_vector * ListHead,  gsl_vector * List, 
+                          int idx1, int idx2, gsl_vector * MesoSigma2, 
+                          gsl_vector * z);

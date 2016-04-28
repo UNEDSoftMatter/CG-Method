@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 27 abr 2016 19:04:24 CEST
+ * Modified   : jue 28 abr 2016 14:05:36 CEST
  *
  * Author     : jatorre
  *
@@ -63,39 +63,49 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
   int omp_get_max_threads();
   int chunks = NParticles / omp_get_max_threads();
 
-  #pragma omp parallel
+  //pragma omp parallel
   {
-    #pragma omp for schedule (dynamic,chunks)
+    //pragma omp for schedule (dynamic,chunks) 
+    // private (vi, fij, NeighboringCells, Verlet, iCell, NNeighbors, j)
     for (int i=0;i<NParticles;i++)
     {
       gsl_vector * vi = gsl_vector_calloc(3);
       gsl_matrix_get_row(vi, Velocities,i);
       double * fij = malloc(3*sizeof(double));
 
-      double   eij = KineticEnergy(vi, (int) gsl_matrix_get(Positions,i,0));
-      gsl_vector_set(Kinetic,i,eij);
+      // Compute the kinetic energy of particle i (0.5 mi vi^2)
+      double ei = KineticEnergy(vi, (int) gsl_matrix_get(Positions,i,0));
+      gsl_vector_set(Kinetic,i,ei);
 
+      // Obtain the list of neighboring cells to iCell (the cell i belongs to)
       gsl_vector * NeighboringCells = gsl_vector_calloc(27);
       int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz));
       int iCell    = FindParticle(Positions,i);
       gsl_matrix_get_row(NeighboringCells, Neighbors, iCell);
            
+      // Obtain the list of neighboring particles that interacts with i
+      // i interacts with all Verlet[j] particles (j = 0 .. NNeighbors-1)
       int NNeighbors = Compute_VerletList(Positions, i, NeighboringCells, iCell, ListHead, List, Verlet);
       gsl_vector_free(NeighboringCells);
-
       Verlet = realloc(Verlet, NNeighbors * sizeof(int));
- 
+
+      // Loop over all the j-neighbors of i-particle
       for (int j=0;j<NNeighbors;j++)
       {
-        if (i != Verlet[j])
-        {
-          eij = Compute_Force_ij(Positions, i, Verlet[j], fij);
+//         if (i != Verlet[j])
+//         {
+          ei = Compute_Force_ij(Positions, i, Verlet[j], type1, type2, fij);
           Forces->data[i*Forces->tda + 0] += fij[0];
           Forces->data[i*Forces->tda + 1] += fij[1];
           Forces->data[i*Forces->tda + 2] += fij[2];
-          Energy->data[i*Energy->stride]  += eij;
-        }
+          Energy->data[i*Energy->stride]  += ei;
+//         }
       }
+
+      // TODO: Do we really need to realloc Verlet?
+      //       We may consider always Verlet[27*NumberOfParticlesPerNode]
+      //       and limit the j-loop to NNeighbors. 
+      //       Will we obtain a better performance?
       Verlet = realloc(Verlet, 27 * NParticles * sizeof(int) / (Mx * My * Mz));
       gsl_vector_free(vi);
       free(fij);
@@ -103,8 +113,6 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
   }
 
   // End of parallel region
-
-  gsl_vector_scale(Energy,0.5);
   
 }
 
@@ -229,13 +237,13 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, int i
 {
   int mu = 0;
   double mass = 0.0;
-  double dv = ((float) Lx * Ly * RealLz) / NNodes;
+  double dv = ((float) Lx * Ly * Lz) / NNodes;
   
   gsl_vector_scale(MesoSigma1, 0.0);
   
   for (int i=0;i<NParticles;i++)
   {
-    mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/RealLz) - 1;
+    mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz) - 1;
     ( mu == -1 ) ? mu = NNodes-1 : mu ;
     mass = ( gsl_matrix_get(Positions,i,0) == 1 ? m1 : m2 );
 
@@ -244,15 +252,69 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, int i
   gsl_vector_scale(MesoSigma1,1.0/dv);
 }
 
-void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead, gsl_vector * List, gsl_matrix * MesoSigma2)
+void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead,
+                          gsl_vector * List, int idx1, int idx2, gsl_vector * MesoSigma2, gsl_vector * z)
 {
 
   double dv = ((float) Lx * Ly * RealLz) / NNodes;
+  double dz = ((float) RealLz) / NNodes;
+  int mu,nu;
+  double eij, val, zij, zmu, zsigma, znu;
+  double * fij = malloc(3*sizeof(double));
 
-  gsl_matrix_scale(MesoSigma2,0.5/dv);
+  for (int i=0;i<NParticles;i++)
+  {
+    mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/RealLz) - 1;
+    ( mu == -1 ) ? mu = NNodes-1 : mu ;
+
+    int iCell = FindParticle(Positions,i);
+    gsl_vector * NeighboringCells = gsl_vector_calloc(27);
+    gsl_matrix_get_row(NeighboringCells, Neighbors, iCell);
+    
+    int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
+    int NNeighbors = Compute_VerletList(Positions, i, NeighboringCells, iCell, ListHead, List, Verlet);
+    Verlet = realloc(Verlet, NNeighbors * sizeof(int));
+    
+    for (int j=0;j<NNeighbors;j++)
+    {
+      nu = floor(gsl_matrix_get(Positions,Verlet[j],3)*NNodes/RealLz) - 1;
+      ( nu == -1 ) ? nu = NNodes-1 : nu ;
+      eij = Compute_Force_ij (Positions, i, Verlet[j], 0, 0, fij);
+      val = (gsl_matrix_get(Positions,i,idx1) - gsl_matrix_get(Positions,j,idx1))*fij[idx2];
+      zij = gsl_matrix_get(Positions,i,2) - gsl_matrix_get(Positions,Verlet[j],2);
+      
+      if (mu == nu)
+      {
+          gsl_vector_set(MesoSigma2,mu,val);
+      }
+      else if (mu > nu)
+      {
+          zmu = (gsl_matrix_get(Positions,i,2)-gsl_vector_get(z,mu))/zij;
+          MesoSigma2->data[mu*MesoSigma2->stride] += val*zmu;
+          for (int sigma=mu-1;sigma>nu;sigma--)
+          {
+            zsigma = dz/zij;
+            MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
+          }
+          znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],2))/zij;
+          MesoSigma2->data[nu*MesoSigma2->stride] += val*znu;
+      } else {
+          znu = (gsl_matrix_get(Positions,i,2)-gsl_vector_get(z,nu))/zij;
+          MesoSigma2->data[nu*MesoSigma2->stride] += val*znu;
+          for (int sigma=nu-1;sigma>mu;sigma--)
+          {
+            zsigma = dz/zij;
+            MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
+          }
+          zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,Verlet[j],2))/zij;
+          MesoSigma2->data[mu*MesoSigma2->stride] += val*zmu;
+      }
+    }
+  }
+  gsl_vector_scale(MesoSigma2,0.5/dv);
 }
           
-double Compute_Force_ij (gsl_matrix * Positions, int i, int j, double * fij)
+double Compute_Force_ij (gsl_matrix * Positions, int i, int j, int type1, int type2, double * fij)
 {
    double r2i, r6i, ff;
    double eij = 0.0;
@@ -260,12 +322,13 @@ double Compute_Force_ij (gsl_matrix * Positions, int i, int j, double * fij)
    double deltax  = Positions->data[i*Positions->tda + 1] - Positions->data[j*Positions->tda + 1];
           deltax -= Lx*round(deltax/Lx);
    double deltay  = Positions->data[i*Positions->tda + 2] - Positions->data[j*Positions->tda + 2];
-          deltay -= Ly*round(deltax/Ly);
+          deltay -= Ly*round(deltay/Ly);
    double deltaz  = Positions->data[i*Positions->tda + 3] - Positions->data[j*Positions->tda + 3];
-          deltaz -= RealLz*round(deltaz/RealLz);
+          deltaz -= Lz*round(deltaz/Lz);
 
    double r2      = deltax*deltax + deltay*deltay + deltaz*deltaz;
 
+   // Obtain LJ parameters
    double * lj = malloc(3*sizeof(float));
    lj = GetLJParams(gsl_matrix_get(Positions,i,0), gsl_matrix_get(Positions,j,0));
    double epsilon = lj[0];
@@ -273,19 +336,20 @@ double Compute_Force_ij (gsl_matrix * Positions, int i, int j, double * fij)
    double ecut    = lj[2];
    free (lj);
 
-   if (r2 <= Rcut*Rcut)
+   // Compute the force
+   r2i      = sigma*sigma/r2;
+   r6i      = pow(r2i,3);
+   ff       = 48.0*epsilon*r2i*r6i*(r6i-0.5);
+
+   if (((type1 == 0)&&(type2 == 0)) || ((((int) gsl_matrix_get(Positions,i,0)) == type1)&&(((int) gsl_matrix_get(Positions,j,0) == type2))))
    {
-     r2i      = sigma*sigma/r2;
-     r6i      = pow(r2i,3);
-     ff       = 48.0*epsilon*r2i*r6i*(r6i-0.5);
-     if (( ((int) gsl_matrix_get(Positions,i,0)) == 1)&&(((int) gsl_matrix_get(Positions,j,0) == 2)))
-     {
-       fij[0] = ff*deltax;  
-       fij[1] = ff*deltay;  
-       fij[2] = ff*deltaz;  
-     }
-     eij = 4.0*epsilon*r6i*(r6i-1.0)-ecut;
+     fij[0] = ff*deltax;  
+     fij[1] = ff*deltay;  
+     fij[2] = ff*deltaz;  
    }
+
+   // Compute the potential energy
+   eij = 4.0*epsilon*r6i*(r6i-1.0)-ecut;
 
    return eij;
 }
@@ -294,16 +358,16 @@ double KineticEnergy (gsl_vector * v, int type)
 {
   double K = pow(gsl_vector_get(v,0),2) + pow(gsl_vector_get(v,1),2) + pow(gsl_vector_get(v,2),2);
   
-  if (type == 1)
+  switch (type)
   {
-    K *= m1;
-  }
-  else
-  {
-    K *= m2;
+    case 1:
+      K *= 0.5 * m1;
+      break;
+    case 2:
+      K *= 0.5 * m2;
+      break;
   }
   return K;
-   
 }
 
 void Compute_Meso_Energy(gsl_matrix * Micro, gsl_vector * MicroEnergy, gsl_vector * z, gsl_vector * MesoEnergy)

@@ -3,7 +3,7 @@
  *
  * Created    : 22.04.2016
  *
- * Modified   : vie 22 abr 2016 17:48:30 CEST
+ * Modified   : jue 28 abr 2016 12:53:42 CEST
  *
  * Author     : jatorre
  *
@@ -121,6 +121,8 @@ void Compute_NeighborCells(int cell, gsl_vector * neighbors)
 
 void Compute_NeighborMatrix(gsl_matrix * Neighbors)
 {
+  // TODO: May we obtain a speedup using vector_view instead
+  //       of matrix_set_row?
   gsl_vector * neighborVector = gsl_vector_calloc (27);
   for (int cell=0;cell<Mx*My*Mz;cell++)
   {
@@ -178,8 +180,8 @@ int Compute_VerletList(gsl_matrix * Micro, int TestParticle, gsl_vector * Neighb
 
       r2  = deltax*deltax + deltay*deltay + deltaz*deltaz;
 
-      if (r2 <= Rcut*Rcut)
-      { 
+      if ((r2 != 0)&&(r2 <= Rcut*Rcut))
+      {
         Verlet[NumberOfNeighbors] = j;
         NumberOfNeighbors++;
       }
