@@ -1,5 +1,5 @@
 CC       := gcc 
-LIBS     := -lm -lblas -llapack -Wall -lgsl -lgslcblas -fopenmp -O0 -ggdb -g
+LIBS     := -lm -lblas -llapack -Wall -lgsl -lgslcblas -fopenmp -O0
 DEBUGGER := -O0 -ggdb
 FLAGS    := -std=gnu99
 TARGET   := ./../CG

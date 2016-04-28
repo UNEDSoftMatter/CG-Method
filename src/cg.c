@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 28 abr 2016 13:28:03 CEST
+ * Modified   : jue 28 abr 2016 18:05:18 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -321,6 +321,39 @@ int main (int argc, char *argv[]) {
     gsl_vector_free(MesoSigma1_xy);
 
     PrintMsg("Obtaining node virial stress tensor...");
+    
+    gsl_vector * MesoSigma2_xx = gsl_vector_calloc (NNodes);
+    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 0, MesoSigma2_xx, z);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoPxx.dat");
+    SaveVectorWithIndex(z, MesoSigma2_xx, NNodes, str);
+    gsl_vector_free(MesoSigma2_xx);
+    
+    gsl_vector * MesoSigma2_yy = gsl_vector_calloc (NNodes);
+    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 1, 1, MesoSigma2_yy, z);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoPyy.dat");
+    SaveVectorWithIndex(z, MesoSigma2_yy, NNodes, str);
+    gsl_vector_free(MesoSigma2_yy);
+    
+    gsl_vector * MesoSigma2_zz = gsl_vector_calloc (NNodes);
+    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 2, 2, MesoSigma2_zz, z);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoPzz.dat");
+    SaveVectorWithIndex(z, MesoSigma2_zz, NNodes, str);
+    gsl_vector_free(MesoSigma2_zz);
+    
+    gsl_vector * MesoSigma2_xy = gsl_vector_calloc (NNodes);
+    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 1, MesoSigma2_xy, z);
+    str = strcpy (str, "./output/");
+    str = strcat (str, basename);
+    str = strcat (str, ".MesoPxy.dat");
+    SaveVectorWithIndex(z, MesoSigma2_xy, NNodes, str);
+    gsl_vector_free(MesoSigma2_xy);
+    
     gsl_vector * MesoSigma2_xz = gsl_vector_calloc (NNodes);
     Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 2, MesoSigma2_xz, z);
     str = strcpy (str, "./output/");
@@ -333,7 +366,6 @@ int main (int argc, char *argv[]) {
     gsl_matrix_free(Positions);
     gsl_matrix_free(Velocities);
     gsl_vector_free(MesoDensity);
-    
 
     gsl_vector_free(List);
     gsl_vector_free(ListHead);
