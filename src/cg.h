@@ -17,7 +17,7 @@
 ############################################################################# */
 
 #define NParticles 12908
-#define NNodes       128
+#define NNodes        32
 #define Lx            16.9154
 #define Ly            16.9154
 #define Lz           153.776 

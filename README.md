@@ -13,9 +13,8 @@ Velocities are in _data/velocities/basename.vel_
 
 _basename_ is given as an argument in CG.
 
-The positions file has 5 columns:  the label of an atom,  the type of atom,  and
-the coordinates x,  y and z.  The velocities file has 4 columns: the label of an
-atom and the velocities in x, y and z.
+The positions file has 4 columns:  the  type of atom,  and the coordinates x,  y
+and z.  The velocities file has 3 columns: the velocities in x, y and z.
 
 **If  your input  files have  other format  use  *awk*  to  adapt  to  the input
 format**, or change the source code.
