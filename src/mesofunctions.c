@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 29 abr 2016 12:38:07 CEST
+ * Modified   : vie 29 abr 2016 13:28:34 CEST
  *
  * Author     : jatorre
  *
@@ -112,7 +112,10 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, int i
   {
     mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz) - 1;
     ( mu == -1 ) ? mu = NNodes-1 : mu ;
-    mass = ( gsl_matrix_get(Positions,i,0) == 1 ? m1 : m2 );
+    // mass = ( gsl_matrix_get(Positions,i,0) == 1 ? m1 : m2 );
+    // If type of atom == 1 then it is a wall particle, so it does not contribute to the
+    // stress tensor
+    mass = ( gsl_matrix_get(Positions,i,0) == 1 ? 0.0 : m2 );
 
     MesoSigma1->data[mu*MesoSigma1->stride] += mass * gsl_matrix_get(Velocities,i,idx1) * gsl_matrix_get(Velocities,i,idx2);
   }
@@ -153,7 +156,10 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
       nu = floor(gsl_matrix_get(Positions,Verlet[j],3)*NNodes/Lz) - 1;
       ( nu == -1 ) ? nu = NNodes-1 : nu ;
 
-      eij = Compute_Force_ij (Positions, i, Verlet[j], 0, 0, fij);
+      // eij = Compute_Force_ij (Positions, i, Verlet[j], 0, 0, fij);
+      // Compute only the force between particles of type 2 and particle of type 2
+      // (fluid-fluid interaction)
+      eij = Compute_Force_ij (Positions, i, Verlet[j], 2, 2, fij);
    
       double distance  = gsl_matrix_get(Positions,i,idx1+1) - gsl_matrix_get(Positions,Verlet[j],idx1+1);
 
