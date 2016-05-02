@@ -17,6 +17,7 @@
 ############################################################################# */
 
 #define NParticles 12908
+#define NSteps        10
 #define NNodes        32
 #define Lx            16.9154
 #define Ly            16.9154
@@ -155,6 +156,10 @@ long timediff (clock_t t1, clock_t t2);
 // Show initial info about the program
 
 void PrintInitInfo(void);
+
+// Read a txt file and import as an array
+
+void ReadInputFiles(char * iFileStr, char (*iFiles)[6]);
 
 /* #############################################################################
 #  Mesoscopic functions in functions.c 

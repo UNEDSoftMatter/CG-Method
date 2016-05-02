@@ -1,6 +1,13 @@
 HISTORICAL MILESTONES
 =====================
 
+
+Rev#002
+-------
+- The program now uses argv[1] as a filename to read all the input files.
+  The idea is to create through bash (for i in $(ls |grep .pos)) a txt
+  file that will be read by the program.
+
 Rev#001
 -------
 - Changed strcpy in stdout to accomplish with -O2 flag

@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 29 abr 2016 12:09:45 CEST
+ * Modified   : lun 02 may 2016 22:52:36 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -12,25 +12,34 @@
  *
  */
 #include "cg.h"
+
 int main (int argc, char *argv[]) {
   
-    PrintInitInfo();
+  PrintInitInfo();
 
-    if (argc != 2)
-    {
-      PrintMsg("ERROR");
-      PrintMsg("ERROR: CG needs an input basename. Exiting now...");
-      PrintMsg("ERROR");
-      return 1;
-    }
+  if (argc != 2)
+  {
+    PrintMsg("ERROR");
+    PrintMsg("ERROR: CG needs an input basename. Exiting now...");
+    PrintMsg("ERROR");
+    return 1;
+  }
 
-    // Use argv[1] as input basename to write outputs
-    char * basename = argv[1];
-    char str[100]; 
-    memset(str,'\0',sizeof(str));
+  // Use argv[1] as input basename to write outputs
+  char str[100]; 
+  memset(str,'\0',sizeof(str));
 
-    PrintMsg("INIT");
+  PrintMsg("INIT");
 
+  char * filestr = argv[1];
+  char basename[6];
+  char Snapshot[NSteps][6];
+  ReadInputFiles(filestr, Snapshot);
+
+  for (int Step=0;Step<NSteps;Step++)
+  {
+    strcpy(basename,Snapshot[Step]);
+    
     // Positions is a matrix that stores: 
     // TYPE x y z 
     // The ID of a particle corresponds to the row
@@ -376,7 +385,9 @@ int main (int argc, char *argv[]) {
     gsl_vector_free(List);
     gsl_vector_free(ListHead);
     gsl_matrix_free(Neighbors);
+  
+  }
 
-    PrintMsg("EOF. Have a nice day.");
-    return 0;
+  PrintMsg("EOF. Have a nice day.");
+  return 0;
 }

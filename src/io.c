@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mar 26 abr 2016 16:16:02 CEST
+ * Modified   : lun 02 may 2016 22:53:13 CEST
  *
  * Author     : jatorre
  *
@@ -97,4 +97,26 @@ void PrintInitInfo(void)
   printf("# Log files will be stored in ./log/                                         #\n");
   printf("#                                                                            #\n");
   printf("##############################################################################\n\n");
+}
+
+void ReadInputFiles(char * iFileStr, char iFiles[][6])
+{
+    FILE *iFile;
+    iFile = fopen(iFileStr, "r");
+    if (!iFile)
+    {
+        PrintMsg("Error reading input file. Exiting now...");
+        printf("\tThe input file was: %s\n", iFileStr);
+    }
+
+    int line=NSteps;
+    int i=0;
+
+    while (line--)
+    {
+        fscanf(iFile,"%s",iFiles[i]);
+        i++;
+    }
+
+    fclose(iFile);
 }
