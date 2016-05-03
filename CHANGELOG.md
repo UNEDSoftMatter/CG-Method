@@ -1,6 +1,10 @@
 HISTORICAL MILESTONES
 =====================
 
+Rev#003
+-------
+- Parameters are now in a separated file `params.h`.
+
 Rev#002
 -------
 - The program now  uses argv[1] as a filename to read  all the input files.  The
