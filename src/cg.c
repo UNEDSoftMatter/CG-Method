@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 03 may 2016 13:20:52 CEST
+ * Modified   : mar 03 may 2016 18:36:06 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -187,7 +187,7 @@ int main (int argc, char *argv[]) {
   gsl_vector * Energy  = gsl_vector_calloc (NParticles);
   gsl_vector * Kinetic = gsl_vector_calloc (NParticles);
   // gsl_vector * zPart   = gsl_vector_calloc (NParticles);
-  gsl_vector * FzPart  = gsl_vector_calloc (NParticles);
+  // gsl_vector * FzPart  = gsl_vector_calloc (NParticles);
 
   // Mesoscopic variables
   gsl_matrix * MesoForce   = gsl_matrix_calloc (NNodes,3);
