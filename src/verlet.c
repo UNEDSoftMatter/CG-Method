@@ -3,7 +3,7 @@
  *
  * Created    : 22.04.2016
  *
- * Modified   : jue 28 abr 2016 12:53:42 CEST
+ * Modified   : mar 03 may 2016 12:23:01 CEST
  *
  * Author     : jatorre
  *
@@ -15,9 +15,14 @@
     
 void Compute_Linked_List(gsl_matrix * Micro, gsl_vector * List, gsl_vector * ListHead)
 {
-  unsigned int    iCell;
-  double xi, yi, zi;
-
+  unsigned int iCell;
+  double  xi, yi, zi;
+    
+  // RESET THE LIST
+  // As C arrays goes from 0 to N-1,  we specify the end of a linked list with -1
+  gsl_vector_set_all(List,-1.0);
+  gsl_vector_set_all(ListHead,-1.0);
+    
   // PARTICLES GO FROM 0 TO N-1
   for (int i=0;i<NParticles;i++)
   {
@@ -121,6 +126,9 @@ void Compute_NeighborCells(int cell, gsl_vector * neighbors)
 
 void Compute_NeighborMatrix(gsl_matrix * Neighbors)
 {
+  // RESET THE NEIGHBORING MATRIX  
+  gsl_matrix_set_zero(Neighbors);
+
   // TODO: May we obtain a speedup using vector_view instead
   //       of matrix_set_row?
   gsl_vector * neighborVector = gsl_vector_calloc (27);

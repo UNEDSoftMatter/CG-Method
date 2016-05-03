@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 29 abr 2016 13:28:34 CEST
+ * Modified   : mar 03 may 2016 13:11:25 CEST
  *
  * Author     : jatorre
  *
@@ -22,6 +22,10 @@ void Compute_Node_Positions(gsl_vector * z)
 
 void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, gsl_vector * n)
 {
+
+  // RESET vector
+  gsl_vector_set_zero(n);
+
   // Valid for PBC,  this function obtains the  density of a slab of volume Lx *
   //  Ly *  dz The  slab is  build as  a  finite  element  based  on  a Delaunay
   // tessellation
@@ -106,7 +110,7 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, int i
   double mass = 0.0;
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
-  gsl_vector_scale(MesoSigma1, 0.0);
+  gsl_vector_set_zero(MesoSigma1);
   
   for (int i=0;i<NParticles;i++)
   {
@@ -125,6 +129,8 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, int i
 void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead,
                           gsl_vector * List, int idx1, int idx2, gsl_vector * MesoSigma2, gsl_vector * z)
 {
+
+  gsl_vector_set_zero(MesoSigma2);
 
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   double dz = ((float) Lz) / NNodes;

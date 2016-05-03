@@ -3,7 +3,7 @@
  *
  * Created    : 29.04.2016
  *
- * Modified   : vie 29 abr 2016 12:21:55 CEST
+ * Modified   : mar 03 may 2016 12:26:06 CEST
  *
  * Author     : jatorre
  *
@@ -17,8 +17,11 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
                     gsl_matrix * Forces, gsl_vector * Energy, gsl_vector * Kinetic )
 {
 
-  gsl_matrix_scale(Forces,0.0);
-  gsl_vector_scale(Energy,0.0);
+  // RESET MATRICES AND VECTORS
+  // TODO: Redundant?
+  gsl_matrix_set_zero(Forces);
+  gsl_vector_set_zero(Energy);
+  gsl_vector_set_zero(Kinetic);
 
   // Begin of parallel region
   
@@ -40,12 +43,12 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
 
       // Obtain the list of neighboring cells to iCell (the cell i belongs to)
       gsl_vector * NeighboringCells = gsl_vector_calloc(27);
-      int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz));
       int iCell    = FindParticle(Positions,i);
       gsl_matrix_get_row(NeighboringCells, Neighbors, iCell);
            
       // Obtain the list of neighboring particles that interacts with i
       // i interacts with all Verlet[j] particles (j = 0 .. NNeighbors-1)
+      int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz));
       int NNeighbors = Compute_VerletList(Positions, i, NeighboringCells, iCell, ListHead, List, Verlet);
       gsl_vector_free(NeighboringCells);
       Verlet = realloc(Verlet, NNeighbors * sizeof(int));
@@ -64,7 +67,8 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
       //       We may consider always Verlet[27*NumberOfParticlesPerNode]
       //       and limit the j-loop to NNeighbors. 
       //       Will we obtain a better performance?
-      Verlet = realloc(Verlet, 27 * NParticles * sizeof(int) / (Mx * My * Mz));
+      // Verlet = realloc(Verlet, 27 * NParticles * sizeof(int) / (Mx * My * Mz));
+      free(Verlet);
       gsl_vector_free(vi);
       free(fij);
     }

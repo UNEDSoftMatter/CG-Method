@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 02 may 2016 22:52:36 CEST
+ * Modified   : mar 03 may 2016 13:20:52 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -11,6 +11,7 @@
  *              from microscopic details
  *
  */
+
 #include "cg.h"
 
 int main (int argc, char *argv[]) {
@@ -25,16 +26,181 @@ int main (int argc, char *argv[]) {
     return 1;
   }
 
-  // Use argv[1] as input basename to write outputs
+  PrintMsg("INIT");
+  
+  // Read the list of all snapshots and create the output files
+
+  // Define variables
   char str[100]; 
   memset(str,'\0',sizeof(str));
-
-  PrintMsg("INIT");
-
   char * filestr = argv[1];
   char basename[6];
+
+  // Read input list
   char Snapshot[NSteps][6];
   ReadInputFiles(filestr, Snapshot);
+ 
+  // INIT OF BLOCK. Create output files
+  struct OutputFiles oFile;
+
+  // Microscopic files
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MicrozForce.dat");
+  oFile.MicrozForce = fopen(str, "w");
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MicroEnergy.dat");
+  oFile.MicroEnergy = fopen(str, "w");
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MicroKinetic.dat");
+  oFile.MicroKinetic = fopen(str, "w");
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MicroVmod.dat");
+  oFile.MicroVmod = fopen(str, "w");
+
+  // Mesoscopic files
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoDensity.dat");
+  oFile.MesoDensity = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoxForce.dat");
+  oFile.MesoxForce = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoyForce.dat");
+  oFile.MesoyForce = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesozForce.dat");
+  oFile.MesozForce = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoEnergy.dat");
+  oFile.MesoEnergy = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoKinetic.dat");
+  oFile.MesoKinetic = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoTemp.dat");
+  oFile.MesoTemp = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_00.dat");
+  oFile.MesoSigma1_00 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_11.dat");
+  oFile.MesoSigma1_11 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_22.dat");
+  oFile.MesoSigma1_22 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_01.dat");
+  oFile.MesoSigma1_01 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_12.dat");
+  oFile.MesoSigma1_12 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma2_00.dat");
+  oFile.MesoSigma2_00 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma2_11.dat");
+  oFile.MesoSigma2_11 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma2_22.dat");
+  oFile.MesoSigma2_22 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma2_01.dat");
+  oFile.MesoSigma2_01 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma2_12.dat");
+  oFile.MesoSigma2_12 = fopen(str, "w");
+
+  // END OF BLOCK. All output files created
+
+  // INIT OF BLOCK. Computing vectors and matrices that
+  // are constant throughout the program
+  
+  PrintMsg("Generating node positions...");
+  gsl_vector * z = gsl_vector_calloc(NNodes);
+  Compute_Node_Positions(z);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoNodes.dat");
+  SaveVectorWithoutIndex(z, str);
+
+  PrintMsg("Obtaining neighboring matrix...");
+  gsl_matrix * Neighbors = gsl_matrix_calloc (Mx*My*Mz,27);
+  Compute_NeighborMatrix(Neighbors);
+
+  // END OF BLOCK. All constant quantities created
+
+  // BEGIN OF BLOCK. Definition of needed vectors, matrices, and so on
+
+  // Positions and velocities
+  gsl_matrix * Positions  = gsl_matrix_calloc (NParticles,4);
+  gsl_matrix * Velocities = gsl_matrix_calloc (NParticles,3);
+  
+  FILE *PositionsFile;
+  FILE *VelocitiesFile;
+    
+  // Linked list
+  gsl_vector * List      = gsl_vector_calloc (NParticles);
+  gsl_vector * ListHead  = gsl_vector_calloc (Mx*My*Mz);
+
+  // Microscopic variables
+  gsl_matrix * Force   = gsl_matrix_calloc (NParticles,3);
+  gsl_vector * Energy  = gsl_vector_calloc (NParticles);
+  gsl_vector * Kinetic = gsl_vector_calloc (NParticles);
+  // gsl_vector * zPart   = gsl_vector_calloc (NParticles);
+  gsl_vector * FzPart  = gsl_vector_calloc (NParticles);
+
+  // Mesoscopic variables
+  gsl_matrix * MesoForce   = gsl_matrix_calloc (NNodes,3);
+  gsl_vector * MesoDensity = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoEnergy  = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoKinetic = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoTemp    = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoSigma1  = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoSigma2  = gsl_vector_calloc (NNodes);
+
+  // END OF BLOCK
+
+  // START COMPUTATION
 
   for (int Step=0;Step<NSteps;Step++)
   {
@@ -44,49 +210,31 @@ int main (int argc, char *argv[]) {
     // TYPE x y z 
     // The ID of a particle corresponds to the row
     PrintMsg("Reading microscopic positions");
+    gsl_matrix_set_zero(Positions);
     strcpy (str, "./data/positions/");
     strcat (str, basename);
     strcat (str, ".pos");
     printf("\tInput file: %s\n", str);
-    gsl_matrix * Positions = gsl_matrix_calloc (NParticles,4);
-    FILE *iFile;
-    iFile = fopen(str, "r");
-      gsl_matrix_fscanf(iFile, Positions);
-    fclose(iFile);
+    PositionsFile = fopen(str, "r");
+      gsl_matrix_fscanf(PositionsFile, Positions);
+    fclose(PositionsFile);
 
     // Velocities is a matrix that stores:
     // vx vy vz
     // The ID of a particle corresponds to the row
     PrintMsg("Reading microscopic velocities");
+    gsl_matrix_set_zero(Velocities);
     strcpy (str, "./data/velocities/");
     strcat (str, basename);
     strcat (str, ".vel");
     printf("\tInput file: %s\n", str);
-    gsl_matrix * Velocities = gsl_matrix_calloc (NParticles,3);
-    FILE *iFile2;
-    iFile2 = fopen(str, "r");
-      gsl_matrix_fscanf(iFile2, Velocities);
-    fclose(iFile2);
+    VelocitiesFile = fopen(str, "r");
+      gsl_matrix_fscanf(VelocitiesFile, Velocities);
+    fclose(VelocitiesFile);
 
     PrintMsg("Obtaining linked list...");
-
-    // As C arrays goes from 0 to N-1,  we specify the end of a linked list with
-    // -1
-    gsl_vector * List     = gsl_vector_calloc (NParticles);
-    gsl_vector * ListHead = gsl_vector_calloc (Mx*My*Mz);
-    
-    gsl_vector_add_constant(List,-1.0);
-    gsl_vector_add_constant(ListHead,-1.0);
-
-    printf("\tComponents of List:     \t%zu\n", List->size);
-    printf("\tComponents of ListHead: \t%zu\n", ListHead->size);
-    
     Compute_Linked_List(Positions, List, ListHead);
     
-    PrintMsg("Obtaining neighboring matrix...");
-    gsl_matrix * Neighbors = gsl_matrix_calloc (Mx*My*Mz,27);
-    Compute_NeighborMatrix(Neighbors);
-
     // Checkpoint: Compute neighbors of a TestCell
     //     int TestCell = 60;
     //     printf("Compute neighbors of cell %d:\n", TestCell);
@@ -111,65 +259,41 @@ int main (int argc, char *argv[]) {
     //     } 
     //
     
-    clock_t t1, t2;
+    // clock_t t1, t2;
 
-    t1 = clock();
+    // t1 = clock();
     PrintMsg("Computing forces in the fluid (type 2 particles) due to the wall (type 1 particles)");
     printf("\tNote that the energy of all the particles is also computed, regardless of the type of particle\n");
-    gsl_matrix * Force   = gsl_matrix_calloc (NParticles,3);
-    gsl_vector * Energy  = gsl_vector_calloc (NParticles);
-    gsl_vector * Kinetic = gsl_vector_calloc (NParticles);
+    
     Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 2, 1, Force, Energy, Kinetic);
-    t2 = clock();
-    printf("\tTime elapsed computing forces and energies: %ld ms\n", timediff(t1,t2));
+    // t2 = clock();
+    // printf("\tTime elapsed computing forces and energies: %ld ms\n", timediff(t1,t2));
     
     //  Checkpoint: Print the force exerted on type2 particles
     //              and the energy of all the particles
-    gsl_vector * zPart  = gsl_vector_calloc(NParticles);
-    gsl_vector * FzPart = gsl_vector_calloc(NParticles);
     // TODO: See if vector_view has a better performance than matrix_get_col
-    gsl_matrix_get_col( zPart, Positions, 3);
-    gsl_matrix_get_col(FzPart, Force, 2);
-    
-    // Print microscopic information
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MicrozForce.dat");
-    SaveVectorWithIndex(zPart, FzPart, NParticles, str);
-    
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MicroEnergy.dat");
-    SaveVectorWithIndex(zPart, Energy, NParticles, str);
-    
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MicroKinetic.dat");
-    SaveVectorWithIndex(zPart, Kinetic, NParticles, str);
+    // gsl_matrix_get_col( zPart, Positions, 3);
+
+    gsl_vector_view FzPart = gsl_matrix_column(Force,2);
+    PrintInfo(Step, &FzPart.vector,  oFile.MicrozForce);
+    PrintInfo(Step, Energy,  oFile.MicroEnergy);
+    PrintInfo(Step, Kinetic, oFile.MicroKinetic);
     
     PrintMsg("Computing the module of the velocity as a estimator for the temperature...");
     gsl_vector * Vmod = Compute_Velocity_Module(Velocities);
-
-    // Print more microscopic information
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MicroVmodule.dat");
-    SaveVectorWithIndex(zPart, Vmod, NParticles, str); 
-    
-    PrintMsg("Drawing the temperature of the particles...");
-    gsl_vector * vr = RescaleVector (Vmod);
-    strcpy (str, "./povray/");
-    strcat (str, basename);
-    strcat (str, ".Temperature.inc");
-    DrawTemperature (Positions,vr,str);
-
+    PrintInfo(Step, Vmod, oFile.MicroVmod);
     gsl_vector_free (Vmod);
-    gsl_vector_free (vr);
-    gsl_vector_free (FzPart);
-    gsl_vector_free (zPart);
+
+    // Checkpoint: Draw temperature in povray
+    //     PrintMsg("Drawing the temperature of the particles...");
+    //     gsl_vector * vr = RescaleVector (Vmod);
+    //     strcpy (str, "./povray/");
+    //     strcat (str, basename);
+    //     strcat (str, ".Temperature.inc");
+    //     DrawTemperature (Positions,vr,str);
+    //     gsl_vector_free (vr);
 
     // Checkpoint: Find the neighboring cells of the cell in which a TestParticle is into
-    //
     //    int TestParticle = 14412;
     //    printf("TESTING PARTICLE %d (type %d) at (%f,%f,%f)\n", TestParticle, ((int) gsl_matrix_get(Positions,TestParticle,0)), 
     //        gsl_matrix_get(Positions,TestParticle,1), gsl_matrix_get(Positions,TestParticle,2), gsl_matrix_get(Positions,TestParticle,3));
@@ -229,64 +353,30 @@ int main (int argc, char *argv[]) {
 
     // MESOSCOPIC INFORMATION
 
-    PrintMsg("Generating node positions...");
-    gsl_vector * z     = gsl_vector_calloc(NNodes);
-    Compute_Node_Positions(z);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoNodes.dat");
-    SaveVectorWithoutIndex(z, str);
-
     PrintMsg("Obtaining node densities...");
-    gsl_vector * MesoDensity = gsl_vector_calloc (NNodes);
     Compute_Meso_Density(Positions,z,MesoDensity);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoDensity.dat");
-    SaveVectorWithIndex(z, MesoDensity, NNodes, str);
-    
+    PrintInfo(Step, MesoDensity, oFile.MesoDensity);
+
     PrintMsg("Obtaining node forces...");
-    gsl_matrix * MesoForce = gsl_matrix_calloc (NNodes,3);
     Compute_Meso_Force(Positions, Force, z, MesoForce);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoForce.dat");
-    SaveMatrixWithIndex(z, MesoForce, str);
-     
-    gsl_matrix_free(MesoForce);
-    gsl_matrix_free(Force);
-    
+    gsl_vector_view MesoxForce = gsl_matrix_column(MesoForce,0);
+    PrintInfo(Step, &MesoxForce.vector, oFile.MesoxForce);
+    gsl_vector_view MesoyForce = gsl_matrix_column(MesoForce,1);
+    PrintInfo(Step, &MesoyForce.vector, oFile.MesoyForce);
+    gsl_vector_view MesozForce = gsl_matrix_column(MesoForce,2);
+    PrintInfo(Step, &MesozForce.vector, oFile.MesozForce);
+
     PrintMsg("Obtaining node energies...");
-    gsl_vector * MesoEnergy = gsl_vector_calloc (NNodes);
     Compute_Meso_Energy(Positions, Energy, z, MesoEnergy);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoEnergy.dat");
-    SaveVectorWithIndex(z, MesoEnergy, NNodes, str);
-    
+    PrintInfo(Step, MesoEnergy, oFile.MesoEnergy);
+
     PrintMsg("Obtaining node kinetic energies...");
-    gsl_vector * MesoKinetic   = gsl_vector_calloc (NNodes);
     Compute_Meso_Energy(Positions, Kinetic, z, MesoKinetic);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoKinetic.dat");
-    SaveVectorWithIndex(z, MesoKinetic, NNodes, str);
-    
+    PrintInfo(Step, MesoKinetic, oFile.MesoKinetic);
+
     PrintMsg("Obtaining node temperature...");
-    gsl_vector * MesoTemp      = gsl_vector_calloc (NNodes);
     Compute_Meso_Temp(MesoKinetic, MesoDensity, MesoTemp);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoTemp.dat");
-    SaveVectorWithIndex(z, MesoTemp, NNodes, str);
-    
-    gsl_vector_free(MesoTemp);
-   
-    gsl_vector_free(MesoEnergy);
-    gsl_vector_free(Energy);
-    
-    gsl_vector_free(MesoKinetic);
-    gsl_vector_free(Kinetic);
+    PrintInfo(Step, MesoTemp, oFile.MesoTemp);
 
     // Remember that velocities are stored as following:
     // VX VY VZ
@@ -294,100 +384,76 @@ int main (int argc, char *argv[]) {
     // K_\mu^{xz} \propto v^x v^z = 0 2
    
     PrintMsg("Obtaining node kinetic stress tensors...");
-    
-    gsl_vector * MesoSigma1_xz = gsl_vector_calloc (NNodes);
-    Compute_Meso_Sigma1(Positions, Velocities, 0, 2, MesoSigma1_xz);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoKxz.dat");
-    SaveVectorWithIndex(z, MesoSigma1_xz, NNodes, str); 
-    gsl_vector_free(MesoSigma1_xz);
-    
-    gsl_vector * MesoSigma1_xx = gsl_vector_calloc (NNodes);
-    Compute_Meso_Sigma1(Positions, Velocities, 0, 0, MesoSigma1_xx);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoKxx.dat");
-    SaveVectorWithIndex(z, MesoSigma1_xx, NNodes, str); 
-    gsl_vector_free(MesoSigma1_xx);
-    
-    gsl_vector * MesoSigma1_yy = gsl_vector_calloc (NNodes);
-    Compute_Meso_Sigma1(Positions, Velocities, 1, 1, MesoSigma1_yy);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoKyy.dat");
-    SaveVectorWithIndex(z, MesoSigma1_yy, NNodes, str); 
-    gsl_vector_free(MesoSigma1_yy);
-    
-    gsl_vector * MesoSigma1_zz = gsl_vector_calloc (NNodes);
-    Compute_Meso_Sigma1(Positions, Velocities, 2, 2, MesoSigma1_zz);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoKzz.dat");
-    SaveVectorWithIndex(z, MesoSigma1_zz, NNodes, str); 
-    gsl_vector_free(MesoSigma1_zz);
-    
-    gsl_vector * MesoSigma1_xy = gsl_vector_calloc (NNodes);
-    Compute_Meso_Sigma1(Positions, Velocities, 0, 1, MesoSigma1_xy);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoKxy.dat");
-    SaveVectorWithIndex(z, MesoSigma1_xy, NNodes, str); 
-    gsl_vector_free(MesoSigma1_xy);
+
+    Compute_Meso_Sigma1(Positions, Velocities, 0, 0, MesoSigma1);
+    PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_00);
+    Compute_Meso_Sigma1(Positions, Velocities, 1, 1, MesoSigma1);
+    PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_11);
+    Compute_Meso_Sigma1(Positions, Velocities, 2, 2, MesoSigma1);
+    PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_22);
+    Compute_Meso_Sigma1(Positions, Velocities, 0, 1, MesoSigma1);
+    PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_01);
+    Compute_Meso_Sigma1(Positions, Velocities, 1, 2, MesoSigma1);
+    PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_12);
 
     PrintMsg("Obtaining node virial stress tensor...");
-    
-    gsl_vector * MesoSigma2_xx = gsl_vector_calloc (NNodes);
-    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 0, MesoSigma2_xx, z);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoPxx.dat");
-    SaveVectorWithIndex(z, MesoSigma2_xx, NNodes, str);
-    gsl_vector_free(MesoSigma2_xx);
-    
-    gsl_vector * MesoSigma2_yy = gsl_vector_calloc (NNodes);
-    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 1, 1, MesoSigma2_yy, z);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoPyy.dat");
-    SaveVectorWithIndex(z, MesoSigma2_yy, NNodes, str);
-    gsl_vector_free(MesoSigma2_yy);
-    
-    gsl_vector * MesoSigma2_zz = gsl_vector_calloc (NNodes);
-    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 2, 2, MesoSigma2_zz, z);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoPzz.dat");
-    SaveVectorWithIndex(z, MesoSigma2_zz, NNodes, str);
-    gsl_vector_free(MesoSigma2_zz);
-    
-    gsl_vector * MesoSigma2_xy = gsl_vector_calloc (NNodes);
-    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 1, MesoSigma2_xy, z);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoPxy.dat");
-    SaveVectorWithIndex(z, MesoSigma2_xy, NNodes, str);
-    gsl_vector_free(MesoSigma2_xy);
-    
-    gsl_vector * MesoSigma2_xz = gsl_vector_calloc (NNodes);
-    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 2, MesoSigma2_xz, z);
-    strcpy (str, "./output/");
-    strcat (str, basename);
-    strcat (str, ".MesoPxz.dat");
-    SaveVectorWithIndex(z, MesoSigma2_xz, NNodes, str);
-    gsl_vector_free(MesoSigma2_xz);
 
-    gsl_vector_free(z);
-    gsl_matrix_free(Positions);
-    gsl_matrix_free(Velocities);
-    gsl_vector_free(MesoDensity);
-
-    gsl_vector_free(List);
-    gsl_vector_free(ListHead);
-    gsl_matrix_free(Neighbors);
+    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 0, MesoSigma2, z);
+    PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_00);
+    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 1, 1, MesoSigma2, z);
+    PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_11);
+    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 2, 2, MesoSigma2, z);
+    PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_22);
+    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 1, MesoSigma2, z);
+    PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_01);
+    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 1, 2, MesoSigma2, z);
+    PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_12);
   
   }
+ 
+  // END OF BLOCK. COMPUTATION DONE
 
+  // BEGIN OF BLOCK. FREE MEM
+  
+  // Close micro files
+  fclose(oFile.MicrozForce);
+  fclose(oFile.MicroEnergy);
+  fclose(oFile.MicroKinetic);
+  fclose(oFile.MicroVmod);
+
+  // Close meso files
+  fclose(oFile.MesoDensity);
+  fclose(oFile.MesoxForce);
+  fclose(oFile.MesoyForce);
+  fclose(oFile.MesozForce);
+  fclose(oFile.MesoEnergy);
+  fclose(oFile.MesoKinetic);
+ 
+  // Free micro vectors and matrices
+  gsl_matrix_free(Force);
+  gsl_vector_free(Energy);
+  gsl_vector_free(Kinetic);
+  
+  // gsl_vector_free(zPart);
+  gsl_vector_free(z);
+
+  gsl_vector_free(List);
+  gsl_vector_free(ListHead);
+  gsl_matrix_free(Neighbors);
+  gsl_matrix_free(Positions);
+  gsl_matrix_free(Velocities);
+   
+  // Free meso vectors and matrices
+  gsl_vector_free(MesoDensity);
+  gsl_matrix_free(MesoForce);
+  gsl_vector_free(MesoEnergy);
+  gsl_vector_free(MesoKinetic);
+  gsl_vector_free(MesoTemp);
+  gsl_vector_free(MesoSigma1);
+  gsl_vector_free(MesoSigma2);
+
+  // END OF BLOCK. MEM FREE
+  
   PrintMsg("EOF. Have a nice day.");
   return 0;
 }

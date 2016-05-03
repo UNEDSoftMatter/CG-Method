@@ -17,7 +17,7 @@
 ############################################################################# */
 
 #define NParticles 12908
-#define NSteps        10
+#define NSteps         5
 #define NNodes        32
 #define Lx            16.9154
 #define Ly            16.9154
@@ -160,6 +160,39 @@ void PrintInitInfo(void);
 // Read a txt file and import as an array
 
 void ReadInputFiles(char * iFileStr, char (*iFiles)[6]);
+
+// Create all the output files
+
+struct OutputFiles
+{
+  FILE * MicrozForce;
+  FILE * MicroEnergy;
+  FILE * MicroKinetic;
+  FILE * MicroVmod;
+  FILE * MesoDensity;
+  FILE * MesoxForce;
+  FILE * MesoyForce;
+  FILE * MesozForce;
+  FILE * MesoEnergy;
+  FILE * MesoKinetic;
+  FILE * MesoTemp;
+  FILE * MesoSigma1_00;
+  FILE * MesoSigma1_11;
+  FILE * MesoSigma1_22;
+  FILE * MesoSigma1_01;
+  FILE * MesoSigma1_12;
+  FILE * MesoSigma2_00;
+  FILE * MesoSigma2_11;
+  FILE * MesoSigma2_22;
+  FILE * MesoSigma2_01;
+  FILE * MesoSigma2_12;
+};
+
+// Print  a row in  *fileptr with the  information stored in  vector.  The first
+// column corresponds to the current step
+
+void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr);
+
 
 /* #############################################################################
 #  Mesoscopic functions in functions.c 
