@@ -12,28 +12,34 @@ perform a `make clean`, followed by `make`.
 The output files created by lammps need to be formatted in snapshots. A good practice
 is, for example:
 
-> ~$ mkdir data/positions
-> ~$ cp output.positions data/positions 
-> ~$ cd data/positions
-> ~/data/positions$ split -a 4 -d --lines=NAtoms+10 output.positions
-> ~/data/positions$ for i in $(ls |grep x0); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; done
-> ~/data/positions$ rm x???? output.positions
-> ~/data/positions$ cd ../../ 
-> ~$ mkdir data/velocities
-> ~$ cp output.velocities data/velocities 
-> ~$ cd data/velocities
-> ~/data/velocities$ split -a 4 -d --lines=NAtoms+10 output.velocities
-> ~/data/velocities$ for i in $(ls |grep x0); do cat $i | tail -n +10 | sort -n |awk '{print $3,$4,$5}' > $i.vel ; done
-> ~/data/velocities$ rm x???? output.velocities
-> ~/data/velocities$ cd ../../ 
+```
+~$ mkdir data/positions
+~$ cp output.positions data/positions 
+~$ cd data/positions
+~/data/positions$ split -a 4 -d --lines=NAtoms+10 output.positions
+~/data/positions$ for i in $(ls |grep x0); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; done
+~/data/positions$ rm x???? output.positions
+~/data/positions$ cd ../../ 
+~$ mkdir data/velocities
+~$ cp output.velocities data/velocities 
+~$ cd data/velocities
+~/data/velocities$ split -a 4 -d --lines=NAtoms+10 output.velocities
+~/data/velocities$ for i in $(ls |grep x0); do cat $i | tail -n +10 | sort -n |awk '{print $3,$4,$5}' > $i.vel ; done
+~/data/velocities$ rm x???? output.velocities
+~/data/velocities$ cd ../../ 
+```
 
 Once the snapshots are created, we may construct a txt file with the name of the position files:
 
-> ~$ for i in $(ls data/positions/); do echo $i; done > files.txt
+```
+~$ for i in $(ls data/positions/); do echo $i; done > files.txt
+```
 
 The program is the called as
 
-> ~$ ./CG files.txt
+```
+~$ ./CG files.txt
+```
 
 Note that positions file has 4 columns:  the  type of atom,  and the coordinates x,  y
 and z.  The velocities file has 3 columns: the velocities in x, y and z.
