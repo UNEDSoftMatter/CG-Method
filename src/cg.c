@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 03 may 2016 18:36:06 CEST
+ * Modified   : mié 04 may 2016 17:34:22 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -186,8 +186,6 @@ int main (int argc, char *argv[]) {
   gsl_matrix * Force   = gsl_matrix_calloc (NParticles,3);
   gsl_vector * Energy  = gsl_vector_calloc (NParticles);
   gsl_vector * Kinetic = gsl_vector_calloc (NParticles);
-  // gsl_vector * zPart   = gsl_vector_calloc (NParticles);
-  // gsl_vector * FzPart  = gsl_vector_calloc (NParticles);
 
   // Mesoscopic variables
   gsl_matrix * MesoForce   = gsl_matrix_calloc (NNodes,3);
@@ -276,8 +274,8 @@ int main (int argc, char *argv[]) {
 
     gsl_vector_view FzPart = gsl_matrix_column(Force,2);
     PrintInfo(Step, &FzPart.vector,  oFile.MicrozForce);
-    PrintInfo(Step, Energy,  oFile.MicroEnergy);
-    PrintInfo(Step, Kinetic, oFile.MicroKinetic);
+    PrintInfo(Step, Energy,          oFile.MicroEnergy);
+    PrintInfo(Step, Kinetic,         oFile.MicroKinetic);
     
     PrintMsg("Computing the module of the velocity as a estimator for the temperature...");
     gsl_vector * Vmod = Compute_Velocity_Module(Velocities);

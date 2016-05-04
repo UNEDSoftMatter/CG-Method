@@ -4,6 +4,10 @@ HISTORICAL MILESTONES
 Rev#003
 -------
 - Parameters are now in a separated file `params.h`.
+- Fixed an error on PBC in the computation of the virial stress tensor 
+  (index out of range for bin mu or nu = NNodes-1)
+- Open issue: There is an error building the linked list for x0004.pos
+- Open issue: Some calls to PrintInfo do not work
 
 Rev#002
 -------

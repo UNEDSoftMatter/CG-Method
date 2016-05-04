@@ -16,14 +16,14 @@ is, for example:
 ~$ mkdir data/positions
 ~$ cp output.positions data/positions 
 ~$ cd data/positions
-~/data/positions$ split -a 4 -d --lines=NAtoms+10 output.positions
+~/data/positions$ split -a 4 -d --lines=NAtoms+9 output.positions
 ~/data/positions$ for i in $(ls |grep x0); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; done
 ~/data/positions$ rm x???? output.positions
 ~/data/positions$ cd ../../ 
 ~$ mkdir data/velocities
 ~$ cp output.velocities data/velocities 
 ~$ cd data/velocities
-~/data/velocities$ split -a 4 -d --lines=NAtoms+10 output.velocities
+~/data/velocities$ split -a 4 -d --lines=NAtoms+9 output.velocities
 ~/data/velocities$ for i in $(ls |grep x0); do cat $i | tail -n +10 | sort -n |awk '{print $3,$4,$5}' > $i.vel ; done
 ~/data/velocities$ rm x???? output.velocities
 ~/data/velocities$ cd ../../ 
@@ -32,7 +32,7 @@ is, for example:
 Once the snapshots are created, we may construct a txt file with the name of the position files:
 
 ```
-~$ for i in $(ls data/positions/); do echo $i; done > files.txt
+~$ for i in $(ls data/positions/); do basename $i .pos; done > files.txt
 ```
 
 The program is the called as

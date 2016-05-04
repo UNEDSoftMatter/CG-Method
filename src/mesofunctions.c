@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 03 may 2016 13:11:25 CEST
+ * Modified   : mié 04 may 2016 17:34:21 CEST
  *
  * Author     : jatorre
  *
@@ -138,6 +138,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
   double eij, val, zij, zmu, zsigma, znu;
   double * fij = malloc(3*sizeof(double));
 
+
   // Forall i particles
   for (int i=0;i<NParticles;i++)
   {
@@ -181,6 +182,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
           distance -= Lz*round(distance/Lz);
           break;
       }
+      
       val = distance*fij[idx2];
 
       zij  = gsl_matrix_get(Positions,i,3) - gsl_matrix_get(Positions,Verlet[j],3);
@@ -194,9 +196,14 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
       {
         if (mu - nu > NNodes/2)
         {
-          zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/zij;
+          // z is out of range for mu = NNodes-1
+          // zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/zij;
+          int bin = ( mu+1 > NNodes - 1 ? (int) Lz : mu+1 );
+          zmu = (gsl_vector_get(z,bin)-gsl_matrix_get(Positions,i,3))/zij;
           MesoSigma2->data[mu*MesoSigma2->stride] += val*zmu;
-          for (int sigma=mu+1;sigma<=NNodes-1;sigma++)
+          // out of range issue
+          // for (int sigma=mu+1;sigma<=NNodes-1;sigma++)
+          for (int sigma=bin;sigma<=NNodes-1;sigma++)
           {
             zsigma = dz/zij;
             MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
@@ -226,9 +233,13 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
       {
         if (nu-mu > NNodes/2)
         {
-          znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/zij;
+          // z is out of range for nu = NNodes-1
+          // znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/zij;
+          int bin = ( nu+1 > NNodes - 1 ? (int) Lz : nu+1 );
+          znu = (gsl_vector_get(z,bin)-gsl_matrix_get(Positions,Verlet[j],3))/zij;
           MesoSigma2->data[nu*MesoSigma2->stride] += val*znu;
-          for (int sigma=nu+1;sigma<=NNodes-1;sigma++)
+          //for (int sigma=nu+1;sigma<=NNodes-1;sigma++)
+          for (int sigma=bin;sigma<=NNodes-1;sigma++)
           {
             zsigma = dz/zij;
             MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
