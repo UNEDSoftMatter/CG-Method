@@ -3,7 +3,7 @@
  *
  * Created    : 22.04.2016
  *
- * Modified   : mar 03 may 2016 12:23:01 CEST
+ * Modified   : vie 06 may 2016 10:43:09 CEST
  *
  * Author     : jatorre
  *
@@ -40,6 +40,7 @@ void Compute_Linked_List(gsl_matrix * Micro, gsl_vector * List, gsl_vector * Lis
     // ListHead->data[iCell*ListHead->stride] = (i+1);
 
     iCell = floor(xi*Mx/Lx) + floor(yi*My/Ly)*Mx + floor(zi*Mz/Lz)*Mx*My; 
+    
     List->data[i*List->stride] = ListHead->data[iCell*ListHead->stride];
     ListHead->data[iCell*ListHead->stride] = i;
   }

@@ -4,10 +4,17 @@ HISTORICAL MILESTONES
 Rev#003
 -------
 - Parameters are now in a separated file `params.h`.
-- Fixed an error on PBC in the computation of the virial stress tensor 
-  (index out of range for bin mu or nu = NNodes-1)
-- Open issue: There is an error building the linked list for x0004.pos
-- Open issue: Some calls to PrintInfo do not work
+- Fixed an error  on PBC in the  computation of the virial  stress tensor (index
+  out of range for bin mu or nu = NNodes-1)
+- Open issue?  There  is an error building  the linked  list on  some snapshots.
+  lammps output gives negative values  for the positions,  which seems something
+  weird.  The  program  now  checks  that  all  the  particles  are  inside  the
+  simulation box, and it applies PBC for atoms outside the simulation box.
+- There  is  a  new  second computation  step  in  which  averaged  profiles are
+  obtained for mesoscopic quantities.
+- Compute_Meso_Density  now computes  the  density  of  `type` particles.  Here,
+  `type` is  a int value  which identifies a wall  (type 1 particle)  or a fluid
+  (type 2 particle)
 
 Rev#002
 -------
@@ -17,8 +24,9 @@ Rev#002
   line.
 - Changed gsl_matrix_get_col for gsl_vector_views.
 - Defined a struct to store information about all the output files.
-- Now the program does not create a file for each snapshot. All the information
-  is saved in the same file if it corresponds to the same mesoscopic variable.
+- Now  the  program  does  not  create  a  file  for  each  snapshot.   All  the
+  information  is  saved  in  the  same  file  if  it  corresponds  to  the same
+  mesoscopic variable.
 - All the vectors and matrices are reset to zero before computation.
 - Definition of the vectors and matrices are now outside the main loop.
 

@@ -3,8 +3,8 @@
 ############################################################################# */
 
 #define NParticles 18086
-#define NSteps       500
-#define NNodes        32
+#define NSteps       501
+#define NNodes        64
 #define Lx            40.0  
 #define Ly            40.0
 #define Lz            16.0001 

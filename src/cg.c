@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 04 may 2016 17:34:22 CEST
+ * Modified   : vie 06 may 2016 16:56:32 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -150,6 +150,21 @@ int main (int argc, char *argv[]) {
   strcat (str, ".MesoSigma2_12.dat");
   oFile.MesoSigma2_12 = fopen(str, "w");
 
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma_00.dat");
+  oFile.MesoSigma_00 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma_11.dat");
+  oFile.MesoSigma_11 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma_22.dat");
+  oFile.MesoSigma_22 = fopen(str, "w");
+
   // END OF BLOCK. All output files created
 
   // INIT OF BLOCK. Computing vectors and matrices that
@@ -188,13 +203,16 @@ int main (int argc, char *argv[]) {
   gsl_vector * Kinetic = gsl_vector_calloc (NParticles);
 
   // Mesoscopic variables
-  gsl_matrix * MesoForce   = gsl_matrix_calloc (NNodes,3);
-  gsl_vector * MesoDensity = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoEnergy  = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoKinetic = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoTemp    = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoSigma1  = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoSigma2  = gsl_vector_calloc (NNodes);
+  gsl_matrix * MesoForce    = gsl_matrix_calloc (NNodes,3);
+  gsl_vector * MesoDensity  = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoEnergy   = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoKinetic  = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoTemp     = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoSigma1   = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoSigma2   = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoSigma_00 = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoSigma_11 = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoSigma_22 = gsl_vector_calloc (NNodes);
 
   // END OF BLOCK
 
@@ -217,6 +235,10 @@ int main (int argc, char *argv[]) {
       gsl_matrix_fscanf(PositionsFile, Positions);
     fclose(PositionsFile);
 
+    PrintMsg("Fixing PBC in the positions file...");
+    FixPBC(Positions);
+
+
     // Velocities is a matrix that stores:
     // vx vy vz
     // The ID of a particle corresponds to the row
@@ -232,7 +254,7 @@ int main (int argc, char *argv[]) {
 
     PrintMsg("Obtaining linked list...");
     Compute_Linked_List(Positions, List, ListHead);
-    
+
     // Checkpoint: Compute neighbors of a TestCell
     //     int TestCell = 60;
     //     printf("Compute neighbors of cell %d:\n", TestCell);
@@ -352,7 +374,7 @@ int main (int argc, char *argv[]) {
     // MESOSCOPIC INFORMATION
 
     PrintMsg("Obtaining node densities...");
-    Compute_Meso_Density(Positions,z,MesoDensity);
+    Compute_Meso_Density(Positions, z, 2, MesoDensity);
     PrintInfo(Step, MesoDensity, oFile.MesoDensity);
 
     PrintMsg("Obtaining node forces...");
@@ -385,34 +407,41 @@ int main (int argc, char *argv[]) {
 
     Compute_Meso_Sigma1(Positions, Velocities, 0, 0, MesoSigma1);
     PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_00);
+    gsl_vector_memcpy(MesoSigma_00,MesoSigma1);
     Compute_Meso_Sigma1(Positions, Velocities, 1, 1, MesoSigma1);
     PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_11);
+    gsl_vector_memcpy(MesoSigma_11,MesoSigma1);
     Compute_Meso_Sigma1(Positions, Velocities, 2, 2, MesoSigma1);
     PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_22);
-    Compute_Meso_Sigma1(Positions, Velocities, 0, 1, MesoSigma1);
-    PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_01);
-    Compute_Meso_Sigma1(Positions, Velocities, 1, 2, MesoSigma1);
-    PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_12);
+    gsl_vector_memcpy(MesoSigma_22,MesoSigma1);
+    //  Compute_Meso_Sigma1(Positions, Velocities, 0, 1, MesoSigma1);
+    //  PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_01);
+    //  Compute_Meso_Sigma1(Positions, Velocities, 1, 2, MesoSigma1);
+    //  PrintInfo(Step, MesoSigma1, oFile.MesoSigma1_12);
 
     PrintMsg("Obtaining node virial stress tensor...");
 
     Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 0, MesoSigma2, z);
     PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_00);
+    gsl_vector_add(MesoSigma_00,MesoSigma2);
     Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 1, 1, MesoSigma2, z);
     PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_11);
+    gsl_vector_add(MesoSigma_11,MesoSigma2);
     Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 2, 2, MesoSigma2, z);
     PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_22);
-    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 1, MesoSigma2, z);
-    PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_01);
-    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 1, 2, MesoSigma2, z);
-    PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_12);
-  
+    gsl_vector_add(MesoSigma_22,MesoSigma2);
+    // Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 0, 1, MesoSigma2, z);
+    // PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_01);
+    // Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, 1, 2, MesoSigma2, z);
+    // PrintInfo(Step, MesoSigma2, oFile.MesoSigma2_12);
+ 
+    PrintMsg("Saving stress tensors...");
+    PrintInfo(Step, MesoSigma_00, oFile.MesoSigma_00);
+    PrintInfo(Step, MesoSigma_11, oFile.MesoSigma_11);
+    PrintInfo(Step, MesoSigma_22, oFile.MesoSigma_22);
+
   }
  
-  // END OF BLOCK. COMPUTATION DONE
-
-  // BEGIN OF BLOCK. FREE MEM
-  
   // Close micro files
   fclose(oFile.MicrozForce);
   fclose(oFile.MicroEnergy);
@@ -426,7 +455,145 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesozForce);
   fclose(oFile.MesoEnergy);
   fclose(oFile.MesoKinetic);
+  
+  fclose(oFile.MesoSigma1_00);
+  fclose(oFile.MesoSigma1_11);
+  fclose(oFile.MesoSigma1_22);
+  fclose(oFile.MesoSigma2_00);
+  fclose(oFile.MesoSigma2_11);
+  fclose(oFile.MesoSigma2_22);
+  fclose(oFile.MesoSigma_00);
+  fclose(oFile.MesoSigma_11);
+  fclose(oFile.MesoSigma_22);
  
+  // SECOND COMPUTATION. OBTAIN MEAN VALUES
+
+  PrintMsg("Computing mean values...");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoDensity.dat");
+  oFile.MesoDensity = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoDensity,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoDensity.avg.dat");
+  FILE * AVGMesoDensity = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoDensity,MesoDensity,"%8.6e");
+  fclose(AVGMesoDensity);
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoxForce.dat");
+  oFile.MesoxForce = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoxForce,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoxForce.avg.dat");
+  FILE * AVGMesoxForce = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoxForce,MesoDensity,"%8.6e");
+  fclose(AVGMesoxForce);
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoyForce.dat");
+  oFile.MesoyForce = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoyForce,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoyForce.avg.dat");
+  FILE * AVGMesoyForce = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoyForce,MesoDensity,"%8.6e");
+  fclose(AVGMesoyForce);
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesozForce.dat");
+  oFile.MesozForce = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesozForce,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesozForce.avg.dat");
+  FILE * AVGMesozForce = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesozForce,MesoDensity,"%8.6e");
+  fclose(AVGMesozForce);
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_00.dat");
+  oFile.MesoSigma1_00 = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoSigma1_00,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_00.avg.dat");
+  FILE * AVGMesoSigma1_00 = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoSigma1_00,MesoDensity,"%8.6e");
+  fclose(AVGMesoSigma1_00);
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_11.dat");
+  oFile.MesoSigma1_11 = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoSigma1_11,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_11.avg.dat");
+  FILE * AVGMesoSigma1_11 = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoSigma1_11,MesoDensity,"%8.6e");
+  fclose(AVGMesoSigma1_11);
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_22.dat");
+  oFile.MesoSigma1_22 = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoSigma1_22,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma1_22.avg.dat");
+  FILE * AVGMesoSigma1_22 = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoSigma1_22,MesoDensity,"%8.6e");
+  fclose(AVGMesoSigma1_22);
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma_00.dat");
+  oFile.MesoSigma_00 = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoSigma_00,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma_00.avg.dat");
+  FILE * AVGMesoSigma_00 = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoSigma_00,MesoDensity,"%8.6e");
+  fclose(AVGMesoSigma_00);
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma_11.dat");
+  oFile.MesoSigma_11 = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoSigma_11,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma_11.avg.dat");
+  FILE * AVGMesoSigma_11 = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoSigma_11,MesoDensity,"%8.6e");
+  fclose(AVGMesoSigma_11);
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma_22.dat");
+  oFile.MesoSigma_22 = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoSigma_22,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoSigma_22.avg.dat");
+  FILE * AVGMesoSigma_22 = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoSigma_22,MesoDensity,"%8.6e");
+  fclose(AVGMesoSigma_22);
+
+  // END OF BLOCK. COMPUTATION DONE
+
+  // BEGIN OF BLOCK. FREE MEM
+  
   // Free micro vectors and matrices
   gsl_matrix_free(Force);
   gsl_vector_free(Energy);
@@ -449,9 +616,14 @@ int main (int argc, char *argv[]) {
   gsl_vector_free(MesoTemp);
   gsl_vector_free(MesoSigma1);
   gsl_vector_free(MesoSigma2);
+  gsl_vector_free(MesoSigma_00);
+  gsl_vector_free(MesoSigma_11);
+  gsl_vector_free(MesoSigma_22);
 
   // END OF BLOCK. MEM FREE
   
+  
+
   PrintMsg("EOF. Have a nice day.");
   return 0;
 }

@@ -39,6 +39,11 @@ void Compute_Forces (gsl_matrix * Positions, gsl_matrix * Velocities,
                      gsl_matrix * Forces, gsl_vector * Energy,
                      gsl_vector * Kinetic);
 
+// Some atoms are  outside the simulation box.  We use PBC to  put them into the
+// box
+
+void FixPBC(gsl_matrix * Positions);
+
 double * GetLJParams (double type1, double type2);
 
 double GetLJsigma (int type1, int type2);
@@ -163,6 +168,9 @@ struct OutputFiles
   FILE * MesoSigma2_22;
   FILE * MesoSigma2_01;
   FILE * MesoSigma2_12;
+  FILE * MesoSigma_00;
+  FILE * MesoSigma_11;
+  FILE * MesoSigma_22;
 };
 
 // Print  a row in  *fileptr with the  information stored in  vector.  The first
@@ -181,7 +189,7 @@ void Compute_Meso_Energy (gsl_matrix * Micro, gsl_vector * MicroEnergy,
                           gsl_vector * z, gsl_vector * MesoEnergy);
 
 void Compute_Meso_Density (gsl_matrix * Positions, gsl_vector * z, 
-                           gsl_vector * MesoDensity);
+                           int type, gsl_vector * MesoDensity);
 
 void Compute_Meso_Force (gsl_matrix * Positions, gsl_matrix * Forces, 
                          gsl_vector * n, gsl_matrix * MesoForce);
@@ -196,3 +204,5 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors,
                           gsl_vector * ListHead,  gsl_vector * List, 
                           int idx1, int idx2, gsl_vector * MesoSigma2, 
                           gsl_vector * z);
+
+void Compute_Mean_Values(FILE * MatrixFile, gsl_vector * MeanValues);

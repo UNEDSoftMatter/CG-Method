@@ -3,7 +3,7 @@
  *
  * Created    : 29.04.2016
  *
- * Modified   : mar 03 may 2016 12:26:06 CEST
+ * Modified   : vie 06 may 2016 10:41:35 CEST
  *
  * Author     : jatorre
  *
@@ -221,3 +221,47 @@ gsl_vector * Compute_Velocity_Module (gsl_matrix * Velocities)
   return vel;
 }
     
+void FixPBC(gsl_matrix * Positions)
+{
+
+  double xi,yi,zi;
+
+  for (int i=0;i<NParticles;i++)
+  {
+    xi = gsl_matrix_get(Positions,i,1);
+    if (xi < 0)
+    {
+      xi += Lx; 
+    } 
+    else if (xi > Lx)
+    {
+      xi -= Lx; 
+    }
+    
+    yi = gsl_matrix_get(Positions,i,2);
+    if (yi < 0)
+    {
+      yi += Ly; 
+    } 
+    else if (yi > Ly)
+    {
+      yi -= Ly; 
+    }
+
+    zi = gsl_matrix_get(Positions,i,3);
+    if (zi < 0)
+    {
+      zi += Lz; 
+    } 
+    else if (zi > Lz)
+    {
+      zi -= Lz; 
+    }
+
+    gsl_matrix_set(Positions,i,1,xi);
+    gsl_matrix_set(Positions,i,2,yi);
+    gsl_matrix_set(Positions,i,3,zi);
+
+  }
+
+}
