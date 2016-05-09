@@ -15,7 +15,7 @@
 #define RealLz        16.0001
 
 #define e1             1.0
-#define e2             2.2895
+#define e2             5.2895
 #define e12            2.2998
 #define s1             1.0 
 #define s2             1.1205

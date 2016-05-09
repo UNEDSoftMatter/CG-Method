@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mié 04 may 2016 17:34:20 CEST
+ * Modified   : lun 09 may 2016 20:57:50 CEST
  *
  * Author     : jatorre
  *
@@ -86,7 +86,7 @@ void PrintInitInfo(void)
   printf("#                                                                            #\n");
   printf("# vx    vy  vz                                                               #\n");
   printf("#                                                                            #\n");
-  printf("# (See preprocess.sh to know how to format a lammps dump file)               #\n");
+  printf("# (See README.md to know how to format a lammps dump file)                   #\n");
   printf("#                                                                            #\n");
   printf("##############################################################################\n");
   printf("#                                                                            #\n");

@@ -3,7 +3,9 @@ HISTORICAL MILESTONES
 
 Rev#003
 -------
-- Parameters are now in a separated file `params.h`.
+- Parameters are  now in  a separated  file `params.h`.  The  file is  stored in
+  `~/examples`  directory.   User  should  copy   the  file  to  `~/src`  before
+  compilation.
 - Fixed an error  on PBC in the  computation of the virial  stress tensor (index
   out of range for bin mu or nu = NNodes-1)
 - Open issue?  There  is an error building  the linked  list on  some snapshots.
@@ -14,15 +16,17 @@ Rev#003
   obtained for mesoscopic quantities.
 - Compute_Meso_Density  now computes  the  density  of  `type` particles.  Here,
   `type` is  a int value  which identifies a wall  (type 1 particle)  or a fluid
-  (type 2 particle)
+  (type 2 particle).
+- Reset `gsl_vector * MesoDensity` each loop iteration.
+- Print z coordinate in the first row of the microscopic files.
 
 Rev#002
 -------
-- The program now  uses argv[1] as a filename to read  all the input files.  The
-  idea is to create in bash (for i in  $(ls |grep .pos)) a txt file that will be
-  read by the program.  Note  that the txt file has a limit  of 6 characters per
-  line.
-- Changed gsl_matrix_get_col for gsl_vector_views.
+- The program  now uses `argv[1]`  as a filename  to read  all the  input files.
+  The idea is  to create in bash `(for  i in $(ls |grep .pos))`  a txt file that
+  will be read  by  the  program.  Note  that  the  txt  file  has  a limit of 6
+  characters per line.
+- Changed `gsl_matrix_get_col` to `gsl_vector_views`.
 - Defined a struct to store information about all the output files.
 - Now  the  program  does  not  create  a  file  for  each  snapshot.   All  the
   information  is  saved  in  the  same  file  if  it  corresponds  to  the same
@@ -32,8 +36,8 @@ Rev#002
 
 Rev#001
 -------
-- Changed strcpy in stdout to accomplish with -O2 flag
-- Clean up of the source code
-- Splitted functions.c into mesofunctions.c and microfunctions.c
-- Added PBC for the computation of the virial stress tensor
-- The stress tensor is now computed only for the fluid
+- Changed strcpy in stdout to accomplish with `-O2` flag.
+- Clean up of the source code.
+- Splitted `functions.c` into `mesofunctions.c` and `microfunctions.c`.
+- Added PBC for the computation of the virial stress tensor.
+- The stress tensor is now computed only for the fluid.

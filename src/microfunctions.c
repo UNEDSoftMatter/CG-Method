@@ -3,7 +3,7 @@
  *
  * Created    : 29.04.2016
  *
- * Modified   : vie 06 may 2016 10:41:35 CEST
+ * Modified   : lun 09 may 2016 19:28:36 CEST
  *
  * Author     : jatorre
  *
@@ -60,6 +60,9 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
         Forces->data[i*Forces->tda + 0] += fij[0];
         Forces->data[i*Forces->tda + 1] += fij[1];
         Forces->data[i*Forces->tda + 2] += fij[2];
+        // Compute only the energy due to type2 particles
+        // if (gsl_matrix_get(Positions,Verlet[j],0) == 2)
+        //   Energy->data[i*Energy->stride]  += ei;
         Energy->data[i*Energy->stride]  += ei;
       }
 
@@ -183,6 +186,8 @@ double Compute_Force_ij (gsl_matrix * Positions, int i, int j, int type1, int ty
    }
 
    // Compute the potential energy
+   // In lammps, pair_modify shift yes implies the existence of an ecut
+   // eij = 4.0*epsilon*r6i*(r6i-1.0);
    eij = 4.0*epsilon*r6i*(r6i-1.0)-ecut;
 
    return eij;

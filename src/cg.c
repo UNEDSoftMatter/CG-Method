@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 06 may 2016 16:56:32 CEST
+ * Modified   : lun 09 may 2016 21:06:59 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -279,20 +279,16 @@ int main (int argc, char *argv[]) {
     //     } 
     //
     
-    // clock_t t1, t2;
-
-    // t1 = clock();
     PrintMsg("Computing forces in the fluid (type 2 particles) due to the wall (type 1 particles)");
-    printf("\tNote that the energy of all the particles is also computed, regardless of the type of particle\n");
-    
     Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 2, 1, Force, Energy, Kinetic);
-    // t2 = clock();
-    // printf("\tTime elapsed computing forces and energies: %ld ms\n", timediff(t1,t2));
     
     //  Checkpoint: Print the force exerted on type2 particles
     //              and the energy of all the particles
-    // TODO: See if vector_view has a better performance than matrix_get_col
-    // gsl_matrix_get_col( zPart, Positions, 3);
+
+    gsl_vector_view  zPart = gsl_matrix_column(Positions,3);
+    PrintInfo(Step, &zPart.vector, oFile.MicrozForce);
+    PrintInfo(Step, &zPart.vector, oFile.MicroEnergy);
+    PrintInfo(Step, &zPart.vector, oFile.MicroKinetic);
 
     gsl_vector_view FzPart = gsl_matrix_column(Force,2);
     PrintInfo(Step, &FzPart.vector,  oFile.MicrozForce);
@@ -301,6 +297,7 @@ int main (int argc, char *argv[]) {
     
     PrintMsg("Computing the module of the velocity as a estimator for the temperature...");
     gsl_vector * Vmod = Compute_Velocity_Module(Velocities);
+    PrintInfo(Step, &zPart.vector, oFile.MicroKinetic);
     PrintInfo(Step, Vmod, oFile.MicroVmod);
     gsl_vector_free (Vmod);
 
@@ -518,6 +515,30 @@ int main (int argc, char *argv[]) {
   gsl_vector_fprintf(AVGMesozForce,MesoDensity,"%8.6e");
   fclose(AVGMesozForce);
   
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoKinetic.dat");
+  oFile.MesoKinetic = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoKinetic,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoKinetic.avg.dat");
+  FILE * AVGMesoKinetic = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoKinetic,MesoDensity,"%8.6e");
+  fclose(AVGMesoKinetic);
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoEnergy.dat");
+  oFile.MesoEnergy = fopen(str, "r");
+  Compute_Mean_Values(oFile.MesoEnergy,MesoDensity);
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoEnergy.avg.dat");
+  FILE * AVGMesoEnergy = fopen(str, "w");
+  gsl_vector_fprintf(AVGMesoEnergy,MesoDensity,"%8.6e");
+  fclose(AVGMesoEnergy);
+
   strcpy (str, "./output/");
   strcat (str, filestr);
   strcat (str, ".MesoSigma1_00.dat");
