@@ -16,16 +16,16 @@ The output  files created by lammps  need to be formatted  in snapshots.  A good
 practice is, for example:
 
 ```
-~$ mkdir data/positions
-~$ cp output.positions data/positions 
+~$ mkdir -p data/positions
 ~$ cd data/positions
+~$ ln -s ../../output.positions ./output.positions 
 ~/data/positions$ split -a 4 -d --lines=NAtoms+9 output.positions
 ~/data/positions$ for i in $(ls |grep x0); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; done
 ~/data/positions$ rm x???? output.positions
 ~/data/positions$ cd ../../ 
-~$ mkdir data/velocities
-~$ cp output.velocities data/velocities 
+~$ mkdir -p data/velocities
 ~$ cd data/velocities
+~$ ln -s ../../output.velocities ./output.velocities 
 ~/data/velocities$ split -a 4 -d --lines=NAtoms+9 output.velocities
 ~/data/velocities$ for i in $(ls |grep x0); do cat $i | tail -n +10 | sort -n |awk '{print $3,$4,$5}' > $i.vel ; done
 ~/data/velocities$ rm x???? output.velocities
