@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 09 may 2016 17:46:13 CEST
+ * Modified   : mar 10 may 2016 12:16:30 CEST
  *
  * Author     : jatorre
  *
@@ -155,8 +155,8 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
       mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz) - 1;
       // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
       // Checkpoint
-      // if (mu == -1) 
-      //   printf("ERROR! Fluid particle %d in bin %d!\n", i, mu);
+      if (mu == -1) 
+        printf("ERROR! Fluid particle %d in bin %d!\n", i, mu);
       // ( mu == -1 ) ? mu = NNodes-1 : mu ;
 
       // Find the cell to which the particle i belongs and all its neighboring cells
@@ -178,8 +178,8 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
           nu = floor(gsl_matrix_get(Positions,Verlet[j],3)*NNodes/Lz) - 1;
           // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
           // Checkpoint
-          // if (nu == -1) 
-          //   printf("ERROR! Fluid particle %d in bin %d!\n", Verlet[j], nu);
+          if (nu == -1) 
+            printf("ERROR! Fluid particle %d in bin %d!\n", Verlet[j], nu);
           // ( nu == -1 ) ? nu = NNodes-1 : nu ;
 
           // Compute only the force between particles of type 2 and particle of type 2
@@ -215,9 +215,9 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
           else if (mu > nu)
           {
             // NEVER APPLIED (bc there are no interacting type2 particles between the walls)
-            // if (mu - nu > NNodes/2)
+            if (mu - nu > NNodes/2)
             // {
-            //   printf("CAUTION! Boundary conditions ij applied! between %d and %d!\n", i, Verlet[j]);
+              printf("ERROR! Boundary conditions ij applied! between %d and %d!\n", i, Verlet[j]);
 
             //   // z is out of range for mu = NNodes-1
             //   // zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/zij;
@@ -259,9 +259,9 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
           else 
           {
             // NEVER APPLIED (bc there are no interacting type2 particles between the walls)
-            // if (nu-mu > NNodes/2)
+            if (nu-mu > NNodes/2)
             // {
-            //   printf("CAUTION! Boundary conditions ji applied! between %d and %d!\n", i, Verlet[j]);
+              printf("ERROR! Boundary conditions ji applied! between %d and %d!\n", i, Verlet[j]);
             //   // z is out of range for nu = NNodes-1
             //   // znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/zij;
             //   int bin = ( nu+1 > NNodes - 1 ? (int) Lz : nu+1 );

@@ -171,6 +171,8 @@ struct OutputFiles
   FILE * MesoSigma_00;
   FILE * MesoSigma_11;
   FILE * MesoSigma_22;
+  FILE * MesoSigma_01;
+  FILE * MesoSigma_12;
 };
 
 // Print  a row in  *fileptr with the  information stored in  vector.  The first

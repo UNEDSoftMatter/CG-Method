@@ -18,7 +18,9 @@ Rev#003
   `type` is  a int value  which identifies a wall  (type 1 particle)  or a fluid
   (type 2 particle).
 - Reset `gsl_vector * MesoDensity` each loop iteration.
-- Print z coordinate in the first row of the microscopic files.
+- Print z coordinate in the microscopic files.
+- Compute and print `\sigma_xy` and `\sigma_xz`.
+- Added ERROR message if PBC happen.
 
 Rev#002
 -------
