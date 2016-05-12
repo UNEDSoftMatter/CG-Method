@@ -4,9 +4,10 @@ HISTORICAL MILESTONES
 Rev#004
 -------
 - Added a system call to create output directory. 
-- The program now computes the force between all the particles.
 - Fixed  an  error  computing mean  values  (Sigma1_01  and  Sigma1_12  were not
   correctly closed).
+- Fixed an  error computing Sigma2 (virial stress  tensor).  If a j-particle was
+  over an i-particle, then zij gave a negative value.
 
 Rev#003
 -------

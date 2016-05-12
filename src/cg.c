@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 12 may 2016 16:23:30 CEST
+ * Modified   : jue 12 may 2016 18:25:55 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -295,10 +295,10 @@ int main (int argc, char *argv[]) {
     //     } 
     //
     
-    // PrintMsg("Computing forces in the fluid (type 2 particles) due to the wall (type 1 particles)");
-    // Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 2, 1, Force, Energy, Kinetic);
-    PrintMsg("Computing forces and energy between all the particles");
-    Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 0, 0, Force, Energy, Kinetic);
+    PrintMsg("Computing forces in the fluid (type 2 particles) due to the wall (type 1 particles)");
+    Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 2, 1, Force, Energy, Kinetic);
+    // PrintMsg("Computing forces and energy between all the particles");
+    // Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 0, 0, Force, Energy, Kinetic);
     
     //  Checkpoint: Print the force exerted on type2 particles
     //              and the energy of all the particles

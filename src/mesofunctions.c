@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 10 may 2016 12:16:30 CEST
+ * Modified   : jue 12 may 2016 18:25:29 CEST
  *
  * Author     : jatorre
  *
@@ -149,6 +149,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
   // Forall i particles
   for (int i=0;i<NParticles;i++)
   {
+    // Only for fluid (type 2) particle
     if (gsl_matrix_get(Positions,i,0) == 2)
     {
       // Find the bin mu to which the particle i belongs
@@ -172,6 +173,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
       // Forall Verlet[j] neighboring particles
       for (int j=0;j<NNeighbors;j++)
       {
+        // Only for fluid (type 2) particles
         if (gsl_matrix_get(Positions,Verlet[j],0) == 2)
         {
           // Find the bin nu to which the particle Verlet[j] belongs
@@ -182,8 +184,10 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
             printf("ERROR! Fluid particle %d in bin %d!\n", Verlet[j], nu);
           // ( nu == -1 ) ? nu = NNodes-1 : nu ;
 
-          // Compute only the force between particles of type 2 and particle of type 2
-          // (fluid-fluid interaction)
+          // Compute only the force between  particles of type 2 and particle of
+          // type 2 (fluid-fluid interaction)
+          // This  portion is  redundant,  the program does  not enter  into the
+          // loop for particles different from type 2
           eij = Compute_Force_ij (Positions, i, Verlet[j], 2, 2, fij);
    
           double distance  = gsl_matrix_get(Positions,i,idx1+1) - gsl_matrix_get(Positions,Verlet[j],idx1+1);
@@ -208,8 +212,6 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
           
           if (mu == nu)
           {
-            // This function overwrites the value of MesoSigma2[mu]!
-            // gsl_vector_set(MesoSigma2,mu,val);
             MesoSigma2->data[mu*MesoSigma2->stride] += val;
           }
           else if (mu > nu)
@@ -284,16 +286,18 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
             // else
             // {
 
+            // Note that nu > mu implies that zij < 0
+
             // We should consider nu == NNodes
             // znu = (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/zij;
-            znu = (nu == NNodes ? gsl_matrix_get(Positions,Verlet[j],3)/zij : (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/zij);
+            znu = (nu == NNodes ? gsl_matrix_get(Positions,Verlet[j],3)/fabs(zij) : (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/fabs(zij));
             MesoSigma2->data[nu*MesoSigma2->stride] += val*znu;
             for (int sigma=nu-1;sigma>mu;sigma--)
             {
-              zsigma = (mu == nu-1 ? 0.0 : dz/zij);
+              zsigma = (mu == nu-1 ? 0.0 : dz/fabs(zij));
               MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
             }
-            zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/zij;
+            zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/fabs(zij);
             MesoSigma2->data[mu*MesoSigma2->stride] += val*zmu;
             // }
           }
