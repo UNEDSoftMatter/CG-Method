@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 12 may 2016 15:26:49 CEST
+ * Modified   : jue 12 may 2016 16:23:30 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -484,9 +484,13 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesoSigma1_00);
   fclose(oFile.MesoSigma1_11);
   fclose(oFile.MesoSigma1_22);
+  fclose(oFile.MesoSigma1_01);
+  fclose(oFile.MesoSigma1_12);
   fclose(oFile.MesoSigma2_00);
   fclose(oFile.MesoSigma2_11);
   fclose(oFile.MesoSigma2_22);
+  fclose(oFile.MesoSigma2_01);
+  fclose(oFile.MesoSigma2_12);
   fclose(oFile.MesoSigma_00);
   fclose(oFile.MesoSigma_11);
   fclose(oFile.MesoSigma_22);

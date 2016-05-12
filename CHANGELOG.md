@@ -5,6 +5,8 @@ Rev#004
 -------
 - Added a system call to create output directory. 
 - The program now computes the force between all the particles.
+- Fixed  an  error  computing mean  values  (Sigma1_01  and  Sigma1_12  were not
+  correctly closed).
 
 Rev#003
 -------
