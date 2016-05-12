@@ -12,20 +12,23 @@ to perform a `make clean`,  followed  by `make`.  An example `params.h` file can
 be found in  `~/examples/`  directory.  **You  should  copy  the  file to ~/src/
 before compiling the code**.
 
+Note that  the the program  is currently limited  to 10000 snaphots  bc of `char
+basename[6];`
+
 The output  files created by lammps  need to be formatted  in snapshots.  A good
 practice is, for example:
 
 ```
 ~$ mkdir -p data/positions
 ~$ cd data/positions
-~$ ln -s ../../output.positions ./output.positions 
+~/data/positions$ ln -s ../../output.positions ./output.positions 
 ~/data/positions$ split -a 4 -d --lines=NAtoms+9 output.positions
 ~/data/positions$ for i in $(ls |grep x0); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; done
 ~/data/positions$ rm x???? output.positions
 ~/data/positions$ cd ../../ 
 ~$ mkdir -p data/velocities
 ~$ cd data/velocities
-~$ ln -s ../../output.velocities ./output.velocities 
+~/data/velocities$ ln -s ../../output.velocities ./output.velocities 
 ~/data/velocities$ split -a 4 -d --lines=NAtoms+9 output.velocities
 ~/data/velocities$ for i in $(ls |grep x0); do cat $i | tail -n +10 | sort -n |awk '{print $3,$4,$5}' > $i.vel ; done
 ~/data/velocities$ rm x???? output.velocities

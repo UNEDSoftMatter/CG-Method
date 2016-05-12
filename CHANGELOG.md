@@ -1,6 +1,11 @@
 HISTORICAL MILESTONES
 =====================
 
+Rev#004
+-------
+- Added a system call to create output directory. 
+- The program now computes the force between all the particles.
+
 Rev#003
 -------
 - Parameters are  now in  a separated  file `params.h`.  The  file is  stored in
