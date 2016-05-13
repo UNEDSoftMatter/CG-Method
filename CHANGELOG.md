@@ -8,6 +8,7 @@ Rev#004
   correctly closed).
 - Fixed an  error computing Sigma2 (virial stress  tensor).  If a j-particle was
   over an i-particle, then zij gave a negative value.
+- Code optimized. We changed gsl_matrix_column to gsl_vector_views.
 
 Rev#003
 -------

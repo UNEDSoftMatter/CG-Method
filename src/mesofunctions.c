@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 12 may 2016 18:25:29 CEST
+ * Modified   : vie 13 may 2016 12:07:23 CEST
  *
  * Author     : jatorre
  *
@@ -162,13 +162,18 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
 
       // Find the cell to which the particle i belongs and all its neighboring cells
       int iCell = FindParticle(Positions,i);
-      gsl_vector * NeighboringCells = gsl_vector_calloc(27);
-      gsl_matrix_get_row(NeighboringCells, Neighbors, iCell);
+      // Code optimization: changed get_row to vector_view
+      // gsl_vector * NeighboringCells = gsl_vector_calloc(27);
+      // gsl_matrix_get_row(NeighboringCells, Neighbors, iCell);
+      gsl_vector_view NeighboringCells = gsl_matrix_row(Neighbors, iCell);
       
       // Find the neighbors of particle i
       int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
-      int NNeighbors = Compute_VerletList(Positions, i, NeighboringCells, iCell, ListHead, List, Verlet);
-      Verlet = realloc(Verlet, NNeighbors * sizeof(int));
+      // Code optimization: changed get_row to vector_view
+      // int NNeighbors = Compute_VerletList(Positions, i, NeighboringCells, iCell, ListHead, List, Verlet);
+      int NNeighbors = Compute_VerletList(Positions, i, &NeighboringCells.vector, iCell, ListHead, List, Verlet);
+      // Not needed
+      // Verlet = realloc(Verlet, NNeighbors * sizeof(int));
       
       // Forall Verlet[j] neighboring particles
       for (int j=0;j<NNeighbors;j++)

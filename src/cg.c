@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 12 may 2016 18:25:55 CEST
+ * Modified   : vie 13 may 2016 12:02:18 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -42,7 +42,6 @@ int main (int argc, char *argv[]) {
  
   // INIT OF BLOCK. Create output files
   struct OutputFiles oFile;
-
   
   // Create output directory if it does not exist
   system("if [ ! -d output ]; then mkdir output; fi");
@@ -314,7 +313,8 @@ int main (int argc, char *argv[]) {
     PrintInfo(Step, Kinetic,        oFile.MicroKinetic);
     
     PrintMsg("Computing the module of the velocity as a estimator for the temperature...");
-    gsl_vector * Vmod = Compute_Velocity_Module(Velocities);
+    gsl_vector * Vmod = gsl_vector_calloc(NParticles);
+    Vmod = Compute_Velocity_Module(Velocities);
     PrintInfo(Step, &zPart.vector, oFile.MicroVmod);
     PrintInfo(Step, Vmod,          oFile.MicroVmod);
     gsl_vector_free(Vmod);
