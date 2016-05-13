@@ -178,7 +178,7 @@ struct OutputFiles
 // Print  a row in  *fileptr with the  information stored in  vector.  The first
 // column corresponds to the current step
 
-void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr);
+void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr, char * filestr);
 
 
 /* #############################################################################

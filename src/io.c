@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : lun 09 may 2016 20:57:50 CEST
+ * Modified   : vie 13 may 2016 13:11:49 CEST
  *
  * Author     : jatorre
  *
@@ -121,12 +121,19 @@ void ReadInputFiles(char * iFileStr, char iFiles[][6])
     fclose(iFile);
 }
 
-void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr)
+void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr, char * filestr)
 {
+  char str[100];
+  memset(str,'\0',sizeof(str));
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  fileptr = fopen(str,"a");
+
   fprintf(fileptr, "%10d", Step);
 
   for (int i=0;i<vector->size;i++)
     fprintf(fileptr, "\t%8.6e", gsl_vector_get(vector,i));
 
   fprintf(fileptr,"\n");
+  fclose(fileptr);
 }
