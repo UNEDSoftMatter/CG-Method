@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 13 may 2016 12:07:23 CEST
+ * Modified   : vie 13 may 2016 14:28:01 CEST
  *
  * Author     : jatorre
  *
@@ -308,8 +308,10 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
           }
         }
       }
+      free(Verlet);
     }
   }
+  free(fij);
   gsl_vector_scale(MesoSigma2,0.5/dv);
 }
           

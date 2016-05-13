@@ -3,7 +3,7 @@
  *
  * Created    : 29.04.2016
  *
- * Modified   : vie 13 may 2016 12:00:25 CEST
+ * Modified   : vie 13 may 2016 14:27:11 CEST
  *
  * Author     : jatorre
  *
@@ -92,10 +92,8 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
   
 }
 
-double *GetLJParams(double type1, double type2)
+void GetLJParams(double type1, double type2, double * lj)
 {
-  double *lj = malloc(3*sizeof(double));
-
   if (type1 == type2)
   {
     if (type1 == 1.0) 
@@ -117,7 +115,6 @@ double *GetLJParams(double type1, double type2)
       lj[1] = s12;
       lj[2] = ecut12;
   }
-  return lj;
 }
 
 double GetLJepsilon(int type1, int type2)
@@ -178,7 +175,7 @@ double Compute_Force_ij (gsl_matrix * Positions, int i, int j, int type1, int ty
 
    // Obtain LJ parameters
    double * lj = malloc(3*sizeof(float));
-   lj = GetLJParams(gsl_matrix_get(Positions,i,0), gsl_matrix_get(Positions,j,0));
+   GetLJParams(gsl_matrix_get(Positions,i,0), gsl_matrix_get(Positions,j,0), lj);
    double epsilon = lj[0];
    double sigma   = lj[1];
    double ecut    = lj[2];

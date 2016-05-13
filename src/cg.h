@@ -44,7 +44,7 @@ void Compute_Forces (gsl_matrix * Positions, gsl_matrix * Velocities,
 
 void FixPBC(gsl_matrix * Positions);
 
-double * GetLJParams (double type1, double type2);
+void GetLJParams (double type1, double type2, double * lj);
 
 double GetLJsigma (int type1, int type2);
 

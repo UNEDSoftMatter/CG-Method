@@ -9,6 +9,9 @@ Rev#004
 - Fixed an  error computing Sigma2 (virial stress  tensor).  If a j-particle was
   over an i-particle, then zij gave a negative value.
 - Code optimized. We changed gsl_matrix_column to gsl_vector_views.
+- Fixed  some  memory  overflow.  Changed  GetLJParameters  from  `double  *` to
+  `void`  and  added  deallocation  of   `int  *Verlet`  and  `double  *fij`  in
+  Compute_Sigma2.
 
 Rev#003
 -------
