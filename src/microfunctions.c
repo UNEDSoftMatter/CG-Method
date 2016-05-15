@@ -3,7 +3,7 @@
  *
  * Created    : 29.04.2016
  *
- * Modified   : vie 13 may 2016 14:27:11 CEST
+ * Modified   : dom 15 may 2016 12:01:47 CEST
  *
  * Author     : jatorre
  *
@@ -217,10 +217,8 @@ double KineticEnergy (gsl_vector * v, int type)
   return K;
 }
 
-gsl_vector * Compute_Velocity_Module (gsl_matrix * Velocities)
+void Compute_Velocity_Module (gsl_matrix * Velocities, gsl_vector * Vmod)
 {
-  gsl_vector * vel = gsl_vector_calloc (NParticles);
-
   double vx, vy, vz;
   for (int i=0;i<NParticles;i++)
   {
@@ -228,10 +226,8 @@ gsl_vector * Compute_Velocity_Module (gsl_matrix * Velocities)
     vy = gsl_matrix_get(Velocities,i,1);
     vz = gsl_matrix_get(Velocities,i,2);
 
-    gsl_vector_set(vel,i,sqrt(vx*vx+vy*vy+vz*vz));
+    gsl_vector_set(Vmod,i,sqrt(vx*vx+vy*vy+vz*vz));
   }
-
-  return vel;
 }
     
 void FixPBC(gsl_matrix * Positions)
@@ -246,7 +242,7 @@ void FixPBC(gsl_matrix * Positions)
     {
       xi += Lx; 
     } 
-    else if (xi > Lx)
+    else if (xi >= Lx)
     {
       xi -= Lx; 
     }
@@ -256,7 +252,7 @@ void FixPBC(gsl_matrix * Positions)
     {
       yi += Ly; 
     } 
-    else if (yi > Ly)
+    else if (yi >= Ly)
     {
       yi -= Ly; 
     }
@@ -266,7 +262,7 @@ void FixPBC(gsl_matrix * Positions)
     {
       zi += Lz; 
     } 
-    else if (zi > Lz)
+    else if (zi >= Lz)
     {
       zi -= Lz; 
     }

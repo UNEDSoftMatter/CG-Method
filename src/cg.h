@@ -52,7 +52,7 @@ double GetLJepsilon (int type1, int type2);
 
 double KineticEnergy (gsl_vector * i, int type);
 
-gsl_vector * Compute_Velocity_Module (gsl_matrix * Velocities);
+void Compute_Velocity_Module (gsl_matrix * Velocities, gsl_vector * Vmod);
 
 /* #############################################################################
 #  Auxiliary functions that appear in aux.c 

@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 13 may 2016 12:02:18 CEST
+ * Modified   : dom 15 may 2016 12:01:59 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -314,7 +314,7 @@ int main (int argc, char *argv[]) {
     
     PrintMsg("Computing the module of the velocity as a estimator for the temperature...");
     gsl_vector * Vmod = gsl_vector_calloc(NParticles);
-    Vmod = Compute_Velocity_Module(Velocities);
+    Compute_Velocity_Module(Velocities, Vmod);
     PrintInfo(Step, &zPart.vector, oFile.MicroVmod);
     PrintInfo(Step, Vmod,          oFile.MicroVmod);
     gsl_vector_free(Vmod);
