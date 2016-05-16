@@ -120,8 +120,8 @@ void SaveMatrixWithIndex (gsl_vector * z, gsl_matrix * Matrix, char * File);
 
 // Store into "File" the vector Vector, with the first column given by vector z
 
-void SaveVectorWithIndex (gsl_vector * z, gsl_vector * Vector, int size, 
-                          char * File);
+void SaveVectorWithIndex(char * basename, char * filename, gsl_vector * z1, 
+                         gsl_vector * z2);
 
 // Store into "File" the vector z
 
@@ -159,20 +159,32 @@ struct OutputFiles
   FILE * MesoKinetic;
   FILE * MesoTemp;
   FILE * MesoSigma1_00;
-  FILE * MesoSigma1_11;
-  FILE * MesoSigma1_22;
   FILE * MesoSigma1_01;
+  FILE * MesoSigma1_02;
+  FILE * MesoSigma1_10;
+  FILE * MesoSigma1_11;
   FILE * MesoSigma1_12;
+  FILE * MesoSigma1_20;
+  FILE * MesoSigma1_21;
+  FILE * MesoSigma1_22;
   FILE * MesoSigma2_00;
-  FILE * MesoSigma2_11;
-  FILE * MesoSigma2_22;
   FILE * MesoSigma2_01;
+  FILE * MesoSigma2_02;
+  FILE * MesoSigma2_10;
+  FILE * MesoSigma2_11;
   FILE * MesoSigma2_12;
+  FILE * MesoSigma2_20;
+  FILE * MesoSigma2_21;
+  FILE * MesoSigma2_22;
   FILE * MesoSigma_00;
-  FILE * MesoSigma_11;
-  FILE * MesoSigma_22;
   FILE * MesoSigma_01;
+  FILE * MesoSigma_02;
+  FILE * MesoSigma_10;
+  FILE * MesoSigma_11;
   FILE * MesoSigma_12;
+  FILE * MesoSigma_20;
+  FILE * MesoSigma_21;
+  FILE * MesoSigma_22;
 };
 
 // Print  a row in  *fileptr with the  information stored in  vector.  The first
@@ -180,6 +192,9 @@ struct OutputFiles
 
 void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr);
 
+// Process the input files (lammps trajectories) into snapshots
+
+void PrepareInputFiles(void);
 
 /* #############################################################################
 #  Mesoscopic functions in functions.c 
@@ -200,11 +215,10 @@ void Compute_Meso_Temp (gsl_vector * MesoKinetic, gsl_vector * MesoDensity,
                         gsl_vector * MesoTemp);
 
 void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities,
-                          int idx1, int idx2, gsl_vector * MesoSigma1);
+                          gsl_matrix * MesoSigma1);
 
 void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, 
                           gsl_vector * ListHead,  gsl_vector * List, 
-                          int idx1, int idx2, gsl_vector * MesoSigma2, 
-                          gsl_vector * z);
+                          gsl_matrix * MesoSigma2, gsl_vector * z);
 
-void Compute_Mean_Values(FILE * MatrixFile, gsl_vector * MeanValues);
+void Compute_Mean_Values(char * basename, char * filename, gsl_vector * MeanValues);

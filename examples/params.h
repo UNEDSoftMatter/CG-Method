@@ -2,8 +2,11 @@
 #  Parameters of the simulation 
 ############################################################################# */
 
+#define PositionsFile  "../Nanopore/output.positions"
+#define VelocitiesFile "../Nanopore/output.velocities"
+
 #define NParticles 18086
-#define NSteps       501
+#define NSteps      1000
 #define NNodes        64
 #define Lx            40.0  
 #define Ly            40.0
@@ -26,5 +29,4 @@
 
 #define m1             1.0
 #define m2             1.34
-
 

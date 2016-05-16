@@ -1,6 +1,19 @@
 HISTORICAL MILESTONES
 =====================
 
+Rev#005
+-------
+- Cleaned up IO functions to make the code more readable.
+- Deleted old commented lines.
+- Now Sigma,  Sigma1, and Sigma2 are defined as `gsl_matrix(NNodes,9)`.  All the
+  nine components are  computed at once and stored  in the following order:  00,
+  01, 02, 10, 11, 12, 20, 21, 22.
+- `Compute_Force_ij` now resets forces to zero each snapshot.
+- The  program  now  uses  lammps  raw  trajectories  and  velocities  to create
+  snapshots.  File locations **should be written in `src/params.h`**.
+- The program now obtains the list  of snapshots directly,  avoiding  the use of
+  `argv[1]`.
+
 Rev#004
 -------
 - Added a system call to create output directory. 

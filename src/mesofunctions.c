@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : vie 13 may 2016 14:28:01 CEST
+ * Modified   : lun 16 may 2016 21:11:58 CEST
  *
  * Author     : jatorre
  *
@@ -107,44 +107,60 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces,
   gsl_matrix_scale(MesoForce,1.0/dv);
 }
 
-void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, int idx1, int idx2, 
-                          gsl_vector * MesoSigma1)
+void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, 
+                          gsl_matrix * MesoSigma1)
 {
   int mu = 0;
   double mass = 0.0;
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
-  gsl_vector_set_zero(MesoSigma1);
+  gsl_matrix_set_zero(MesoSigma1);
   
+  // Loop over all i-particles
   for (int i=0;i<NParticles;i++)
   {
+    // Consider only type2 (fluid) particles 
     if (gsl_matrix_get(Positions,i,0) == 2)
     {
+      // Obtain the bin to where the i-particle belongs to
       mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz) - 1;
+      // PBC: If mu == -1, the particle belongs to the upper bin
       ( mu == -1 ) ? mu = NNodes-1 : mu ;
+
       // mass = ( gsl_matrix_get(Positions,i,0) == 1 ? m1 : m2 );
       // If type of atom == 1 then it is a wall particle, so it does not contribute to the
       // stress tensor
       mass = ( gsl_matrix_get(Positions,i,0) == 1 ? 0.0 : m2 );
 
-      MesoSigma1->data[mu*MesoSigma1->stride] += mass * gsl_matrix_get(Velocities,i,idx1) * gsl_matrix_get(Velocities,i,idx2);
+      double * sigma1 = malloc(9*sizeof(double));
+      sigma1[0] = gsl_matrix_get(Velocities,i,0) * gsl_matrix_get(Velocities,i,0);
+      sigma1[1] = gsl_matrix_get(Velocities,i,0) * gsl_matrix_get(Velocities,i,1);
+      sigma1[2] = gsl_matrix_get(Velocities,i,0) * gsl_matrix_get(Velocities,i,2);
+      sigma1[3] = gsl_matrix_get(Velocities,i,1) * gsl_matrix_get(Velocities,i,0);
+      sigma1[4] = gsl_matrix_get(Velocities,i,1) * gsl_matrix_get(Velocities,i,1);
+      sigma1[5] = gsl_matrix_get(Velocities,i,1) * gsl_matrix_get(Velocities,i,2);
+      sigma1[6] = gsl_matrix_get(Velocities,i,2) * gsl_matrix_get(Velocities,i,0);
+      sigma1[7] = gsl_matrix_get(Velocities,i,2) * gsl_matrix_get(Velocities,i,1);
+      sigma1[8] = gsl_matrix_get(Velocities,i,2) * gsl_matrix_get(Velocities,i,2);
+     
+      for (int j=0;j<9;j++)
+        MesoSigma1->data[mu*MesoSigma1->tda+j] += mass * sigma1[j];
+
+      free(sigma1);
     }
   }
-  gsl_vector_scale(MesoSigma1,1.0/dv);
+  gsl_matrix_scale(MesoSigma1,1.0/dv);
 }
 
 void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_vector * ListHead,
-                          gsl_vector * List, int idx1, int idx2, gsl_vector * MesoSigma2, gsl_vector * z)
+                          gsl_vector * List, gsl_matrix * MesoSigma2, gsl_vector * z)
 {
 
-  gsl_vector_set_zero(MesoSigma2);
+  gsl_matrix_set_zero(MesoSigma2);
 
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   double dz = ((float) Lz) / NNodes;
   int mu,nu;
-  double eij, val, zij, zmu, zsigma, znu;
-  double * fij = malloc(3*sizeof(double));
-
 
   // Forall i particles
   for (int i=0;i<NParticles;i++)
@@ -162,18 +178,11 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
 
       // Find the cell to which the particle i belongs and all its neighboring cells
       int iCell = FindParticle(Positions,i);
-      // Code optimization: changed get_row to vector_view
-      // gsl_vector * NeighboringCells = gsl_vector_calloc(27);
-      // gsl_matrix_get_row(NeighboringCells, Neighbors, iCell);
       gsl_vector_view NeighboringCells = gsl_matrix_row(Neighbors, iCell);
       
       // Find the neighbors of particle i
       int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
-      // Code optimization: changed get_row to vector_view
-      // int NNeighbors = Compute_VerletList(Positions, i, NeighboringCells, iCell, ListHead, List, Verlet);
       int NNeighbors = Compute_VerletList(Positions, i, &NeighboringCells.vector, iCell, ListHead, List, Verlet);
-      // Not needed
-      // Verlet = realloc(Verlet, NNeighbors * sizeof(int));
       
       // Forall Verlet[j] neighboring particles
       for (int j=0;j<NNeighbors;j++)
@@ -193,37 +202,41 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
           // type 2 (fluid-fluid interaction)
           // This  portion is  redundant,  the program does  not enter  into the
           // loop for particles different from type 2
-          eij = Compute_Force_ij (Positions, i, Verlet[j], 2, 2, fij);
-   
-          double distance  = gsl_matrix_get(Positions,i,idx1+1) - gsl_matrix_get(Positions,Verlet[j],idx1+1);
-
-          switch (idx1)
-          {
-            case 0:
-              distance -= Lx*round(distance/Lx);
-              break;
-            case 1:
-              distance -= Ly*round(distance/Ly);
-              break;
-            case 2:
-              distance -= Lz*round(distance/Lz);
-              break;
-          }
+          double * fij = malloc(3*sizeof(double));
           
-          val = distance*fij[idx2];
+          double eij = Compute_Force_ij (Positions, i, Verlet[j], 2, 2, fij);
+  
+          double * rij = malloc(3*sizeof(double));
 
-          zij  = gsl_matrix_get(Positions,i,3) - gsl_matrix_get(Positions,Verlet[j],3);
-          zij -= Lz*round(zij/Lz);
-          
+          rij[0]  = gsl_matrix_get(Positions,i,1) - gsl_matrix_get(Positions,Verlet[j],1);
+          rij[0] -= Lx*round(rij[0]/Lx);
+          rij[1]  = gsl_matrix_get(Positions,i,2) - gsl_matrix_get(Positions,Verlet[j],2);
+          rij[1] -= Ly*round(rij[1]/Ly);
+          rij[2]  = gsl_matrix_get(Positions,i,3) - gsl_matrix_get(Positions,Verlet[j],3);
+          rij[2] -= Lz*round(rij[2]/Lz);
+
+          double * sigma2 = malloc(9*sizeof(double));
+
+          sigma2[0] = rij[0]*fij[0];
+          sigma2[1] = rij[0]*fij[1];
+          sigma2[2] = rij[0]*fij[2];
+          sigma2[3] = rij[1]*fij[0];
+          sigma2[4] = rij[1]*fij[1];
+          sigma2[5] = rij[1]*fij[2];
+          sigma2[6] = rij[2]*fij[0];
+          sigma2[7] = rij[2]*fij[1];
+          sigma2[8] = rij[2]*fij[2];
+
           if (mu == nu)
           {
-            MesoSigma2->data[mu*MesoSigma2->stride] += val;
+            for (int j=0;j<9;j++)
+              MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j];
           }
           else if (mu > nu)
           {
+            // {
             // NEVER APPLIED (bc there are no interacting type2 particles between the walls)
             if (mu - nu > NNodes/2)
-            // {
               printf("ERROR! Boundary conditions ij applied! between %d and %d!\n", i, Verlet[j]);
 
             //   // z is out of range for mu = NNodes-1
@@ -251,15 +264,18 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
             
             // We should consider mu == NNodes
             //  zmu = (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/zij;
-            zmu = (mu == NNodes ? gsl_matrix_get(Positions,i,3)/zij : (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/zij);
-            MesoSigma2->data[mu*MesoSigma2->stride] += val*zmu;
+            int zmu = (mu == NNodes ? gsl_matrix_get(Positions,i,3)/rij[2] : (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/rij[2]);
+            for (int j=0;j<9;j++)
+              MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*zmu;
             for (int sigma=mu-1;sigma>nu;sigma--)
             {
-              zsigma = (nu == mu-1 ? 0.0 : dz/zij);
-              MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
+              int zsigma = (nu == mu-1 ? 0.0 : dz/rij[2]);
+              for (int j=0;j<9;j++)
+                MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*zsigma;
             }
-            znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/zij;
-            MesoSigma2->data[nu*MesoSigma2->stride] += val*znu;
+            int znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/rij[2];
+            for (int j=0;j<9;j++)
+              MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*znu;
 
             // }
           } 
@@ -270,49 +286,54 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
             // {
               printf("ERROR! Boundary conditions ji applied! between %d and %d!\n", i, Verlet[j]);
             //   // z is out of range for nu = NNodes-1
-            //   // znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/zij;
+            //   // znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/rij[2];
             //   int bin = ( nu+1 > NNodes - 1 ? (int) Lz : nu+1 );
-            //   znu = (gsl_vector_get(z,bin)-gsl_matrix_get(Positions,Verlet[j],3))/zij;
+            //   znu = (gsl_vector_get(z,bin)-gsl_matrix_get(Positions,Verlet[j],3))/rij[2];
             //   MesoSigma2->data[nu*MesoSigma2->stride] += val*znu;
             //   //for (int sigma=nu+1;sigma<=NNodes-1;sigma++)
             //   for (int sigma=bin;sigma<=NNodes-1;sigma++)
             //   {
-            //     zsigma = (NNodes-1 == bin ? 0.0 : dz/zij);
+            //     zsigma = (NNodes-1 == bin ? 0.0 : dz/rij[2]);
             //     MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
             //   }
             //   for (int sigma=0;sigma<=mu-1;sigma++)
             //   {
-            //     zsigma = (mu-1 == 0 ? 0.0 : dz/zij);
+            //     zsigma = (mu-1 == 0 ? 0.0 : dz/rij[2]);
             //     MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
             //   }
-            //   zmu = (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/zij;
+            //   zmu = (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/rij[2];
             //   MesoSigma2->data[mu*MesoSigma2->stride] += val*zmu;
             // }
             // else
             // {
 
-            // Note that nu > mu implies that zij < 0
+            // Note that nu > mu implies that rij[2] < 0
 
             // We should consider nu == NNodes
-            // znu = (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/zij;
-            znu = (nu == NNodes ? gsl_matrix_get(Positions,Verlet[j],3)/fabs(zij) : (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/fabs(zij));
-            MesoSigma2->data[nu*MesoSigma2->stride] += val*znu;
+            // znu = (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/rij[2];
+            int znu = (nu == NNodes ? gsl_matrix_get(Positions,Verlet[j],3)/fabs(rij[2]) : (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/fabs(rij[2]));
+            for (int j=0;j<9;j++)
+              MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*znu;
             for (int sigma=nu-1;sigma>mu;sigma--)
             {
-              zsigma = (mu == nu-1 ? 0.0 : dz/fabs(zij));
-              MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
+              int zsigma = (mu == nu-1 ? 0.0 : dz/fabs(rij[2]));
+              for (int j=0;j<9;j++)
+                MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*zsigma;
             }
-            zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/fabs(zij);
-            MesoSigma2->data[mu*MesoSigma2->stride] += val*zmu;
+            int zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/fabs(rij[2]);
+            for (int j=0;j<9;j++)
+              MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*zmu;
             // }
           }
+          free(fij);
+          free(rij);
+          free(sigma2);
         }
       }
       free(Verlet);
     }
   }
-  free(fij);
-  gsl_vector_scale(MesoSigma2,0.5/dv);
+  gsl_matrix_scale(MesoSigma2,0.5/dv);
 }
           
 void Compute_Meso_Energy(gsl_matrix * Micro, gsl_vector * MicroEnergy, gsl_vector * z, gsl_vector * MesoEnergy)
@@ -368,11 +389,18 @@ void Compute_Meso_Temp(gsl_vector * MesoKinetic, gsl_vector * MesoDensity, gsl_v
   gsl_vector_scale(MesoTemp,2.0/3.0);
 }
   
-void Compute_Mean_Values(FILE * MatrixFile, gsl_vector * MeanValues)
+void Compute_Mean_Values(char * basename, char * filename, gsl_vector * MeanValues)
 {
   gsl_matrix * InputMatrix = gsl_matrix_calloc (NSteps,NNodes+1);     
   
-  gsl_matrix_fscanf(MatrixFile, InputMatrix);
+  FILE *iFile;
+  char str[100]; 
+  strcpy (str, "./output/");
+  strcat (str, basename);
+  strcat (str, filename);
+  iFile = fopen(str, "r");
+    gsl_matrix_fscanf(iFile, InputMatrix);
+  fclose(iFile);
 
   gsl_vector_set_zero(MeanValues);
 
