@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : lun 16 may 2016 22:44:14 CEST
+ * Modified   : mar 17 may 2016 12:08:10 CEST
  *
  * Author     : jatorre
  *
@@ -106,7 +106,7 @@ void PrintInitInfo(void)
   printf("##############################################################################\n\n");
 }
 
-void ReadInputFiles(char * iFileStr, char iFiles[][6])
+void ReadInputFiles(char * iFileStr, char iFiles[][7])
 {
     FILE *iFile;
     iFile = fopen(iFileStr, "r");
