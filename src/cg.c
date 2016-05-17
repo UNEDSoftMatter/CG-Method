@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 17 may 2016 11:46:18 CEST
+ * Modified   : mar 17 may 2016 12:06:01 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -20,15 +20,16 @@ int main (int argc, char *argv[]) {
   
   PrintMsg("INIT");
 
+  char * filestr;
   if (argc == 2)
   {
-    char * filestr = argv[1];
+    filestr = argv[1];
     PrintMsg("argv[1] provided.");
-    prinft("Using %s as input file list...\n", filestr);
+    printf("Using %s as input file list...\n", filestr);
   }
   else 
   {
-    char * filestr = "sim";
+    filestr = "sim";
     PrintMsg("argv[1] not provided. Generating input data and storing file list in 'sim'");
     PrintMsg("Creating snapshots from the simulation files...");
     PrepareInputFiles();

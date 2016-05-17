@@ -141,7 +141,7 @@ void PrintInitInfo(void);
 
 // Read a txt file and import as an array
 
-void ReadInputFiles(char * iFileStr, char (*iFiles)[6]);
+void ReadInputFiles(char * iFileStr, char (*iFiles)[7]);
 
 // Create all the output files
 
