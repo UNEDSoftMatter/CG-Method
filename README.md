@@ -41,11 +41,12 @@ Please,  see LAMMPS documentation  to understand the meaning  of these commands.
 
 *CG-Method* admits arguments.
 
-1.  If you do not provide any argument,  *CG-Method* calls to the function `void
-PrepareInputFiles(void)`   (located   in   `src/io.c`).   This   function   will
-create  snapshots  for   the  positions  and  velocities   using  system  calls.
-Then,  it will  create a file  list called `sim`  which will be  used to process
-each snapshot.
+### *CG-Method* with arguments
+
+If you  do not provide any  argument,  *CG-Method* calls  to the  function `void
+PrepareInputFiles(void)`  (located in  `src/io.c`).  This  function  will create
+snapshots for the  positions and velocities using  system calls.  Then,  it will
+create a file list called `sim` which will be used to process each snapshot.
 
 Essentially, `PrepareInputFiles` will do the following:
 ```
@@ -78,10 +79,18 @@ basename of each snapshot:
 
 The program uses the file `sim` to process each snapshot.
 
-2.  If you  provide an argument to  *CG-Method*,  it will  omit the  creation of
+### *CG-Method* without arguments
+
+If  you provide  an argument  to  *CG-Method*,  it  will  omit  the  creation of
 snapshots and it will use `argv[1]` as the file list.
 
-Note  that the  position files  have  4  columns:  the  type  of  atom,  and the
-coordinates x,  y and z.  The velocitiy files have 3 columns:  the velocities in
-x, y and z.
+## Checklist
+
+1.  Note that  the position files have  4 columns:  the  type of  atom,  and the
+coordinates x,  y  and z.  The velocitiy  files have 3  columns:  the velocities
+in x, y and z.
+2. The file `params.h` should be in `~/src` directory.
+3. You should compile whenever you change `params.h`.
+4.  If called without arguments,  `params.h` should contain the relative path of
+positions and velocities.
 
