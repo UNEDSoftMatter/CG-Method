@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 17 may 2016 18:52:33 CEST
+ * Modified   : mar 17 may 2016 19:38:43 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -476,6 +476,7 @@ int main (int argc, char *argv[]) {
         PrintInfo(Step, MesoDensity_2, oFile.MesoDensity_2);
         gsl_vector_memcpy(MesoDensity_0, MesoDensity_1);
         gsl_vector_add(MesoDensity_0, MesoDensity_2);
+        PrintInfo(Step, MesoDensity_0, oFile.MesoDensity_0);
       }
       #pragma omp section
       {
