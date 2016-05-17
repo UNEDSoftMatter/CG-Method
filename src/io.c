@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mar 17 may 2016 12:08:10 CEST
+ * Modified   : mar 17 may 2016 13:53:01 CEST
  *
  * Author     : jatorre
  *
@@ -83,23 +83,28 @@ void PrintInitInfo(void)
   printf("#                                                                            #\n");
   printf("# This program computes mesoscopic variables from microscopic configurations #\n");
   printf("#                                                                            #\n");
+  printf("# Last stable version can be found in                                        #\n");
+  printf("#    https://github.com/UNEDSoftMatter/CG-Method.git                         #\n");
+  printf("#                                                                            #\n");
   printf("##############################################################################\n");
   printf("#                                                                            #\n");
-  printf("# The positions of the particles should be in data/positions/*.pos           #\n");
+  printf("# If called without arguments, CG-Method will create snapshots from lammps   #\n");
+  printf("# output files (see README.md to find information about the correct format)  #\n");
   printf("#                                                                            #\n");
-  printf("# TYPE  x   y   z                                                            #\n");
+  printf("# If called with an argument, CG-Method will use the argument as an input    #\n");
+  printf("# file which contains the list of snapshots                                  #\n");
   printf("#                                                                            #\n");
-  printf("# The velocities of the particles should be in data/velocities/*.vel         #\n");
+  printf("# In both cases, the snapshots are located in data/positions/x?????.pos      #\n");
+  printf("# with the format 'TYPE x y z' for the positions, and                        #\n");
+  printf("# in data/velocities/*.vel with the format 'vx vy vz' for the velocities     #\n");
   printf("#                                                                            #\n");
-  printf("# vx    vy  vz                                                               #\n");
-  printf("#                                                                            #\n");
-  printf("# (See README.md to know how to format a lammps dump file)                   #\n");
+  printf("# (See README.md to know how to format lammps dump files)                    #\n");
   printf("#                                                                            #\n");
   printf("##############################################################################\n");
   printf("#                                                                            #\n");
   printf("# Mesoscopic profiles will be stored in ./output/                            #\n");
   printf("#                                                                            #\n");
-  printf("# Microscopic visualization will be stored in ./povray/                      #\n");
+  printf("# Microscopic visualization (if any) will be stored in ./povray/             #\n");
   printf("#                                                                            #\n");
   printf("# Log files (if any) will be stored in ./log/                                #\n");
   printf("#                                                                            #\n");
