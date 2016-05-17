@@ -1,6 +1,13 @@
 HISTORICAL MILESTONES
 =====================
 
+Rev#006
+-------
+- The program now computes density profiles for type1 particles, type2 particles
+  and the global density.
+- New Parallelized regions:  `Compute_MesoSigma2`  (through force calculations),
+  creation of positions and velocities snapshots, and mesoscopic profiles.
+
 Rev#005
 -------
 - Cleaned up IO functions to make the code more readable.

@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mar 17 may 2016 13:53:01 CEST
+ * Modified   : mar 17 may 2016 18:52:41 CEST
  *
  * Author     : jatorre
  *
@@ -149,34 +149,42 @@ void PrepareInputFiles(void)
   char NLines[6];
   int SizeOfChunk = NParticles+9;
 
-  // Processing positions file
-  PrintMsg("Processing positions file...");
-  system("if [ ! -d data/positions ]; then mkdir -p data/positions; fi");
-  strcpy(str,"cd data/positions; ln -s ../../");
-  strcat(str,PositionsFileStr);
-  strcat(str," ./output.positions");
-  system(str);
-  sprintf(NLines,"%d",SizeOfChunk);
-  strcpy(str,"cd data/positions; split -a 5 -d --lines=");
-  strcat(str,NLines);
-  strcat(str," output.positions");
-  system(str);
-  system("cd data/positions; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; rm $i ; done");
-  system("rm data/positions/output.positions");
-
-  // Processing velocities file
-  PrintMsg("Processing velocities file...");
-  system("if [ ! -d data/velocities ]; then mkdir -p data/velocities; fi");
-  strcpy(str,"cd data/velocities; ln -s ../../");
-  strcat(str,VelocitiesFileStr);
-  strcat(str," ./output.velocities");
-  system(str);
-  strcpy(str,"cd data/velocities; split -a 5 -d --lines=");
-  strcat(str,NLines);
-  strcat(str," output.velocities");
-  system(str);
-  system("cd data/velocities/; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $3,$4,$5}' > $i.vel ; rm $i ; done");
-  system("rm data/velocities/output.velocities");
+  #pragma omp parallel sections num_threads(2)
+  {
+    #pragma omp section
+    {
+      // Processing positions file
+      PrintMsg("Processing positions file...");
+      system("if [ ! -d data/positions ]; then mkdir -p data/positions; fi");
+      strcpy(str,"cd data/positions; ln -s ../../");
+      strcat(str,PositionsFileStr);
+      strcat(str," ./output.positions");
+      system(str);
+      sprintf(NLines,"%d",SizeOfChunk);
+      strcpy(str,"cd data/positions; split -a 5 -d --lines=");
+      strcat(str,NLines);
+      strcat(str," output.positions");
+      system(str);
+      system("cd data/positions; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; rm $i ; done");
+      system("rm data/positions/output.positions");
+    }
+    #pragma omp section
+    {
+      // Processing velocities file
+      PrintMsg("Processing velocities file...");
+      system("if [ ! -d data/velocities ]; then mkdir -p data/velocities; fi");
+      strcpy(str,"cd data/velocities; ln -s ../../");
+      strcat(str,VelocitiesFileStr);
+      strcat(str," ./output.velocities");
+      system(str);
+      strcpy(str,"cd data/velocities; split -a 5 -d --lines=");
+      strcat(str,NLines);
+      strcat(str," output.velocities");
+      system(str);
+      system("cd data/velocities/; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $3,$4,$5}' > $i.vel ; rm $i ; done");
+      system("rm data/velocities/output.velocities");
+    }
+  }
 
   // Create snapshot list
   PrintMsg("Creating snapshot list in file 'sim'...");

@@ -151,7 +151,9 @@ struct OutputFiles
   FILE * MicroEnergy;
   FILE * MicroKinetic;
   FILE * MicroVmod;
-  FILE * MesoDensity;
+  FILE * MesoDensity_0;
+  FILE * MesoDensity_1;
+  FILE * MesoDensity_2;
   FILE * MesoxForce;
   FILE * MesoyForce;
   FILE * MesozForce;
