@@ -6,6 +6,9 @@ interactions,  stress  tensors,  and so  on,  from  a  microscopic configuration
 obtained through a MD simulation.  A MD  input script for LAMMPS can be obtained
 in https://github.com/UNEDSoftMatter/Nanopore.
 
+*CG-Method*  needs blas,  lapack  and GSL.  If  you get  an error  compiling the
+code, verify that the development version of these libraries are installed.
+
 All the parameters  are  specified  in  the  header  file `params.h`.  Note that
 **you should compile whenever the  parameters are changed**.  A good practice is
 to do  a `make clean`,  followed by  `make`.  An example `params.h`  file can be
@@ -86,11 +89,13 @@ snapshots and it will use `argv[1]` as the file list.
 
 ## Checklist
 
-1.  Note that  the position files have  4 columns:  the  type of  atom,  and the
+1.  *CG-Method* needs blas,  lapack and GSL.  If  you get an error compiling the
+code, verify that these libraries are installed.
+2.  Note that  the position files have  4 columns:  the  type of  atom,  and the
 coordinates x,  y  and z.  The velocitiy  files have 3  columns:  the velocities
 in x, y and z.
-2. The file `params.h` should be in `~/src` directory.
-3. You should compile whenever you change `params.h`.
-4.  If called without arguments,  `params.h` should contain the relative path of
+3. The file `params.h` should be in `~/src` directory.
+4. You should compile whenever you change `params.h`.
+5.  If called without arguments,  `params.h` should contain the relative path of
 positions and velocities.
 

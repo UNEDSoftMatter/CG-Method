@@ -15,6 +15,7 @@ Rev#005
   an argument,  it will generate the  snapshot from lammps output.  If `argv[1]`
   is  provided,  then the  program will  use this  file list  without processing
   lammps output.
+- Added information about blas, lapack and gsl.
 
 Rev#004
 -------
