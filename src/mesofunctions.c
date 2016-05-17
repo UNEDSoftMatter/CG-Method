@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 16 may 2016 21:11:58 CEST
+ * Modified   : mar 17 may 2016 14:38:42 CEST
  *
  * Author     : jatorre
  *
@@ -120,7 +120,7 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities,
   for (int i=0;i<NParticles;i++)
   {
     // Consider only type2 (fluid) particles 
-    if (gsl_matrix_get(Positions,i,0) == 2)
+    if ((int) gsl_matrix_get(Positions,i,0) == 2)
     {
       // Obtain the bin to where the i-particle belongs to
       mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz) - 1;
@@ -130,7 +130,7 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities,
       // mass = ( gsl_matrix_get(Positions,i,0) == 1 ? m1 : m2 );
       // If type of atom == 1 then it is a wall particle, so it does not contribute to the
       // stress tensor
-      mass = ( gsl_matrix_get(Positions,i,0) == 1 ? 0.0 : m2 );
+      mass = ( (int) gsl_matrix_get(Positions,i,0) == 1 ? 0.0 : m2 );
 
       double * sigma1 = malloc(9*sizeof(double));
       sigma1[0] = gsl_matrix_get(Velocities,i,0) * gsl_matrix_get(Velocities,i,0);
@@ -166,7 +166,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
   for (int i=0;i<NParticles;i++)
   {
     // Only for fluid (type 2) particle
-    if (gsl_matrix_get(Positions,i,0) == 2)
+    if ((int) gsl_matrix_get(Positions,i,0) == 2)
     {
       // Find the bin mu to which the particle i belongs
       mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz) - 1;
@@ -188,7 +188,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
       for (int j=0;j<NNeighbors;j++)
       {
         // Only for fluid (type 2) particles
-        if (gsl_matrix_get(Positions,Verlet[j],0) == 2)
+        if ((int) gsl_matrix_get(Positions,Verlet[j],0) == 2)
         {
           // Find the bin nu to which the particle Verlet[j] belongs
           nu = floor(gsl_matrix_get(Positions,Verlet[j],3)*NNodes/Lz) - 1;
@@ -229,8 +229,8 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
 
           if (mu == nu)
           {
-            for (int j=0;j<9;j++)
-              MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j];
+            for (int k=0;k<9;k++)
+              MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k];
           }
           else if (mu > nu)
           {
@@ -265,17 +265,17 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
             // We should consider mu == NNodes
             //  zmu = (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/zij;
             int zmu = (mu == NNodes ? gsl_matrix_get(Positions,i,3)/rij[2] : (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/rij[2]);
-            for (int j=0;j<9;j++)
-              MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*zmu;
+            for (int k=0;k<9;k++)
+              MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zmu;
             for (int sigma=mu-1;sigma>nu;sigma--)
             {
               int zsigma = (nu == mu-1 ? 0.0 : dz/rij[2]);
-              for (int j=0;j<9;j++)
-                MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*zsigma;
+              for (int k=0;k<9;k++)
+                MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zsigma;
             }
             int znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/rij[2];
-            for (int j=0;j<9;j++)
-              MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*znu;
+            for (int k=0;k<9;k++)
+              MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*znu;
 
             // }
           } 
@@ -312,17 +312,17 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
             // We should consider nu == NNodes
             // znu = (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/rij[2];
             int znu = (nu == NNodes ? gsl_matrix_get(Positions,Verlet[j],3)/fabs(rij[2]) : (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/fabs(rij[2]));
-            for (int j=0;j<9;j++)
-              MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*znu;
+            for (int k=0;k<9;k++)
+              MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*znu;
             for (int sigma=nu-1;sigma>mu;sigma--)
             {
               int zsigma = (mu == nu-1 ? 0.0 : dz/fabs(rij[2]));
-              for (int j=0;j<9;j++)
-                MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*zsigma;
+              for (int k=0;k<9;k++)
+                MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zsigma;
             }
             int zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/fabs(rij[2]);
-            for (int j=0;j<9;j++)
-              MesoSigma2->data[mu*MesoSigma2->tda+j] += sigma2[j]*zmu;
+            for (int k=0;k<9;k++)
+              MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zmu;
             // }
           }
           free(fij);
