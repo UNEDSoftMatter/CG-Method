@@ -11,8 +11,10 @@ Rev#005
 - `Compute_Force_ij` now resets forces to zero each snapshot.
 - The  program  now  uses  lammps  raw  trajectories  and  velocities  to create
   snapshots.  File locations **should be written in `src/params.h`**.
-- The program now obtains the list  of snapshots directly,  avoiding  the use of
-  `argv[1]`.
+- The program  can be called with  or without arguments.  If you  do not provide
+  an argument,  it will generate the  snapshot from lammps output.  If `argv[1]`
+  is  provided,  then the  program will  use this  file list  without processing
+  lammps output.
 
 Rev#004
 -------

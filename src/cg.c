@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 16 may 2016 22:35:16 CEST
+ * Modified   : mar 17 may 2016 11:46:18 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -17,32 +17,29 @@
 int main (int argc, char *argv[]) {
   
   PrintInitInfo();
-
-//   if (argc != 2)
-//   {
-//     PrintMsg("ERROR");
-//     PrintMsg("ERROR: CG needs an input basename. Exiting now...");
-//     PrintMsg("ERROR");
-//     return 1;
-//   }
-
+  
   PrintMsg("INIT");
 
-  // Prepare the input files
-  PrintMsg("Creating snapshots from the simulation files...");
-  PrepareInputFiles();
-
-  // Read the list of all snapshots and create the output files
-
-  // Define variables
+  if (argc == 2)
+  {
+    char * filestr = argv[1];
+    PrintMsg("argv[1] provided.");
+    prinft("Using %s as input file list...\n", filestr);
+  }
+  else 
+  {
+    char * filestr = "sim";
+    PrintMsg("argv[1] not provided. Generating input data and storing file list in 'sim'");
+    PrintMsg("Creating snapshots from the simulation files...");
+    PrepareInputFiles();
+  }
+  
   char str[100]; 
   memset(str,'\0',sizeof(str));
-  // char * filestr = argv[1];
-  char * filestr = "sim";
-  char basename[6];
+  char basename[7];
 
   // Read input list
-  char Snapshot[NSteps][6];
+  char Snapshot[NSteps][7];
   ReadInputFiles(filestr, Snapshot);
  
   // INIT OF BLOCK. Create output files

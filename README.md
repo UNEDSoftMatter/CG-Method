@@ -8,16 +8,28 @@ in https://github.com/UNEDSoftMatter/Nanopore.
 
 All the parameters  are  specified  in  the  header  file `params.h`.  Note that
 **you should compile whenever the  parameters are changed**.  A good practice is
-to perform a `make clean`,  followed  by `make`.  An example `params.h` file can
-be found  in `~/examples/` directory.  Note that  **you should copy  the file to
-~/src/ before compiling the code**.
+to do  a `make clean`,  followed by  `make`.  An example `params.h`  file can be
+found in `~/examples/`  directory.  Note  that  **you  should  copy  the file to
+~/src/ before compiling the code**. If you obtain the following error
+```
+~/CG-Method/src$ make
+gcc  -c cg.c -o cg.c.o -lm -lblas -llapack -Wall -lgsl -lgslcblas -fopenmp -O2 -std=gnu99
+In file included from cg.c:15:0:
+cg.h:19:20: fatal error: params.h: No existe el fichero o el directorio
+ #include "params.h"
+                     ^
+compilation terminated.
+Makefile:13: recipe for target 'cg.c.o' failed
+make: *** [cg.c.o] Error 1
+```
+it is because you did not copy `params.h` into the `src` directory.
 
-Note  that the  program is  currently  limited  to  100000  snaphots  (see `char
+Note  that  *CG-Method*  is currently  limited  to  100000  snaphots  (see `char
 basename[7];` in `cg.c`).
 
-*CG-Method*  needs the  location (see  below)  of  the  positions  file  and the
-velocities file  created by LAMMPS.  In  LAMMPS,  use a custom  dump output like
-this one
+The file  `params.h` should contains the  location (see below)  of the positions
+file and the  velocities file created by LAMMPS.  In  LAMMPS,  use a custom dump
+output like this one
 
 ```
 dump custom positions 100 id type  x  y  z output.positions
@@ -26,10 +38,16 @@ dump custom positions 100 id type vx vy vz output.velocities
 ```
 
 Please,  see LAMMPS documentation  to understand the meaning  of these commands.
-CG-Method  uses   the   function   `void   PrepareInputFiles(void)`  (locate  in
-`src/io.c`)  to create  snapshots from  the original  LAMMPS dumps  using system
-calls. The following instructions are performed by `PrepareInputFiles`
 
+*CG-Method* admits arguments.
+
+1.  If you do not provide any argument,  *CG-Method* calls to the function `void
+PrepareInputFiles(void)`   (located   in   `src/io.c`).   This   function   will
+create  snapshots  for   the  positions  and  velocities   using  system  calls.
+Then,  it will  create a file  list called `sim`  which will be  used to process
+each snapshot.
+
+Essentially, `PrepareInputFiles` will do the following:
 ```
 ~$ if [ ! -d data/positions ]; then mkdir -p data/positions; fi
 ~$ cd data/positions
@@ -58,8 +76,12 @@ basename of each snapshot:
 ~$ for i in $(ls data/positions/ | grep .pos); do basename $i .pos; done > sim 
 ```
 
-The program uses the file `sim` to process each snapshot
+The program uses the file `sim` to process each snapshot.
 
-Note that position files have 4 columns:  the type of atom,  and the coordinates
-x, y and z.  The velocitiy files have 3 columns: the velocities in x, y and z.
+2.  If you  provide an argument to  *CG-Method*,  it will  omit the  creation of
+snapshots and it will use `argv[1]` as the file list.
+
+Note  that the  position files  have  4  columns:  the  type  of  atom,  and the
+coordinates x,  y and z.  The velocitiy files have 3 columns:  the velocities in
+x, y and z.
 
