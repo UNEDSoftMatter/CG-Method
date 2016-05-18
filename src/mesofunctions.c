@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 17 may 2016 18:52:43 CEST
+ * Modified   : mié 18 may 2016 13:08:13 CEST
  *
  * Author     : jatorre
  *
@@ -269,16 +269,16 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
               
               // We should consider mu == NNodes
               //  zmu = (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/zij;
-              int zmu = (mu == NNodes ? gsl_matrix_get(Positions,i,3)/rij[2] : (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/rij[2]);
+              double zmu = (mu == NNodes ? gsl_matrix_get(Positions,i,3)/rij[2] : (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/rij[2]);
               for (int k=0;k<9;k++)
                 MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zmu;
               for (int sigma=mu-1;sigma>nu;sigma--)
               {
-                int zsigma = (nu == mu-1 ? 0.0 : dz/rij[2]);
+                double zsigma = (nu == mu-1 ? 0.0 : dz/rij[2]);
                 for (int k=0;k<9;k++)
                   MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zsigma;
               }
-              int znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/rij[2];
+              double znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/rij[2];
               for (int k=0;k<9;k++)
                 MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*znu;
 
@@ -316,16 +316,16 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
 
               // We should consider nu == NNodes
               // znu = (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/rij[2];
-              int znu = (nu == NNodes ? gsl_matrix_get(Positions,Verlet[j],3)/fabs(rij[2]) : (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/fabs(rij[2]));
+              double znu = (nu == NNodes ? gsl_matrix_get(Positions,Verlet[j],3)/fabs(rij[2]) : (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/fabs(rij[2]));
               for (int k=0;k<9;k++)
                 MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*znu;
               for (int sigma=nu-1;sigma>mu;sigma--)
               {
-                int zsigma = (mu == nu-1 ? 0.0 : dz/fabs(rij[2]));
+                double zsigma = (mu == nu-1 ? 0.0 : dz/fabs(rij[2]));
                 for (int k=0;k<9;k++)
                   MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zsigma;
               }
-              int zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/fabs(rij[2]);
+              double zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/fabs(rij[2]);
               for (int k=0;k<9;k++)
                 MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zmu;
               // }
