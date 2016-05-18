@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 18 may 2016 15:07:14 CEST
+ * Modified   : mié 18 may 2016 17:27:47 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -465,7 +465,7 @@ int main (int argc, char *argv[]) {
 
     // MESOSCOPIC INFORMATION
     
-    #pragma omp parallel sections num_threads(6)
+    #pragma omp parallel sections num_threads(5)
     {
       #pragma omp section
       {
@@ -500,12 +500,6 @@ int main (int argc, char *argv[]) {
         PrintMsg("Obtaining node kinetic energies...");
         Compute_Meso_Energy(Positions, Kinetic, z, MesoKinetic);
         PrintInfo(Step, MesoKinetic, oFile.MesoKinetic);
-      }
-      #pragma omp section
-      {
-        PrintMsg("Obtaining node temperature...");
-        Compute_Meso_Temp(MesoKinetic, MesoDensity_0, MesoTemp);
-        PrintInfo(Step, MesoTemp, oFile.MesoTemp);
       }
       #pragma omp section
       {
@@ -578,6 +572,10 @@ int main (int argc, char *argv[]) {
     PrintInfo(Step, &MesoSigma_21.vector, oFile.MesoSigma_21);
     gsl_vector_view  MesoSigma_22 = gsl_matrix_column(MesoSigma,8);
     PrintInfo(Step, &MesoSigma_22.vector, oFile.MesoSigma_22);
+        
+    PrintMsg("Obtaining node temperature...");
+    Compute_Meso_Temp(MesoKinetic, MesoDensity_0, MesoTemp);
+    PrintInfo(Step, MesoTemp, oFile.MesoTemp);
 
   }
  
