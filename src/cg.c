@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 17 may 2016 19:38:43 CEST
+ * Modified   : mié 18 may 2016 11:32:47 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -647,6 +647,8 @@ int main (int argc, char *argv[]) {
   SaveVectorWithIndex(filestr, ".MesoKinetic.avg.dat",   z, MesoAverage);
   Compute_Mean_Values(filestr, ".MesoEnergy.dat",           MesoAverage);
   SaveVectorWithIndex(filestr, ".MesoEnergy.avg.dat",    z, MesoAverage);
+  Compute_Mean_Values(filestr, ".MesoTemp.dat",             MesoAverage);
+  SaveVectorWithIndex(filestr, ".MesoTemp.avg.dat",      z, MesoAverage);
 
   // Stress tensor averages
 
