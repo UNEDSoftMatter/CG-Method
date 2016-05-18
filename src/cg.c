@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 18 may 2016 11:32:47 CEST
+ * Modified   : mié 18 may 2016 15:07:14 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -596,6 +596,7 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesozForce);
   fclose(oFile.MesoEnergy);
   fclose(oFile.MesoKinetic);
+  fclose(oFile.MesoTemp);
   
   fclose(oFile.MesoSigma1_00);
   fclose(oFile.MesoSigma1_01);
