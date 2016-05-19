@@ -7,6 +7,7 @@ Rev#006
   and the global density.
 - New Parallelized regions:  `Compute_MesoSigma2`  (through force calculations),
   creation of positions and velocities snapshots, and mesoscopic profiles.
+- New parallelized region: `Compute_Mean_Values`.
 
 Rev#005
 -------
