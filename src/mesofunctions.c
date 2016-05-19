@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 18 may 2016 13:08:13 CEST
+ * Modified   : jue 19 may 2016 15:04:37 CEST
  *
  * Author     : jatorre
  *
@@ -419,4 +419,18 @@ void Compute_Mean_Values(char * basename, char * filename, gsl_vector * MeanValu
   }
 
   gsl_vector_scale(MeanValues,1.0/NSteps);
+}
+
+void Compute_Meso_Velocity(gsl_matrix * MesoMomentum, gsl_vector * MesoDensity_0, gsl_matrix * MesoVelocity)
+{
+
+  gsl_matrix_memcpy(MesoVelocity,MesoMomentum);
+  
+  gsl_vector_view vx = gsl_matrix_column(MesoVelocity,0);
+  gsl_vector_div(&vx.vector,MesoDensity_0);
+  gsl_vector_view vy = gsl_matrix_column(MesoVelocity,1);
+  gsl_vector_div(&vy.vector,MesoDensity_0);
+  gsl_vector_view vz = gsl_matrix_column(MesoVelocity,2);
+  gsl_vector_div(&vz.vector,MesoDensity_0);
+
 }

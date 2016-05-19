@@ -193,6 +193,11 @@ struct OutputFiles
   FILE * MesoMomentum_0;
   FILE * MesoMomentum_1;
   FILE * MesoMomentum_2;
+  FILE * MesoVelocity_0;
+  FILE * MesoVelocity_1;
+  FILE * MesoVelocity_2;
+//   FILE * MicroG;
+//   FILE * MicroV;
 };
 
 // Print  a row in  *fileptr with the  information stored in  vector.  The first
@@ -230,3 +235,6 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors,
                           gsl_matrix * MesoSigma2, gsl_vector * z);
 
 void Compute_Mean_Values(char * basename, char * filename, gsl_vector * MeanValues);
+        
+void Compute_Meso_Velocity(gsl_matrix * MesoMomentum, gsl_vector * MesoDensity_0,
+                           gsl_matrix * MesoVelocity);

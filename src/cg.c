@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 19 may 2016 14:36:28 CEST
+ * Modified   : jue 19 may 2016 15:05:12 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -69,6 +69,16 @@ int main (int argc, char *argv[]) {
   //   strcat (str, filestr);
   //   strcat (str, ".MicroVmod.dat");
   //   oFile.MicroVmod = fopen(str, "w");
+
+//   strcpy (str, "./output/");
+//   strcat (str, filestr);
+//   strcat (str, ".MicroV.dat");
+//   oFile.MicroV = fopen(str, "w");
+// 
+//   strcpy (str, "./output/");
+//   strcat (str, filestr);
+//   strcat (str, ".MicroG.dat");
+//   oFile.MicroG = fopen(str, "w");
 
   // Mesoscopic files
   strcpy (str, "./output/");
@@ -268,6 +278,21 @@ int main (int argc, char *argv[]) {
   strcat (str, ".MesoMomentum_2.dat");
   oFile.MesoMomentum_2 = fopen(str, "w");
 
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoVelocity_0.dat");
+  oFile.MesoVelocity_0 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoVelocity_1.dat");
+  oFile.MesoVelocity_1 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoVelocity_2.dat");
+  oFile.MesoVelocity_2 = fopen(str, "w");
+
   // END OF BLOCK. All output files created
 
   // INIT OF BLOCK. Computing vectors and matrices that
@@ -321,6 +346,8 @@ int main (int argc, char *argv[]) {
   gsl_matrix * MesoSigma    = gsl_matrix_calloc (NNodes,9);
   
   gsl_matrix * MesoMomentum = gsl_matrix_calloc (NNodes,3);
+  
+  gsl_matrix * MesoVelocity = gsl_matrix_calloc (NNodes,3);
 
   // END OF BLOCK
 
@@ -330,9 +357,9 @@ int main (int argc, char *argv[]) {
   {
     strcpy(basename,Snapshot[Step]);
 
-    #pragma omp parallel sections num_threads(2)
+    //pragma omp parallel sections num_threads(2)
     {
-      #pragma omp section
+      //pragma omp section
       {
         // Positions is a matrix that stores: 
         // TYPE x y z 
@@ -353,7 +380,7 @@ int main (int argc, char *argv[]) {
         PrintMsg("Fixing PBC in the positions file...");
         FixPBC(Positions);
       }
-      #pragma omp section
+      //pragma omp section
       {
         // Velocities is a matrix that stores:
         // vx vy vz
@@ -396,6 +423,12 @@ int main (int argc, char *argv[]) {
     
     PrintMsg("Computing forces in the fluid (type 2 particles) due to the wall (type 1 particles)");
     Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 2, 1, Force, Energy, Kinetic);
+   
+    // Checkpoint: Compare velocities and momentum
+    //     gsl_vector_view  gx = gsl_matrix_column(Momentum,0);
+    //     gsl_vector_view  vx = gsl_matrix_column(Velocities,0);
+    //     PrintInfo(Step, &gx.vector, oFile.MicroG);
+    //     PrintInfo(Step, &vx.vector, oFile.MicroV);
     
     //  Checkpoint: Print the force exerted on type2 particles
     //              and the energy of all the particles
@@ -537,6 +570,18 @@ int main (int argc, char *argv[]) {
       }
       #pragma omp section
       {
+        Compute_Meso_Velocity(MesoMomentum,MesoDensity_0,MesoVelocity);
+
+        gsl_vector_view MesoVelocity_0 = gsl_matrix_column(MesoVelocity,0);
+        PrintInfo(Step, &MesoVelocity_0.vector, oFile.MesoVelocity_0);
+        gsl_vector_view MesoVelocity_1 = gsl_matrix_column(MesoVelocity,1);
+        PrintInfo(Step, &MesoVelocity_1.vector, oFile.MesoVelocity_1);
+        gsl_vector_view MesoVelocity_2 = gsl_matrix_column(MesoVelocity,2);
+        PrintInfo(Step, &MesoVelocity_2.vector, oFile.MesoVelocity_2);
+
+      }
+      #pragma omp section
+      {
         PrintMsg("Obtaining node kinetic energies...");
         Compute_Meso_Energy(Positions, Kinetic, z, MesoKinetic);
         PrintInfo(Step, MesoKinetic, oFile.MesoKinetic);
@@ -668,14 +713,21 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesoMomentum_1);
   fclose(oFile.MesoMomentum_2);
 
+  fclose(oFile.MesoVelocity_0);
+  fclose(oFile.MesoVelocity_1);
+  fclose(oFile.MesoVelocity_2);
+
+//   fclose(oFile.MicroG);
+//   fclose(oFile.MicroV);
+
   // SECOND COMPUTATION. OBTAIN MEAN VALUES
 
   PrintMsg("Computing mean values...");
     
-  #pragma omp parallel sections num_threads(4)
-  {
-    #pragma omp section
-    {
+//   #pragma omp parallel sections num_threads(4)
+//   {
+//     #pragma omp section
+//     {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
     
       Compute_Mean_Values(filestr, ".MesoDensity_0.dat",        MesoAverage);
@@ -697,11 +749,11 @@ int main (int argc, char *argv[]) {
       Compute_Mean_Values(filestr, ".MesoTemp.dat",             MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoTemp.avg.dat",      z, MesoAverage);
       
-      gsl_vector_free(MesoAverage);
-    } 
-    #pragma omp section
-    {
-      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
+//      gsl_vector_free(MesoAverage);
+//     } 
+//     #pragma omp section
+//     {
+//      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
 
       // Kinetic stress tensor
       Compute_Mean_Values(filestr, ".MesoSigma1_00.dat",         MesoAverage);
@@ -723,11 +775,11 @@ int main (int argc, char *argv[]) {
       Compute_Mean_Values(filestr, ".MesoSigma1_22.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoSigma1_22.avg.dat",  z, MesoAverage);
       
-      gsl_vector_free(MesoAverage);
-    } 
-    #pragma omp section
-    {
-      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
+//      gsl_vector_free(MesoAverage);
+//     } 
+//     #pragma omp section
+//     {
+//      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
   
       // Virial stress tensor
       Compute_Mean_Values(filestr, ".MesoSigma2_00.dat",         MesoAverage);
@@ -749,11 +801,11 @@ int main (int argc, char *argv[]) {
       Compute_Mean_Values(filestr, ".MesoSigma2_22.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoSigma2_22.avg.dat",  z, MesoAverage);
       
-      gsl_vector_free(MesoAverage);
-    } 
-    #pragma omp section
-    {
-      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
+//       gsl_vector_free(MesoAverage);
+//     } 
+//     #pragma omp section
+//     {
+//       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
   
       // Total stress tensor
       Compute_Mean_Values(filestr, ".MesoSigma_00.dat",         MesoAverage);
@@ -774,10 +826,24 @@ int main (int argc, char *argv[]) {
       SaveVectorWithIndex(filestr, ".MesoSigma_21.avg.dat",  z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoSigma_22.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoSigma_22.avg.dat",  z, MesoAverage);
-  
+      
+      Compute_Mean_Values(filestr, ".MesoMomentum_0.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoMomentum_0.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoMomentum_1.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoMomentum_1.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoMomentum_2.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoMomentum_2.avg.dat",  z, MesoAverage);
+      
+      Compute_Mean_Values(filestr, ".MesoVelocity_0.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoVelocity_0.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoVelocity_1.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoVelocity_1.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoVelocity_2.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoVelocity_2.avg.dat",  z, MesoAverage);
+
       gsl_vector_free(MesoAverage);
-    }
-  }
+//     }
+//   }
   // END OF BLOCK. COMPUTATION DONE
 
   // BEGIN OF BLOCK. FREE MEM
@@ -811,6 +877,7 @@ int main (int argc, char *argv[]) {
   gsl_matrix_free(MesoSigma);
   
   gsl_matrix_free(MesoMomentum);
+  gsl_matrix_free(MesoVelocity);
 
   // END OF BLOCK. MEM FREE
   

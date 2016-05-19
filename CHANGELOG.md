@@ -4,6 +4,7 @@ HISTORICAL MILESTONES
 Rev#007
 -------
 - Added computation of micro and meso momentum.
+- Added computation of meso velocity.
 
 Rev#006
 -------

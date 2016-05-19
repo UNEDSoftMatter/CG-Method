@@ -3,7 +3,7 @@
  *
  * Created    : 29.04.2016
  *
- * Modified   : jue 19 may 2016 14:28:21 CEST
+ * Modified   : jue 19 may 2016 14:38:55 CEST
  *
  * Author     : jatorre
  *
@@ -259,7 +259,7 @@ void Compute_Momentum(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
 
   gsl_matrix_memcpy(Momentum,Velocities);
 
-  for (int i=0;NParticles;i++)
+  for (int i=0;i<NParticles;i++)
   {
     gsl_vector_view gi = gsl_matrix_row(Momentum,i);
     if ((int) gsl_matrix_get(Positions,i,0) == 1 )
