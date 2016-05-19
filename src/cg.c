@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 19 may 2016 15:05:12 CEST
+ * Modified   : jue 19 may 2016 17:25:42 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -69,16 +69,6 @@ int main (int argc, char *argv[]) {
   //   strcat (str, filestr);
   //   strcat (str, ".MicroVmod.dat");
   //   oFile.MicroVmod = fopen(str, "w");
-
-//   strcpy (str, "./output/");
-//   strcat (str, filestr);
-//   strcat (str, ".MicroV.dat");
-//   oFile.MicroV = fopen(str, "w");
-// 
-//   strcpy (str, "./output/");
-//   strcat (str, filestr);
-//   strcat (str, ".MicroG.dat");
-//   oFile.MicroG = fopen(str, "w");
 
   // Mesoscopic files
   strcpy (str, "./output/");
@@ -293,6 +283,11 @@ int main (int argc, char *argv[]) {
   strcat (str, ".MesoVelocity_2.dat");
   oFile.MesoVelocity_2 = fopen(str, "w");
 
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoInternalEnergy.dat");
+  oFile.MesoInternalEnergy = fopen(str, "w");
+
   // END OF BLOCK. All output files created
 
   // INIT OF BLOCK. Computing vectors and matrices that
@@ -346,8 +341,9 @@ int main (int argc, char *argv[]) {
   gsl_matrix * MesoSigma    = gsl_matrix_calloc (NNodes,9);
   
   gsl_matrix * MesoMomentum = gsl_matrix_calloc (NNodes,3);
-  
   gsl_matrix * MesoVelocity = gsl_matrix_calloc (NNodes,3);
+  
+  gsl_vector * MesoInternalEnergy = gsl_vector_calloc (NNodes);
 
   // END OF BLOCK
 
@@ -546,7 +542,7 @@ int main (int argc, char *argv[]) {
       #pragma omp section
       {
         PrintMsg("Obtaining node energies...");
-        Compute_Meso_Energy(Positions, Energy, z, MesoEnergy);
+        Compute_Meso_Profile(Positions, Energy, z, MesoEnergy);
         PrintInfo(Step, MesoEnergy, oFile.MesoEnergy);
       }
       #pragma omp section
@@ -555,21 +551,22 @@ int main (int argc, char *argv[]) {
 
         gsl_vector_view MesoMomentum_0  = gsl_matrix_column(MesoMomentum,0);
         gsl_vector_view Momentum_0      = gsl_matrix_column(Momentum,0);
-        Compute_Meso_Energy(Positions, &Momentum_0.vector, z, &MesoMomentum_0.vector);
+        Compute_Meso_Profile(Positions, &Momentum_0.vector, z, &MesoMomentum_0.vector);
         PrintInfo(Step, &MesoMomentum_0.vector, oFile.MesoMomentum_0);
         
         gsl_vector_view MesoMomentum_1  = gsl_matrix_column(MesoMomentum,1);
         gsl_vector_view Momentum_1      = gsl_matrix_column(Momentum,1);
-        Compute_Meso_Energy(Positions, &Momentum_1.vector, z, &MesoMomentum_1.vector);
+        Compute_Meso_Profile(Positions, &Momentum_1.vector, z, &MesoMomentum_1.vector);
         PrintInfo(Step, &MesoMomentum_1.vector, oFile.MesoMomentum_1);
         
         gsl_vector_view MesoMomentum_2  = gsl_matrix_column(MesoMomentum,2);
         gsl_vector_view Momentum_2      = gsl_matrix_column(Momentum,2);
-        Compute_Meso_Energy(Positions, &Momentum_2.vector, z, &MesoMomentum_2.vector);
+        Compute_Meso_Profile(Positions, &Momentum_2.vector, z, &MesoMomentum_2.vector);
         PrintInfo(Step, &MesoMomentum_2.vector, oFile.MesoMomentum_2);
       }
       #pragma omp section
       {
+        PrintMsg("Obtaining node velocity...");
         Compute_Meso_Velocity(MesoMomentum,MesoDensity_0,MesoVelocity);
 
         gsl_vector_view MesoVelocity_0 = gsl_matrix_column(MesoVelocity,0);
@@ -578,12 +575,11 @@ int main (int argc, char *argv[]) {
         PrintInfo(Step, &MesoVelocity_1.vector, oFile.MesoVelocity_1);
         gsl_vector_view MesoVelocity_2 = gsl_matrix_column(MesoVelocity,2);
         PrintInfo(Step, &MesoVelocity_2.vector, oFile.MesoVelocity_2);
-
       }
       #pragma omp section
       {
         PrintMsg("Obtaining node kinetic energies...");
-        Compute_Meso_Energy(Positions, Kinetic, z, MesoKinetic);
+        Compute_Meso_Profile(Positions, Kinetic, z, MesoKinetic);
         PrintInfo(Step, MesoKinetic, oFile.MesoKinetic);
       }
       #pragma omp section
@@ -661,6 +657,10 @@ int main (int argc, char *argv[]) {
     PrintMsg("Obtaining node temperature...");
     Compute_Meso_Temp(MesoKinetic, MesoDensity_0, MesoTemp);
     PrintInfo(Step, MesoTemp, oFile.MesoTemp);
+        
+    PrintMsg("Obtaining node internal energies...");
+    Compute_InternalEnergy(MesoEnergy, MesoMomentum, MesoDensity_2, MesoInternalEnergy);
+    PrintInfo(Step, MesoInternalEnergy, oFile.MesoInternalEnergy);
 
   }
  
@@ -690,6 +690,7 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesoSigma1_20);
   fclose(oFile.MesoSigma1_21);
   fclose(oFile.MesoSigma1_22);
+  
   fclose(oFile.MesoSigma2_00);
   fclose(oFile.MesoSigma2_01);
   fclose(oFile.MesoSigma2_02);
@@ -699,6 +700,7 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesoSigma2_20);
   fclose(oFile.MesoSigma2_21);
   fclose(oFile.MesoSigma2_22);
+
   fclose(oFile.MesoSigma_00);
   fclose(oFile.MesoSigma_01);
   fclose(oFile.MesoSigma_02);
@@ -716,18 +718,17 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesoVelocity_0);
   fclose(oFile.MesoVelocity_1);
   fclose(oFile.MesoVelocity_2);
-
-//   fclose(oFile.MicroG);
-//   fclose(oFile.MicroV);
+  
+  fclose(oFile.MesoInternalEnergy);
 
   // SECOND COMPUTATION. OBTAIN MEAN VALUES
 
   PrintMsg("Computing mean values...");
     
-//   #pragma omp parallel sections num_threads(4)
-//   {
-//     #pragma omp section
-//     {
+  #pragma omp parallel sections
+  {
+    #pragma omp section
+    {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
     
       Compute_Mean_Values(filestr, ".MesoDensity_0.dat",        MesoAverage);
@@ -749,11 +750,11 @@ int main (int argc, char *argv[]) {
       Compute_Mean_Values(filestr, ".MesoTemp.dat",             MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoTemp.avg.dat",      z, MesoAverage);
       
-//      gsl_vector_free(MesoAverage);
-//     } 
-//     #pragma omp section
-//     {
-//      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
+      gsl_vector_free(MesoAverage);
+    } 
+    #pragma omp section
+    {
+      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
 
       // Kinetic stress tensor
       Compute_Mean_Values(filestr, ".MesoSigma1_00.dat",         MesoAverage);
@@ -775,11 +776,11 @@ int main (int argc, char *argv[]) {
       Compute_Mean_Values(filestr, ".MesoSigma1_22.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoSigma1_22.avg.dat",  z, MesoAverage);
       
-//      gsl_vector_free(MesoAverage);
-//     } 
-//     #pragma omp section
-//     {
-//      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
+      gsl_vector_free(MesoAverage);
+    } 
+    #pragma omp section
+    {
+      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
   
       // Virial stress tensor
       Compute_Mean_Values(filestr, ".MesoSigma2_00.dat",         MesoAverage);
@@ -801,11 +802,11 @@ int main (int argc, char *argv[]) {
       Compute_Mean_Values(filestr, ".MesoSigma2_22.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoSigma2_22.avg.dat",  z, MesoAverage);
       
-//       gsl_vector_free(MesoAverage);
-//     } 
-//     #pragma omp section
-//     {
-//       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
+      gsl_vector_free(MesoAverage);
+    } 
+    #pragma omp section
+    {
+      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
   
       // Total stress tensor
       Compute_Mean_Values(filestr, ".MesoSigma_00.dat",         MesoAverage);
@@ -827,6 +828,12 @@ int main (int argc, char *argv[]) {
       Compute_Mean_Values(filestr, ".MesoSigma_22.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoSigma_22.avg.dat",  z, MesoAverage);
       
+      gsl_vector_free(MesoAverage);
+    } 
+    #pragma omp section
+    {
+      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
+
       Compute_Mean_Values(filestr, ".MesoMomentum_0.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoMomentum_0.avg.dat",  z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoMomentum_1.dat",         MesoAverage);
@@ -840,10 +847,13 @@ int main (int argc, char *argv[]) {
       SaveVectorWithIndex(filestr, ".MesoVelocity_1.avg.dat",  z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoVelocity_2.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoVelocity_2.avg.dat",  z, MesoAverage);
+      
+      Compute_Mean_Values(filestr, ".MesoInternalEnergy.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoInternalEnergy.avg.dat",  z, MesoAverage);
 
       gsl_vector_free(MesoAverage);
-//     }
-//   }
+    }
+  }
   // END OF BLOCK. COMPUTATION DONE
 
   // BEGIN OF BLOCK. FREE MEM
@@ -878,6 +888,7 @@ int main (int argc, char *argv[]) {
   
   gsl_matrix_free(MesoMomentum);
   gsl_matrix_free(MesoVelocity);
+  gsl_vector_free(MesoInternalEnergy);
 
   // END OF BLOCK. MEM FREE
   

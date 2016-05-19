@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 19 may 2016 15:04:37 CEST
+ * Modified   : jue 19 may 2016 17:24:48 CEST
  *
  * Author     : jatorre
  *
@@ -421,16 +421,82 @@ void Compute_Mean_Values(char * basename, char * filename, gsl_vector * MeanValu
   gsl_vector_scale(MeanValues,1.0/NSteps);
 }
 
-void Compute_Meso_Velocity(gsl_matrix * MesoMomentum, gsl_vector * MesoDensity_0, gsl_matrix * MesoVelocity)
+void Compute_Meso_Velocity(gsl_matrix * MesoMomentum, gsl_vector * MesoDensity, gsl_matrix * MesoVelocity)
 {
-
   gsl_matrix_memcpy(MesoVelocity,MesoMomentum);
   
   gsl_vector_view vx = gsl_matrix_column(MesoVelocity,0);
-  gsl_vector_div(&vx.vector,MesoDensity_0);
+  gsl_vector_div(&vx.vector,MesoDensity);
   gsl_vector_view vy = gsl_matrix_column(MesoVelocity,1);
-  gsl_vector_div(&vy.vector,MesoDensity_0);
+  gsl_vector_div(&vy.vector,MesoDensity);
   gsl_vector_view vz = gsl_matrix_column(MesoVelocity,2);
-  gsl_vector_div(&vz.vector,MesoDensity_0);
+  gsl_vector_div(&vz.vector,MesoDensity);
 
+  for (int mu=0;mu<NNodes;mu++)
+  {
+    gsl_vector_view vmu = gsl_matrix_row(MesoVelocity,mu); 
+    if (fabs(gsl_vector_get(MesoDensity,mu)) < 10E-8)
+      gsl_vector_set_zero(&vmu.vector);
+  }
 }
+          
+void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector * z, gsl_vector * Meso)
+{
+  double dv = ((float) Lx * Ly * Lz) / NNodes;
+  double dz = ((float) Lz) / NNodes;
+  double zi, ei;
+  int muRight, muLeft;
+
+  // RESET vector
+  gsl_vector_set_zero(Meso);
+
+  for (int i=0;i<NParticles;i++)
+  {
+    zi      = gsl_matrix_get(Positions,i,3);
+    ei      = gsl_vector_get(Micro,i);
+    muRight = (int) floor(zi*NNodes/Lz);        
+    muLeft  = muRight-1;
+    if (muLeft < 0) 
+    {
+      Meso->data[muRight*Meso->stride] += ei * zi/dz;
+      Meso->data[ NNodes*Meso->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
+    } 
+    else if (muRight == NNodes)
+    {
+      Meso->data[ NNodes*Meso->stride] += ei * 1.0/dz;
+    }
+    else 
+    {
+      Meso->data[muRight*Meso->stride] += ei * (zi -  gsl_vector_get(z,muLeft))/dz;
+      Meso->data[ muLeft*Meso->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
+    }
+  }
+  gsl_vector_scale(Meso,1.0/dv);
+}
+        
+void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum, 
+                            gsl_vector * MesoDensity, gsl_vector * InternalEnergy)
+{
+  gsl_vector * GMod2 = gsl_vector_calloc(NNodes);
+
+  for (int mu=0;mu<NNodes;mu++)
+  {
+    double gmu2 = pow(gsl_matrix_get(MesoMomentum,mu,0),2) + pow(gsl_matrix_get(MesoMomentum,mu,1),2) + pow(gsl_matrix_get(MesoMomentum,mu,2),2);
+    gsl_vector_set(GMod2,mu,gmu2);
+  }
+
+  gsl_vector_memcpy(InternalEnergy,GMod2);
+  gsl_vector_scale(InternalEnergy,-1.0);
+  gsl_vector_div(InternalEnergy,MesoDensity);
+  
+  for (int mu=0;mu<NNodes;mu++)
+  {
+    if (fabs(gsl_vector_get(MesoDensity,mu)) < 10E-8)
+      gsl_vector_set(InternalEnergy,mu,0.0);
+  }
+  
+  gsl_vector_add(InternalEnergy,MesoEnergy);
+
+  gsl_vector_free(GMod2);
+}
+

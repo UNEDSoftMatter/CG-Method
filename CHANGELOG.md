@@ -5,6 +5,9 @@ Rev#007
 -------
 - Added computation of micro and meso momentum.
 - Added computation of meso velocity.
+- Fixed an  issue in the computation  of meso  velocity when  MesoDensity equals
+  0.0.
+- Added computation of internal energy.
 
 Rev#006
 -------
