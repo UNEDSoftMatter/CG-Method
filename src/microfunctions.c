@@ -3,7 +3,7 @@
  *
  * Created    : 29.04.2016
  *
- * Modified   : mar 17 may 2016 18:52:44 CEST
+ * Modified   : jue 19 may 2016 14:28:21 CEST
  *
  * Author     : jatorre
  *
@@ -251,4 +251,24 @@ void FixPBC(gsl_matrix * Positions)
 
   }
 
+}
+
+void Compute_Momentum(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * Momentum)
+{
+  gsl_matrix_set_zero(Momentum);
+
+  gsl_matrix_memcpy(Momentum,Velocities);
+
+  for (int i=0;NParticles;i++)
+  {
+    gsl_vector_view gi = gsl_matrix_row(Momentum,i);
+    if ((int) gsl_matrix_get(Positions,i,0) == 1 )
+    {
+      gsl_vector_scale(&gi.vector,m1);
+    }
+    else
+    {
+      gsl_vector_scale(&gi.vector,m2);
+    }
+  }
 }

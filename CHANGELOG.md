@@ -1,6 +1,10 @@
 HISTORICAL MILESTONES
 =====================
 
+Rev#007
+-------
+- Added computation of micro and meso momentum.
+
 Rev#006
 -------
 - The program now computes density profiles for type1 particles, type2 particles

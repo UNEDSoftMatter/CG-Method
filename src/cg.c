@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 19 may 2016 12:07:44 CEST
+ * Modified   : jue 19 may 2016 14:36:28 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -253,6 +253,21 @@ int main (int argc, char *argv[]) {
   strcat (str, ".MesoSigma_22.dat");
   oFile.MesoSigma_22 = fopen(str, "w");
 
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoMomentum_0.dat");
+  oFile.MesoMomentum_0 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoMomentum_1.dat");
+  oFile.MesoMomentum_1 = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MesoMomentum_2.dat");
+  oFile.MesoMomentum_2 = fopen(str, "w");
+
   // END OF BLOCK. All output files created
 
   // INIT OF BLOCK. Computing vectors and matrices that
@@ -274,9 +289,10 @@ int main (int argc, char *argv[]) {
 
   // BEGIN OF BLOCK. Definition of needed vectors, matrices, and so on
 
-  // Positions and velocities
+  // Positions, velocities and momentum
   gsl_matrix * Positions  = gsl_matrix_calloc (NParticles,4);
   gsl_matrix * Velocities = gsl_matrix_calloc (NParticles,3);
+  gsl_matrix * Momentum   = gsl_matrix_calloc (NParticles,3);
 
   FILE *PositionsFile;
   FILE *VelocitiesFile;
@@ -303,6 +319,8 @@ int main (int argc, char *argv[]) {
   gsl_matrix * MesoSigma1   = gsl_matrix_calloc (NNodes,9);
   gsl_matrix * MesoSigma2   = gsl_matrix_calloc (NNodes,9);
   gsl_matrix * MesoSigma    = gsl_matrix_calloc (NNodes,9);
+  
+  gsl_matrix * MesoMomentum = gsl_matrix_calloc (NNodes,3);
 
   // END OF BLOCK
 
@@ -349,6 +367,9 @@ int main (int argc, char *argv[]) {
         VelocitiesFile = fopen(str, "r");
           gsl_matrix_fscanf(VelocitiesFile, Velocities);
         fclose(VelocitiesFile);
+
+        // Compute microscopic momentum
+        Compute_Momentum(Positions,Velocities,Momentum);
       }
     }
 
@@ -465,7 +486,7 @@ int main (int argc, char *argv[]) {
 
     // MESOSCOPIC INFORMATION
     
-    #pragma omp parallel sections num_threads(5)
+    #pragma omp parallel sections
     {
       #pragma omp section
       {
@@ -494,6 +515,25 @@ int main (int argc, char *argv[]) {
         PrintMsg("Obtaining node energies...");
         Compute_Meso_Energy(Positions, Energy, z, MesoEnergy);
         PrintInfo(Step, MesoEnergy, oFile.MesoEnergy);
+      }
+      #pragma omp section
+      {
+        PrintMsg("Obtaining node momentum...");
+
+        gsl_vector_view MesoMomentum_0  = gsl_matrix_column(MesoMomentum,0);
+        gsl_vector_view Momentum_0      = gsl_matrix_column(Momentum,0);
+        Compute_Meso_Energy(Positions, &Momentum_0.vector, z, &MesoMomentum_0.vector);
+        PrintInfo(Step, &MesoMomentum_0.vector, oFile.MesoMomentum_0);
+        
+        gsl_vector_view MesoMomentum_1  = gsl_matrix_column(MesoMomentum,1);
+        gsl_vector_view Momentum_1      = gsl_matrix_column(Momentum,1);
+        Compute_Meso_Energy(Positions, &Momentum_1.vector, z, &MesoMomentum_1.vector);
+        PrintInfo(Step, &MesoMomentum_1.vector, oFile.MesoMomentum_1);
+        
+        gsl_vector_view MesoMomentum_2  = gsl_matrix_column(MesoMomentum,2);
+        gsl_vector_view Momentum_2      = gsl_matrix_column(Momentum,2);
+        Compute_Meso_Energy(Positions, &Momentum_2.vector, z, &MesoMomentum_2.vector);
+        PrintInfo(Step, &MesoMomentum_2.vector, oFile.MesoMomentum_2);
       }
       #pragma omp section
       {
@@ -623,6 +663,10 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesoSigma_20);
   fclose(oFile.MesoSigma_21);
   fclose(oFile.MesoSigma_22);
+  
+  fclose(oFile.MesoMomentum_0);
+  fclose(oFile.MesoMomentum_1);
+  fclose(oFile.MesoMomentum_2);
 
   // SECOND COMPUTATION. OBTAIN MEAN VALUES
 
@@ -749,8 +793,10 @@ int main (int argc, char *argv[]) {
   gsl_vector_free(List);
   gsl_vector_free(ListHead);
   gsl_matrix_free(Neighbors);
+  
   gsl_matrix_free(Positions);
   gsl_matrix_free(Velocities);
+  gsl_matrix_free(Momentum);
    
   // Free meso vectors and matrices
   gsl_vector_free(MesoDensity_0);
@@ -763,6 +809,8 @@ int main (int argc, char *argv[]) {
   gsl_matrix_free(MesoSigma1);
   gsl_matrix_free(MesoSigma2);
   gsl_matrix_free(MesoSigma);
+  
+  gsl_matrix_free(MesoMomentum);
 
   // END OF BLOCK. MEM FREE
   

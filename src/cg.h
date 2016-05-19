@@ -54,6 +54,9 @@ double KineticEnergy (gsl_vector * i, int type);
 
 void Compute_Velocity_Module (gsl_matrix * Velocities, gsl_vector * Vmod);
 
+void Compute_Momentum(gsl_matrix * Positions, gsl_matrix * Velocities, 
+                      gsl_matrix * Momentum);
+
 /* #############################################################################
 #  Auxiliary functions that appear in aux.c 
 ############################################################################# */
@@ -187,6 +190,9 @@ struct OutputFiles
   FILE * MesoSigma_20;
   FILE * MesoSigma_21;
   FILE * MesoSigma_22;
+  FILE * MesoMomentum_0;
+  FILE * MesoMomentum_1;
+  FILE * MesoMomentum_2;
 };
 
 // Print  a row in  *fileptr with the  information stored in  vector.  The first
