@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 19 may 2016 17:25:42 CEST
+ * Modified   : jue 19 may 2016 18:51:44 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -542,7 +542,7 @@ int main (int argc, char *argv[]) {
       #pragma omp section
       {
         PrintMsg("Obtaining node energies...");
-        Compute_Meso_Profile(Positions, Energy, z, MesoEnergy);
+        Compute_Meso_Profile(Positions, Energy, z, MesoEnergy, 2);
         PrintInfo(Step, MesoEnergy, oFile.MesoEnergy);
       }
       #pragma omp section
@@ -551,23 +551,23 @@ int main (int argc, char *argv[]) {
 
         gsl_vector_view MesoMomentum_0  = gsl_matrix_column(MesoMomentum,0);
         gsl_vector_view Momentum_0      = gsl_matrix_column(Momentum,0);
-        Compute_Meso_Profile(Positions, &Momentum_0.vector, z, &MesoMomentum_0.vector);
+        Compute_Meso_Profile(Positions, &Momentum_0.vector, z, &MesoMomentum_0.vector, 2);
         PrintInfo(Step, &MesoMomentum_0.vector, oFile.MesoMomentum_0);
         
         gsl_vector_view MesoMomentum_1  = gsl_matrix_column(MesoMomentum,1);
         gsl_vector_view Momentum_1      = gsl_matrix_column(Momentum,1);
-        Compute_Meso_Profile(Positions, &Momentum_1.vector, z, &MesoMomentum_1.vector);
+        Compute_Meso_Profile(Positions, &Momentum_1.vector, z, &MesoMomentum_1.vector, 2);
         PrintInfo(Step, &MesoMomentum_1.vector, oFile.MesoMomentum_1);
         
         gsl_vector_view MesoMomentum_2  = gsl_matrix_column(MesoMomentum,2);
         gsl_vector_view Momentum_2      = gsl_matrix_column(Momentum,2);
-        Compute_Meso_Profile(Positions, &Momentum_2.vector, z, &MesoMomentum_2.vector);
+        Compute_Meso_Profile(Positions, &Momentum_2.vector, z, &MesoMomentum_2.vector, 2);
         PrintInfo(Step, &MesoMomentum_2.vector, oFile.MesoMomentum_2);
       }
       #pragma omp section
       {
         PrintMsg("Obtaining node velocity...");
-        Compute_Meso_Velocity(MesoMomentum,MesoDensity_0,MesoVelocity);
+        Compute_Meso_Velocity(MesoMomentum,MesoDensity_2,MesoVelocity);
 
         gsl_vector_view MesoVelocity_0 = gsl_matrix_column(MesoVelocity,0);
         PrintInfo(Step, &MesoVelocity_0.vector, oFile.MesoVelocity_0);
@@ -579,7 +579,7 @@ int main (int argc, char *argv[]) {
       #pragma omp section
       {
         PrintMsg("Obtaining node kinetic energies...");
-        Compute_Meso_Profile(Positions, Kinetic, z, MesoKinetic);
+        Compute_Meso_Profile(Positions, Kinetic, z, MesoKinetic, 2);
         PrintInfo(Step, MesoKinetic, oFile.MesoKinetic);
       }
       #pragma omp section
@@ -655,7 +655,7 @@ int main (int argc, char *argv[]) {
     PrintInfo(Step, &MesoSigma_22.vector, oFile.MesoSigma_22);
         
     PrintMsg("Obtaining node temperature...");
-    Compute_Meso_Temp(MesoKinetic, MesoDensity_0, MesoTemp);
+    Compute_Meso_Temp(MesoKinetic, MesoDensity_2, MesoTemp);
     PrintInfo(Step, MesoTemp, oFile.MesoTemp);
         
     PrintMsg("Obtaining node internal energies...");

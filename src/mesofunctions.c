@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 19 may 2016 17:24:48 CEST
+ * Modified   : jue 19 may 2016 18:47:47 CEST
  *
  * Author     : jatorre
  *
@@ -440,7 +440,7 @@ void Compute_Meso_Velocity(gsl_matrix * MesoMomentum, gsl_vector * MesoDensity, 
   }
 }
           
-void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector * z, gsl_vector * Meso)
+void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector * z, gsl_vector * Meso, int type)
 {
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   double dz = ((float) Lz) / NNodes;
@@ -452,23 +452,26 @@ void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector
 
   for (int i=0;i<NParticles;i++)
   {
-    zi      = gsl_matrix_get(Positions,i,3);
-    ei      = gsl_vector_get(Micro,i);
-    muRight = (int) floor(zi*NNodes/Lz);        
-    muLeft  = muRight-1;
-    if (muLeft < 0) 
+    if ((int) gsl_matrix_get(Positions,i,0) == type)
     {
-      Meso->data[muRight*Meso->stride] += ei * zi/dz;
-      Meso->data[ NNodes*Meso->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
-    } 
-    else if (muRight == NNodes)
-    {
-      Meso->data[ NNodes*Meso->stride] += ei * 1.0/dz;
-    }
-    else 
-    {
-      Meso->data[muRight*Meso->stride] += ei * (zi -  gsl_vector_get(z,muLeft))/dz;
-      Meso->data[ muLeft*Meso->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
+      zi      = gsl_matrix_get(Positions,i,3);
+      ei      = gsl_vector_get(Micro,i);
+      muRight = (int) floor(zi*NNodes/Lz);        
+      muLeft  = muRight-1;
+      if (muLeft < 0) 
+      {
+        Meso->data[muRight*Meso->stride] += ei * zi/dz;
+        Meso->data[ NNodes*Meso->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
+      } 
+      else if (muRight == NNodes)
+      {
+        Meso->data[ NNodes*Meso->stride] += ei * 1.0/dz;
+      }
+      else 
+      {
+        Meso->data[muRight*Meso->stride] += ei * (zi -  gsl_vector_get(z,muLeft))/dz;
+        Meso->data[ muLeft*Meso->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
+      }
     }
   }
   gsl_vector_scale(Meso,1.0/dv);

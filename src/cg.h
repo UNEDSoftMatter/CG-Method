@@ -239,7 +239,7 @@ void Compute_Meso_Velocity(gsl_matrix * MesoMomentum, gsl_vector * MesoDensity_0
                            gsl_matrix * MesoVelocity);
 
 void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector * z,
-                          gsl_vector * Meso);
+                          gsl_vector * Meso, int type);
 
 void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum, 
                             gsl_vector * MesoDensity, gsl_vector * InternalEnergy);
