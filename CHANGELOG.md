@@ -1,6 +1,11 @@
 HISTORICAL MILESTONES
 =====================
 
+Rev#008
+-------
+- Changed most syscalls to C functions.
+- Changed `strcpy` and `strcat` to sprintf.
+
 Rev#007
 -------
 - Added computation of micro and meso momentum.

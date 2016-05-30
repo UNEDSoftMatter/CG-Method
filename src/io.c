@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mar 17 may 2016 18:52:41 CEST
+ * Modified   : lun 30 may 2016 19:47:57 CEST
  *
  * Author     : jatorre
  *
@@ -145,48 +145,96 @@ void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr)
 
 void PrepareInputFiles(void)
 {
-  char str[100];
-  char NLines[6];
-  int SizeOfChunk = NParticles+9;
+//   char str[100];
+//   char NLines[6];
+//   int SizeOfChunk = NParticles+9;
+// 
+//   #pragma omp parallel sections num_threads(2)
+//   {
+//     #pragma omp section
+//     {
+//       // Processing positions file
+//       PrintMsg("Processing positions file...");
+//       system("if [ ! -d data/positions ]; then mkdir -p data/positions; fi");
+//       strcpy(str,"cd data/positions; ln -s ../../");
+//       strcat(str,PositionsFileStr);
+//       strcat(str," ./output.positions");
+//       system(str);
+//       sprintf(NLines,"%d",SizeOfChunk);
+//       strcpy(str,"cd data/positions; split -a 5 -d --lines=");
+//       strcat(str,NLines);
+//       strcat(str," output.positions");
+//       system(str);
+//       system("cd data/positions; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; rm $i ; done");
+//       system("rm data/positions/output.positions");
+//     }
+//     #pragma omp section
+//     {
+//       // Processing velocities file
+//       PrintMsg("Processing velocities file...");
+//       system("if [ ! -d data/velocities ]; then mkdir -p data/velocities; fi");
+//       strcpy(str,"cd data/velocities; ln -s ../../");
+//       strcat(str,VelocitiesFileStr);
+//       strcat(str," ./output.velocities");
+//       system(str);
+//       strcpy(str,"cd data/velocities; split -a 5 -d --lines=");
+//       strcat(str,NLines);
+//       strcat(str," output.velocities");
+//       system(str);
+//       system("cd data/velocities/; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $3,$4,$5}' > $i.vel ; rm $i ; done");
+//       system("rm data/velocities/output.velocities");
+//     }
+//   }
 
-  #pragma omp parallel sections num_threads(2)
-  {
-    #pragma omp section
-    {
-      // Processing positions file
-      PrintMsg("Processing positions file...");
-      system("if [ ! -d data/positions ]; then mkdir -p data/positions; fi");
-      strcpy(str,"cd data/positions; ln -s ../../");
-      strcat(str,PositionsFileStr);
-      strcat(str," ./output.positions");
-      system(str);
-      sprintf(NLines,"%d",SizeOfChunk);
-      strcpy(str,"cd data/positions; split -a 5 -d --lines=");
-      strcat(str,NLines);
-      strcat(str," output.positions");
-      system(str);
-      system("cd data/positions; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; rm $i ; done");
-      system("rm data/positions/output.positions");
-    }
-    #pragma omp section
-    {
-      // Processing velocities file
-      PrintMsg("Processing velocities file...");
-      system("if [ ! -d data/velocities ]; then mkdir -p data/velocities; fi");
-      strcpy(str,"cd data/velocities; ln -s ../../");
-      strcat(str,VelocitiesFileStr);
-      strcat(str," ./output.velocities");
-      system(str);
-      strcpy(str,"cd data/velocities; split -a 5 -d --lines=");
-      strcat(str,NLines);
-      strcat(str," output.velocities");
-      system(str);
-      system("cd data/velocities/; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $3,$4,$5}' > $i.vel ; rm $i ; done");
-      system("rm data/velocities/output.velocities");
-    }
-  }
+  struct stat status;
+ 
+  if (stat("./data", &status) != 0) // && S_ISDIR(status.st_mode)))
+    mkdir("./data",0755);
+  if (stat("./data/positions",  &status) != 0)// && S_ISDIR(status.st_mode)))
+    mkdir("./data/positions",0755);
+  if (stat("./data/velocities", &status)!= 0)// && S_ISDIR(status.st_mode)))
+    mkdir("./data/velocities",0755);
+
+  Split_File("data/positions",  PositionsFileStr);
+  Split_File("data/velocities", VelocitiesFileStr);
 
   // Create snapshot list
   PrintMsg("Creating snapshot list in file 'sim'...");
-  system("for i in $(ls data/positions/ | grep .pos); do basename $i .pos; done > sim");
+  //system("for i in $(ls data/positions/ | grep .pos); do basename $i .pos; done > sim");
+  system("for i in $(ls data/positions/); do echo $i; done > sim");
+}
+
+void Split_File(char *directory, char *iFile)
+{
+  // (via) https://www.codingunit.com/c-tutorial-splitting-a-text-file-into-multiple-files
+  FILE *ptr_iFile;
+  FILE *ptr_oFile;
+  char line[128];
+  char oFileName[10];
+  int  filecounter=1; 
+  int  linecounter=1;
+  int  SizeOfChunk = NParticles+10;
+
+  ptr_iFile = fopen(iFile, "r");
+  sprintf(oFileName, "%s/x%05d", directory, filecounter);
+  printf("%s\n", oFileName);
+  ptr_oFile = fopen(oFileName, "w");
+  while (fgets(line, sizeof line, ptr_iFile)!=NULL)
+  {
+    
+    if (linecounter == SizeOfChunk)
+    {
+      fclose(ptr_oFile);
+      linecounter = 1;
+      filecounter++;
+      sprintf(oFileName, "%s/x%05d", directory, filecounter);
+      ptr_oFile = fopen(oFileName, "w");
+    }
+    
+    if (linecounter > 9 )
+      fprintf(ptr_oFile,"%s", line);
+
+    linecounter++;
+  }
+  fclose(ptr_iFile);
 }

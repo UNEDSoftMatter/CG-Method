@@ -11,6 +11,7 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
+#include <sys/stat.h>
 
 /* #############################################################################
 #  Parameters of the simulation 
@@ -207,6 +208,10 @@ void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr);
 // Process the input files (lammps trajectories) into snapshots
 
 void PrepareInputFiles(void);
+
+// Process the input files (lammps trajectories) into snapshots
+
+void Split_File(char *directory, char *iFile);
 
 /* #############################################################################
 #  Mesoscopic functions in functions.c 

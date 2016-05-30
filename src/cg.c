@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 19 may 2016 18:51:44 CEST
+ * Modified   : lun 30 may 2016 20:06:53 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -46,8 +46,12 @@ int main (int argc, char *argv[]) {
   // INIT OF BLOCK. Create output files
   struct OutputFiles oFile;
   
+  
   // Create output directory if it does not exist
-  system("if [ ! -d output ]; then mkdir output; fi");
+  // system("if [ ! -d output ]; then mkdir output; fi");
+  struct stat status;
+  if (stat("./output", &status) != 0) // && S_ISDIR(status.st_mode)))
+    mkdir("./output",0755);
   
   // Microscopic files
   //   strcpy (str, "./output/");
@@ -71,221 +75,135 @@ int main (int argc, char *argv[]) {
   //   oFile.MicroVmod = fopen(str, "w");
 
   // Mesoscopic files
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoDensity_0.dat");
+  sprintf(str, "./output/%s.MesoDensity_0.dat", filestr);
   oFile.MesoDensity_0 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoDensity_1.dat");
+  sprintf(str, "./output/%s.MesoDensity_1.dat", filestr);
   oFile.MesoDensity_1 = fopen(str, "w");
-
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoDensity_2.dat");
+  
+  sprintf(str, "./output/%s.MesoDensity_2.dat", filestr);
   oFile.MesoDensity_2 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoxForce.dat");
+  sprintf(str, "./output/%s.MesoxForce.dat", filestr);
   oFile.MesoxForce = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoyForce.dat");
+  sprintf(str, "./output/%s.MesoyForce.dat", filestr);
   oFile.MesoyForce = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesozForce.dat");
+  sprintf(str, "./output/%s.MesozForce.dat", filestr);
   oFile.MesozForce = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoEnergy.dat");
+  sprintf(str, "./output/%s.MesoEnergy.dat", filestr);
   oFile.MesoEnergy = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoKinetic.dat");
+  sprintf(str, "./output/%s.MesoKinetic.dat", filestr);
   oFile.MesoKinetic = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoTemp.dat");
+  sprintf(str, "./output/%s.MesoTemp.dat", filestr);
   oFile.MesoTemp = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma1_00.dat");
+  sprintf(str, "./output/%s.MesoSigma1_00.dat", filestr);
   oFile.MesoSigma1_00 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma1_01.dat");
+  sprintf(str, "./output/%s.MesoSigma1_01.dat", filestr);
   oFile.MesoSigma1_01 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma1_02.dat");
+  sprintf(str, "./output/%s.MesoSigma1_02.dat", filestr);
   oFile.MesoSigma1_02 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma1_10.dat");
+  sprintf(str, "./output/%s.MesoSigma1_10.dat", filestr);
   oFile.MesoSigma1_10 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma1_11.dat");
+  sprintf(str, "./output/%s.MesoSigma1_11.dat", filestr);
   oFile.MesoSigma1_11 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma1_12.dat");
+  sprintf(str, "./output/%s.MesoSigma1_12.dat", filestr);
   oFile.MesoSigma1_12 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma1_20.dat");
+  sprintf(str, "./output/%s.MesoSigma1_20.dat", filestr);
   oFile.MesoSigma1_20 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma1_21.dat");
+  sprintf(str, "./output/%s.MesoSigma1_21.dat", filestr);
   oFile.MesoSigma1_21 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma1_22.dat");
+  sprintf(str, "./output/%s.MesoSigma1_22.dat", filestr);
   oFile.MesoSigma1_22 = fopen(str, "w");
   
   // Virial stress tensor
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma2_00.dat");
+  sprintf(str, "./output/%s.MesoSigma2_00.dat", filestr);
   oFile.MesoSigma2_00 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma2_01.dat");
+  sprintf(str, "./output/%s.MesoSigma2_01.dat", filestr);
   oFile.MesoSigma2_01 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma2_02.dat");
+  sprintf(str, "./output/%s.MesoSigma2_02.dat", filestr);
   oFile.MesoSigma2_02 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma2_10.dat");
+  sprintf(str, "./output/%s.MesoSigma2_10.dat", filestr);
   oFile.MesoSigma2_10 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma2_11.dat");
+  sprintf(str, "./output/%s.MesoSigma2_11.dat", filestr);
   oFile.MesoSigma2_11 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma2_12.dat");
+  sprintf(str, "./output/%s.MesoSigma2_12.dat", filestr);
   oFile.MesoSigma2_12 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma2_20.dat");
+  sprintf(str, "./output/%s.MesoSigma2_20.dat", filestr);
   oFile.MesoSigma2_20 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma2_21.dat");
+  sprintf(str, "./output/%s.MesoSigma2_21.dat", filestr);
   oFile.MesoSigma2_21 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma2_22.dat");
+  sprintf(str, "./output/%s.MesoSigma2_22.dat", filestr);
   oFile.MesoSigma2_22 = fopen(str, "w");
 
   // Total stress tensor
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma_00.dat");
+  sprintf(str, "./output/%s.MesoSigma_00.dat", filestr);
   oFile.MesoSigma_00 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma_01.dat");
+  sprintf(str, "./output/%s.MesoSigma_01.dat", filestr);
   oFile.MesoSigma_01 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma_02.dat");
+  sprintf(str, "./output/%s.MesoSigma_02.dat", filestr);
   oFile.MesoSigma_02 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma_10.dat");
+  sprintf(str, "./output/%s.MesoSigma_10.dat", filestr);
   oFile.MesoSigma_10 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma_11.dat");
+  sprintf(str, "./output/%s.MesoSigma_11.dat", filestr);
   oFile.MesoSigma_11 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma_12.dat");
+  sprintf(str, "./output/%s.MesoSigma_12.dat", filestr);
   oFile.MesoSigma_12 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma_20.dat");
+  sprintf(str, "./output/%s.MesoSigma_20.dat", filestr);
   oFile.MesoSigma_20 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma_21.dat");
+  sprintf(str, "./output/%s.MesoSigma_21.dat", filestr);
   oFile.MesoSigma_21 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoSigma_22.dat");
+  sprintf(str, "./output/%s.MesoSigma_22.dat", filestr);
   oFile.MesoSigma_22 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoMomentum_0.dat");
+  sprintf(str, "./output/%s.MesoMomentum_0.dat", filestr);
   oFile.MesoMomentum_0 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoMomentum_1.dat");
+  sprintf(str, "./output/%s.MesoMomentum_1.dat", filestr);
   oFile.MesoMomentum_1 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoMomentum_2.dat");
+  sprintf(str, "./output/%s.MesoMomentum_2.dat", filestr);
   oFile.MesoMomentum_2 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoVelocity_0.dat");
+  sprintf(str, "./output/%s.Mesovelocity_0.dat", filestr);
   oFile.MesoVelocity_0 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoVelocity_1.dat");
+  sprintf(str, "./output/%s.Mesovelocity_1.dat", filestr);
   oFile.MesoVelocity_1 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoVelocity_2.dat");
+  sprintf(str, "./output/%s.Mesovelocity_2.dat", filestr);
   oFile.MesoVelocity_2 = fopen(str, "w");
 
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoInternalEnergy.dat");
+  sprintf(str, "./output/%s.MesoInternalEnergy.dat", filestr);
   oFile.MesoInternalEnergy = fopen(str, "w");
 
   // END OF BLOCK. All output files created
@@ -296,9 +214,7 @@ int main (int argc, char *argv[]) {
   PrintMsg("Generating node positions...");
   gsl_vector * z = gsl_vector_calloc(NNodes);
   Compute_Node_Positions(z);
-  strcpy (str, "./output/");
-  strcat (str, filestr);
-  strcat (str, ".MesoNodes.dat");
+  sprintf(str, "./output/%s.MesoNodes.dat", filestr);
   SaveVectorWithoutIndex(z, str);
 
   PrintMsg("Obtaining neighboring matrix...");
@@ -310,7 +226,11 @@ int main (int argc, char *argv[]) {
   // BEGIN OF BLOCK. Definition of needed vectors, matrices, and so on
 
   // Positions, velocities and momentum
+  gsl_matrix * PositionsBase  = gsl_matrix_calloc (NParticles,5);
+  gsl_matrix * VelocitiesBase = gsl_matrix_calloc (NParticles,5);
+
   gsl_matrix * Positions  = gsl_matrix_calloc (NParticles,4);
+
   gsl_matrix * Velocities = gsl_matrix_calloc (NParticles,3);
   gsl_matrix * Momentum   = gsl_matrix_calloc (NParticles,3);
 
@@ -361,13 +281,21 @@ int main (int argc, char *argv[]) {
         // TYPE x y z 
         // The ID of a particle corresponds to the row
         PrintMsg("Reading microscopic positions");
-        gsl_matrix_set_zero(Positions);
-        strcpy (str, "./data/positions/");
-        strcat (str, basename);
-        strcat (str, ".pos");
+        gsl_matrix_set_zero(PositionsBase);
+        sprintf(str, "./data/positions/%s", basename);
         printf("\tInput file: %s\n", str);
         PositionsFile = fopen(str, "r");
-          gsl_matrix_fscanf(PositionsFile, Positions);
+        gsl_matrix_fscanf(PositionsFile, PositionsBase);
+
+        gsl_vector_view Position_0      = gsl_matrix_column(PositionsBase,1);
+        gsl_matrix_set_col(Positions,0,&Position_0.vector);
+        gsl_vector_view Position_1      = gsl_matrix_column(PositionsBase,2);
+        gsl_matrix_set_col(Positions,1,&Position_1.vector);
+        gsl_vector_view Position_2      = gsl_matrix_column(PositionsBase,3);
+        gsl_matrix_set_col(Positions,2,&Position_2.vector);
+        gsl_vector_view Position_3      = gsl_matrix_column(PositionsBase,4);
+        gsl_matrix_set_col(Positions,3,&Position_3.vector);
+
         fclose(PositionsFile);
 
         // There are some positions coordinates  that are outside the box lammps can
@@ -382,13 +310,19 @@ int main (int argc, char *argv[]) {
         // vx vy vz
         // The ID of a particle corresponds to the row
         PrintMsg("Reading microscopic velocities");
-        gsl_matrix_set_zero(Velocities);
-        strcpy (str, "./data/velocities/");
-        strcat (str, basename);
-        strcat (str, ".vel");
+        gsl_matrix_set_zero(VelocitiesBase);
+        sprintf(str, "./data/velocities/%s", basename);
         printf("\tInput file: %s\n", str);
         VelocitiesFile = fopen(str, "r");
-          gsl_matrix_fscanf(VelocitiesFile, Velocities);
+        gsl_matrix_fscanf(VelocitiesFile, VelocitiesBase);
+
+        gsl_vector_view Velocity_0      = gsl_matrix_column(VelocitiesBase,2);
+        gsl_matrix_set_col(Velocities,0,&Velocity_0.vector);
+        gsl_vector_view Velocity_1      = gsl_matrix_column(VelocitiesBase,3);
+        gsl_matrix_set_col(Velocities,1,&Velocity_1.vector);
+        gsl_vector_view Velocity_2      = gsl_matrix_column(VelocitiesBase,4);
+        gsl_matrix_set_col(Velocities,2,&Velocity_2.vector);
+
         fclose(VelocitiesFile);
 
         // Compute microscopic momentum
@@ -872,6 +806,8 @@ int main (int argc, char *argv[]) {
   
   gsl_matrix_free(Positions);
   gsl_matrix_free(Velocities);
+  gsl_matrix_free(PositionsBase);
+  gsl_matrix_free(VelocitiesBase);
   gsl_matrix_free(Momentum);
    
   // Free meso vectors and matrices
