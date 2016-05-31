@@ -4,7 +4,11 @@ HISTORICAL MILESTONES
 Rev#008
 -------
 - Changed most syscalls to C functions.
-- Changed `strcpy` and `strcat` to sprintf.
+- Changed `strcpy` and `strcat` to `sprintf`.
+- Added  configuration  flags  for   computations.   Now  user  may  choose  the
+  computations to be done by changing `params.h`.
+- Now the program deletes the content of `/data/positions` and `data/velocities`
+  if called without arguments.
 
 Rev#007
 -------

@@ -44,3 +44,16 @@
 #define ecut2          ((double)  4.0*e2*(pow( s2/Rcut,12)-pow( s2/Rcut,6)))
 #define ecut12         ((double) 4.0*e12*(pow(s12/Rcut,12)-pow(s12/Rcut,6)))
 
+// Computations to be done
+#define true  1
+#define false 0
+
+#define __COMPUTE_DENSITY__         true
+#define __COMPUTE_FORCE__           true
+#define __COMPUTE_ENERGY__          true
+#define __COMPUTE_TEMPERATURE__     true
+#define __COMPUTE_STRESS__          true
+#define __COMPUTE_MOMENTUM__        true
+#define __COMPUTE_VELOCITY__        true
+#define __COMPUTE_INTERNAL_ENERGY__ true
+

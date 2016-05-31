@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 30 may 2016 20:06:53 CEST
+ * Modified   : mar 31 may 2016 12:51:50 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -15,9 +15,11 @@
 #include "cg.h"
 
 int main (int argc, char *argv[]) {
-  
+
   PrintInitInfo();
-  
+
+  PrintComputingOptions();
+
   PrintMsg("INIT");
 
   char * filestr;
@@ -45,7 +47,6 @@ int main (int argc, char *argv[]) {
  
   // INIT OF BLOCK. Create output files
   struct OutputFiles oFile;
-  
   
   // Create output directory if it does not exist
   // system("if [ ! -d output ]; then mkdir output; fi");
@@ -75,136 +76,120 @@ int main (int argc, char *argv[]) {
   //   oFile.MicroVmod = fopen(str, "w");
 
   // Mesoscopic files
-  sprintf(str, "./output/%s.MesoDensity_0.dat", filestr);
-  oFile.MesoDensity_0 = fopen(str, "w");
+  #if __COMPUTE_DENSITY__
+    sprintf(str, "./output/%s.MesoDensity_0.dat", filestr);
+    oFile.MesoDensity_0 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoDensity_1.dat", filestr);
+    oFile.MesoDensity_1 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoDensity_2.dat", filestr);
+    oFile.MesoDensity_2 = fopen(str, "w");
+  #endif
 
-  sprintf(str, "./output/%s.MesoDensity_1.dat", filestr);
-  oFile.MesoDensity_1 = fopen(str, "w");
+  #if __COMPUTE_FORCE__
+    sprintf(str, "./output/%s.MesoxForce.dat", filestr);
+    oFile.MesoxForce = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoyForce.dat", filestr);
+    oFile.MesoyForce = fopen(str, "w");
+    sprintf(str, "./output/%s.MesozForce.dat", filestr);
+    oFile.MesozForce = fopen(str, "w");
+  #endif
+
+  #if __COMPUTE_ENERGY__
+    sprintf(str, "./output/%s.MesoEnergy.dat", filestr);
+    oFile.MesoEnergy = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoKinetic.dat", filestr);
+    oFile.MesoKinetic = fopen(str, "w");
+  #endif
+
+  #if __COMPUTE_TEMPERATURE__
+    sprintf(str, "./output/%s.MesoTemp.dat", filestr);
+    oFile.MesoTemp = fopen(str, "w");
+  #endif 
+
+  #if __COMPUTE_STRESS__
+    // Kinetic stress tensor
+    sprintf(str, "./output/%s.MesoSigma1_00.dat", filestr);
+    oFile.MesoSigma1_00 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma1_01.dat", filestr);
+    oFile.MesoSigma1_01 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma1_02.dat", filestr);
+    oFile.MesoSigma1_02 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma1_10.dat", filestr);
+    oFile.MesoSigma1_10 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma1_11.dat", filestr);
+    oFile.MesoSigma1_11 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma1_12.dat", filestr);
+    oFile.MesoSigma1_12 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma1_20.dat", filestr);
+    oFile.MesoSigma1_20 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma1_21.dat", filestr);
+    oFile.MesoSigma1_21 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma1_22.dat", filestr);
+    oFile.MesoSigma1_22 = fopen(str, "w");
   
-  sprintf(str, "./output/%s.MesoDensity_2.dat", filestr);
-  oFile.MesoDensity_2 = fopen(str, "w");
+    // Virial stress tensor
+    sprintf(str, "./output/%s.MesoSigma2_00.dat", filestr);
+    oFile.MesoSigma2_00 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma2_01.dat", filestr);
+    oFile.MesoSigma2_01 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma2_02.dat", filestr);
+    oFile.MesoSigma2_02 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma2_10.dat", filestr);
+    oFile.MesoSigma2_10 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma2_11.dat", filestr);
+    oFile.MesoSigma2_11 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma2_12.dat", filestr);
+    oFile.MesoSigma2_12 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma2_20.dat", filestr);
+    oFile.MesoSigma2_20 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma2_21.dat", filestr);
+    oFile.MesoSigma2_21 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma2_22.dat", filestr);
+    oFile.MesoSigma2_22 = fopen(str, "w");
 
-  sprintf(str, "./output/%s.MesoxForce.dat", filestr);
-  oFile.MesoxForce = fopen(str, "w");
+    // Total stress tensor
+    sprintf(str, "./output/%s.MesoSigma_00.dat", filestr);
+    oFile.MesoSigma_00 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma_01.dat", filestr);
+    oFile.MesoSigma_01 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma_02.dat", filestr);
+    oFile.MesoSigma_02 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma_10.dat", filestr);
+    oFile.MesoSigma_10 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma_11.dat", filestr);
+    oFile.MesoSigma_11 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma_12.dat", filestr);
+    oFile.MesoSigma_12 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma_20.dat", filestr);
+    oFile.MesoSigma_20 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma_21.dat", filestr);
+    oFile.MesoSigma_21 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoSigma_22.dat", filestr);
+    oFile.MesoSigma_22 = fopen(str, "w");
+  #endif
 
-  sprintf(str, "./output/%s.MesoyForce.dat", filestr);
-  oFile.MesoyForce = fopen(str, "w");
+  #if __COMPUTE_MOMENTUM__
+    sprintf(str, "./output/%s.MesoMomentum_0.dat", filestr);
+    oFile.MesoMomentum_0 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoMomentum_1.dat", filestr);
+    oFile.MesoMomentum_1 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoMomentum_2.dat", filestr);
+    oFile.MesoMomentum_2 = fopen(str, "w");
+  #endif
 
-  sprintf(str, "./output/%s.MesozForce.dat", filestr);
-  oFile.MesozForce = fopen(str, "w");
+  #if __COMPUTE_VELOCITY__
+    sprintf(str, "./output/%s.MesoVelocity_0.dat", filestr);
+    oFile.MesoVelocity_0 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoVelocity_1.dat", filestr);
+    oFile.MesoVelocity_1 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoVelocity_2.dat", filestr);
+    oFile.MesoVelocity_2 = fopen(str, "w");
+  #endif
 
-  sprintf(str, "./output/%s.MesoEnergy.dat", filestr);
-  oFile.MesoEnergy = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoKinetic.dat", filestr);
-  oFile.MesoKinetic = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoTemp.dat", filestr);
-  oFile.MesoTemp = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma1_00.dat", filestr);
-  oFile.MesoSigma1_00 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma1_01.dat", filestr);
-  oFile.MesoSigma1_01 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma1_02.dat", filestr);
-  oFile.MesoSigma1_02 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma1_10.dat", filestr);
-  oFile.MesoSigma1_10 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma1_11.dat", filestr);
-  oFile.MesoSigma1_11 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma1_12.dat", filestr);
-  oFile.MesoSigma1_12 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma1_20.dat", filestr);
-  oFile.MesoSigma1_20 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma1_21.dat", filestr);
-  oFile.MesoSigma1_21 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma1_22.dat", filestr);
-  oFile.MesoSigma1_22 = fopen(str, "w");
-  
-  // Virial stress tensor
-  sprintf(str, "./output/%s.MesoSigma2_00.dat", filestr);
-  oFile.MesoSigma2_00 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma2_01.dat", filestr);
-  oFile.MesoSigma2_01 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma2_02.dat", filestr);
-  oFile.MesoSigma2_02 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma2_10.dat", filestr);
-  oFile.MesoSigma2_10 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma2_11.dat", filestr);
-  oFile.MesoSigma2_11 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma2_12.dat", filestr);
-  oFile.MesoSigma2_12 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma2_20.dat", filestr);
-  oFile.MesoSigma2_20 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma2_21.dat", filestr);
-  oFile.MesoSigma2_21 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma2_22.dat", filestr);
-  oFile.MesoSigma2_22 = fopen(str, "w");
-
-  // Total stress tensor
-  sprintf(str, "./output/%s.MesoSigma_00.dat", filestr);
-  oFile.MesoSigma_00 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma_01.dat", filestr);
-  oFile.MesoSigma_01 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma_02.dat", filestr);
-  oFile.MesoSigma_02 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma_10.dat", filestr);
-  oFile.MesoSigma_10 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma_11.dat", filestr);
-  oFile.MesoSigma_11 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma_12.dat", filestr);
-  oFile.MesoSigma_12 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma_20.dat", filestr);
-  oFile.MesoSigma_20 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma_21.dat", filestr);
-  oFile.MesoSigma_21 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoSigma_22.dat", filestr);
-  oFile.MesoSigma_22 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoMomentum_0.dat", filestr);
-  oFile.MesoMomentum_0 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoMomentum_1.dat", filestr);
-  oFile.MesoMomentum_1 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoMomentum_2.dat", filestr);
-  oFile.MesoMomentum_2 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.Mesovelocity_0.dat", filestr);
-  oFile.MesoVelocity_0 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.Mesovelocity_1.dat", filestr);
-  oFile.MesoVelocity_1 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.Mesovelocity_2.dat", filestr);
-  oFile.MesoVelocity_2 = fopen(str, "w");
-
-  sprintf(str, "./output/%s.MesoInternalEnergy.dat", filestr);
-  oFile.MesoInternalEnergy = fopen(str, "w");
+  #if __COMPUTE_INTERNAL_ENERGY__
+    sprintf(str, "./output/%s.MesoInternalEnergy.dat", filestr);
+    oFile.MesoInternalEnergy = fopen(str, "w");
+  #endif
 
   // END OF BLOCK. All output files created
 
@@ -451,6 +436,7 @@ int main (int argc, char *argv[]) {
     
     #pragma omp parallel sections
     {
+      #if __COMPUTE_DENSITY__
       #pragma omp section
       {
         PrintMsg("Obtaining node densities...");
@@ -462,6 +448,8 @@ int main (int argc, char *argv[]) {
         gsl_vector_add(MesoDensity_0, MesoDensity_2);
         PrintInfo(Step, MesoDensity_0, oFile.MesoDensity_0);
       }
+      #endif
+      #if __COMPUTE_FORCE__
       #pragma omp section
       {
         PrintMsg("Obtaining node forces...");
@@ -473,12 +461,16 @@ int main (int argc, char *argv[]) {
         gsl_vector_view MesozForce = gsl_matrix_column(MesoForce,2);
         PrintInfo(Step, &MesozForce.vector, oFile.MesozForce);
       }
+      #endif
+      #if __COMPUTE_ENERGY__
       #pragma omp section
       {
         PrintMsg("Obtaining node energies...");
         Compute_Meso_Profile(Positions, Energy, z, MesoEnergy, 2);
         PrintInfo(Step, MesoEnergy, oFile.MesoEnergy);
       }
+      #endif
+      #if __COMPUTE_MOMENTUM__
       #pragma omp section
       {
         PrintMsg("Obtaining node momentum...");
@@ -498,6 +490,8 @@ int main (int argc, char *argv[]) {
         Compute_Meso_Profile(Positions, &Momentum_2.vector, z, &MesoMomentum_2.vector, 2);
         PrintInfo(Step, &MesoMomentum_2.vector, oFile.MesoMomentum_2);
       }
+      #endif
+      #if __COMPUTE_VELOCITY__
       #pragma omp section
       {
         PrintMsg("Obtaining node velocity...");
@@ -510,12 +504,16 @@ int main (int argc, char *argv[]) {
         gsl_vector_view MesoVelocity_2 = gsl_matrix_column(MesoVelocity,2);
         PrintInfo(Step, &MesoVelocity_2.vector, oFile.MesoVelocity_2);
       }
+      #endif
+      #if __COMPUTE_ENERGY__
       #pragma omp section
       {
         PrintMsg("Obtaining node kinetic energies...");
         Compute_Meso_Profile(Positions, Kinetic, z, MesoKinetic, 2);
         PrintInfo(Step, MesoKinetic, oFile.MesoKinetic);
       }
+      #endif
+      #if __COMPUTE_STRESS__
       #pragma omp section
       {
         PrintMsg("Obtaining node kinetic stress tensors...");
@@ -541,8 +539,10 @@ int main (int argc, char *argv[]) {
         gsl_vector_view  MesoSigma1_22 = gsl_matrix_column(MesoSigma1,8);
         PrintInfo(Step, &MesoSigma1_22.vector, oFile.MesoSigma1_22);
       }
+      #endif
     }
 
+    #if __COMPUTE_STRESS__
     PrintMsg("Obtaining node virial stress tensor...");
 
     Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, MesoSigma2, z);
@@ -587,15 +587,20 @@ int main (int argc, char *argv[]) {
     PrintInfo(Step, &MesoSigma_21.vector, oFile.MesoSigma_21);
     gsl_vector_view  MesoSigma_22 = gsl_matrix_column(MesoSigma,8);
     PrintInfo(Step, &MesoSigma_22.vector, oFile.MesoSigma_22);
+    #endif
         
+    #if __COMPUTE_TEMPERATURE__
     PrintMsg("Obtaining node temperature...");
     Compute_Meso_Temp(MesoKinetic, MesoDensity_2, MesoTemp);
     PrintInfo(Step, MesoTemp, oFile.MesoTemp);
+    #endif
         
+    #if __COMPUTE_INTERNAL_ENERGY__
     PrintMsg("Obtaining node internal energies...");
     Compute_InternalEnergy(MesoEnergy, MesoMomentum, MesoDensity_2, MesoInternalEnergy);
     PrintInfo(Step, MesoInternalEnergy, oFile.MesoInternalEnergy);
-
+    #endif
+  
   }
  
   // Close micro files
@@ -605,16 +610,28 @@ int main (int argc, char *argv[]) {
   // fclose(oFile.MicroVmod);
 
   // Close meso files
+  #if __COMPUTE_DENSITY__
   fclose(oFile.MesoDensity_0);
   fclose(oFile.MesoDensity_1);
   fclose(oFile.MesoDensity_2);
+  #endif
+
+  #if __COMPUTE_FORCE__
   fclose(oFile.MesoxForce);
   fclose(oFile.MesoyForce);
   fclose(oFile.MesozForce);
+  #endif
+
+  #if __COMPUTE_ENERGY__
   fclose(oFile.MesoEnergy);
   fclose(oFile.MesoKinetic);
+  #endif
+
+  #if __COMPUTE_TEMPERATURE__
   fclose(oFile.MesoTemp);
-  
+  #endif
+
+  #if __COMPUTE_STRESS__
   fclose(oFile.MesoSigma1_00);
   fclose(oFile.MesoSigma1_01);
   fclose(oFile.MesoSigma1_02);
@@ -644,16 +661,23 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesoSigma_20);
   fclose(oFile.MesoSigma_21);
   fclose(oFile.MesoSigma_22);
-  
+  #endif
+
+  #if __COMPUTE_MOMENTUM__
   fclose(oFile.MesoMomentum_0);
   fclose(oFile.MesoMomentum_1);
   fclose(oFile.MesoMomentum_2);
+  #endif
 
+  #if __COMPUTE_VELOCITY__
   fclose(oFile.MesoVelocity_0);
   fclose(oFile.MesoVelocity_1);
   fclose(oFile.MesoVelocity_2);
-  
+  #endif
+
+  #if __COMPUTE_INTERNAL_ENERGY__
   fclose(oFile.MesoInternalEnergy);
+  #endif
 
   // SECOND COMPUTATION. OBTAIN MEAN VALUES
 
@@ -665,27 +689,39 @@ int main (int argc, char *argv[]) {
     {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
     
+      #if __COMPUTE_DENSITY__
       Compute_Mean_Values(filestr, ".MesoDensity_0.dat",        MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoDensity_0.avg.dat", z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoDensity_1.dat",        MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoDensity_1.avg.dat", z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoDensity_2.dat",        MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoDensity_2.avg.dat", z, MesoAverage);
+      #endif
+
+      #if __COMPUTE_FORCE__
       Compute_Mean_Values(filestr, ".MesoxForce.dat",           MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoxForce.avg.dat",    z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoyForce.dat",           MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoyForce.avg.dat",    z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesozForce.dat",           MesoAverage);
       SaveVectorWithIndex(filestr, ".MesozForce.avg.dat",    z, MesoAverage);
+      #endif
+
+      #if __COMPUTE_ENERGY__
       Compute_Mean_Values(filestr, ".MesoKinetic.dat",          MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoKinetic.avg.dat",   z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoEnergy.dat",           MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoEnergy.avg.dat",    z, MesoAverage);
+      #endif
+
+      #if __COMPUTE_TEMPERATURE__
       Compute_Mean_Values(filestr, ".MesoTemp.dat",             MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoTemp.avg.dat",      z, MesoAverage);
+      #endif
       
       gsl_vector_free(MesoAverage);
     } 
+    #if __COMPUTE_STRESS__
     #pragma omp section
     {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
@@ -764,26 +800,33 @@ int main (int argc, char *argv[]) {
       
       gsl_vector_free(MesoAverage);
     } 
+    #endif
     #pragma omp section
     {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
 
+      #if __COMPUTE_MOMENTUM__
       Compute_Mean_Values(filestr, ".MesoMomentum_0.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoMomentum_0.avg.dat",  z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoMomentum_1.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoMomentum_1.avg.dat",  z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoMomentum_2.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoMomentum_2.avg.dat",  z, MesoAverage);
-      
+      #endif
+
+      #if __COMPUTE_VELOCITY__
       Compute_Mean_Values(filestr, ".MesoVelocity_0.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoVelocity_0.avg.dat",  z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoVelocity_1.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoVelocity_1.avg.dat",  z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoVelocity_2.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoVelocity_2.avg.dat",  z, MesoAverage);
-      
+      #endif
+
+      #if __COMPUTE_INTERNAL_ENERGY__
       Compute_Mean_Values(filestr, ".MesoInternalEnergy.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoInternalEnergy.avg.dat",  z, MesoAverage);
+      #endif
 
       gsl_vector_free(MesoAverage);
     }

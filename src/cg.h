@@ -1,9 +1,14 @@
+#ifndef HEADER_SEEN
+
+#define HEADER_SEEN
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
 #include <omp.h>
+#include <ftw.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_mode.h>
 #include <gsl/gsl_errno.h>
@@ -213,6 +218,10 @@ void PrepareInputFiles(void);
 
 void Split_File(char *directory, char *iFile);
 
+// Show which computations will be done
+
+void PrintComputingOptions(void);
+
 /* #############################################################################
 #  Mesoscopic functions in functions.c 
 ############################################################################# */
@@ -248,3 +257,5 @@ void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector
 
 void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum, 
                             gsl_vector * MesoDensity, gsl_vector * InternalEnergy);
+
+#endif

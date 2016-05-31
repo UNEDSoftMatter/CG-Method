@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : lun 30 may 2016 19:47:57 CEST
+ * Modified   : mar 31 may 2016 13:01:05 CEST
  *
  * Author     : jatorre
  *
@@ -190,10 +190,14 @@ void PrepareInputFiles(void)
  
   if (stat("./data", &status) != 0) // && S_ISDIR(status.st_mode)))
     mkdir("./data",0755);
-  if (stat("./data/positions",  &status) != 0)// && S_ISDIR(status.st_mode)))
-    mkdir("./data/positions",0755);
-  if (stat("./data/velocities", &status)!= 0)// && S_ISDIR(status.st_mode)))
-    mkdir("./data/velocities",0755);
+  
+  if (stat("./data/positions",  &status) == 0) // && S_ISDIR(status.st_mode)))
+    system("rm -r ./data/positions");
+  mkdir("./data/positions",0755);
+  
+  if (stat("./data/velocities", &status) == 0) // && S_ISDIR(status.st_mode)))
+    system("rm -r ./data/velocities");
+  mkdir("./data/velocities",0755);
 
   Split_File("data/positions",  PositionsFileStr);
   Split_File("data/velocities", VelocitiesFileStr);
@@ -211,30 +215,91 @@ void Split_File(char *directory, char *iFile)
   FILE *ptr_oFile;
   char line[128];
   char oFileName[10];
-  int  filecounter=1; 
-  int  linecounter=1;
-  int  SizeOfChunk = NParticles+10;
+  int  filecounter=0; 
+  int  linecounter=0;
+  int  SizeOfChunk = NParticles+9;
 
   ptr_iFile = fopen(iFile, "r");
   sprintf(oFileName, "%s/x%05d", directory, filecounter);
-  printf("%s\n", oFileName);
   ptr_oFile = fopen(oFileName, "w");
-  while (fgets(line, sizeof line, ptr_iFile)!=NULL)
+  while (fgets(line, sizeof(line), ptr_iFile) != NULL)
   {
-    
+//    printf("Line: %d\n", linecounter);
+
     if (linecounter == SizeOfChunk)
     {
       fclose(ptr_oFile);
-      linecounter = 1;
+      linecounter = 0;
       filecounter++;
       sprintf(oFileName, "%s/x%05d", directory, filecounter);
       ptr_oFile = fopen(oFileName, "w");
     }
     
-    if (linecounter > 9 )
+    if (linecounter > 8 )
       fprintf(ptr_oFile,"%s", line);
 
     linecounter++;
   }
   fclose(ptr_iFile);
+}
+
+void PrintComputingOptions(void)
+{
+  PrintMsg("Computations to be done:");
+  
+  printf("\tMesoscopic densities:\t\t\t\t");
+  #if __COMPUTE_DENSITY__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tMesoscopic forces exerted by walls:\t\t");
+  #if __COMPUTE_FORCE__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tMesoscopic kinetic and total energies:\t\t");
+  #if __COMPUTE_FORCE__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tMesoscopic temperature:\t\t\t\t");
+  #if __COMPUTE_TEMPERATURE__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tMesoscopic kinetic and virial stress tensor:\t");
+  #if __COMPUTE_STRESS__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tMesoscopic momentum:\t\t\t\t");
+  #if __COMPUTE_MOMENTUM__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tMesoscopic velocities:\t\t\t\t");
+  #if __COMPUTE_VELOCITY__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tMesoscopic internal energy:\t\t\t");
+  #if __COMPUTE_INTERNAL_ENERGY__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
 }
