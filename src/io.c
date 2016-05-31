@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mar 31 may 2016 13:01:05 CEST
+ * Modified   : mar 31 may 2016 16:01:46 CEST
  *
  * Author     : jatorre
  *
@@ -214,7 +214,7 @@ void Split_File(char *directory, char *iFile)
   FILE *ptr_iFile;
   FILE *ptr_oFile;
   char line[128];
-  char oFileName[10];
+  char oFileName[100];
   int  filecounter=0; 
   int  linecounter=0;
   int  SizeOfChunk = NParticles+9;
