@@ -70,6 +70,9 @@ void Compute_Momentum(gsl_matrix * Positions, gsl_matrix * Velocities,
 double       MaxVector     (gsl_vector * v); // Obtain the maximum of a vector
 double       MinVector     (gsl_vector * v); // Obtain the minimum of a vector
 gsl_vector * RescaleVector (gsl_vector * v); // Rescale a vector between 0 and 1
+double       Heaviside     (double x);       // Heaviside function
+double       max(double x, double y);
+double       min(double x, double y);
 
 
 /* #############################################################################
@@ -257,5 +260,7 @@ void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector
 
 void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum, 
                             gsl_vector * MesoDensity, gsl_vector * InternalEnergy);
+
+double zmuij(gsl_vector * z, int mu, double zi, double zj);
 
 #endif

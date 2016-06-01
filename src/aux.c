@@ -3,7 +3,7 @@
  *
  * Created    : 25.04.2016
  *
- * Modified   : lun 25 abr 2016 13:01:48 CEST
+ * Modified   : mié 01 jun 2016 18:28:01 CEST
  *
  * Author     : jatorre
  *
@@ -49,4 +49,26 @@ gsl_vector * RescaleVector (gsl_vector * v)
 
   return vrescaled; 
 
+}
+
+double Heaviside(double x)
+{
+  if (x < 0.0)
+    return 0.0;
+  
+  return 1.0;
+}
+
+double min(double x, double y)
+{
+  double val;
+  val = (x < y ? x : y);
+  return val;
+}
+
+double max(double x, double y)
+{
+  double val;
+  val = (x > y ? x : y);
+  return val;
 }

@@ -1,0 +1,8 @@
+CG
+*.c.o
+*.dat
+/data
+/junk
+*.swp
+/povray
+*.log

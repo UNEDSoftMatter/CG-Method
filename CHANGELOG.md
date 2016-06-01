@@ -9,6 +9,10 @@ Rev#008
   computations to be done by changing `params.h`.
 - Now the program deletes the content of `/data/positions` and `data/velocities`
   if called without arguments.
+- Fixed  an  issue  computing  zmuij.   Now   zmuij  is  a  function  called  in
+  `Compute_Sigma2` that avoid the use of  conditional (mu < nu,  nu < mu,  nu ==
+  mu).
+- Added `.gitignore` file to the repo.
 
 Rev#007
 -------

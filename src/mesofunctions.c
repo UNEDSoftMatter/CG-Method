@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 19 may 2016 18:47:47 CEST
+ * Modified   : mié 01 jun 2016 19:08:49 CEST
  *
  * Author     : jatorre
  *
@@ -173,8 +173,9 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
       // Only for fluid (type 2) particle
       if ((int) gsl_matrix_get(Positions,i,0) == 2)
       {
+        double zi = gsl_matrix_get(Positions,i,3);
         // Find the bin mu to which the particle i belongs
-        int mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz) - 1;
+        int mu = floor(zi*NNodes/Lz) - 1;
         // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
         // Checkpoint
         if (mu == -1) 
@@ -195,8 +196,9 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
           // Only for fluid (type 2) particles
           if ((int) gsl_matrix_get(Positions,Verlet[j],0) == 2)
           {
+            double zj = gsl_matrix_get(Positions,Verlet[j],3);
             // Find the bin nu to which the particle Verlet[j] belongs
-            int nu = floor(gsl_matrix_get(Positions,Verlet[j],3)*NNodes/Lz) - 1;
+            int nu = floor(zj*NNodes/Lz) - 1;
             // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
             // Checkpoint
             if (nu == -1) 
@@ -217,119 +219,28 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
             rij[0] -= Lx*round(rij[0]/Lx);
             rij[1]  = gsl_matrix_get(Positions,i,2) - gsl_matrix_get(Positions,Verlet[j],2);
             rij[1] -= Ly*round(rij[1]/Ly);
-            rij[2]  = gsl_matrix_get(Positions,i,3) - gsl_matrix_get(Positions,Verlet[j],3);
+            rij[2]  = zi - zj;
             rij[2] -= Lz*round(rij[2]/Lz);
 
             double * sigma2 = malloc(9*sizeof(double));
 
-            sigma2[0] = rij[0]*fij[0];
-            sigma2[1] = rij[0]*fij[1];
-            sigma2[2] = rij[0]*fij[2];
-            sigma2[3] = rij[1]*fij[0];
-            sigma2[4] = rij[1]*fij[1];
-            sigma2[5] = rij[1]*fij[2];
-            sigma2[6] = rij[2]*fij[0];
-            sigma2[7] = rij[2]*fij[1];
-            sigma2[8] = rij[2]*fij[2];
-
-            if (mu == nu)
+            for (int sigma=((int)min(mu,nu)); sigma<=((int)max(mu,nu));sigma++)
             {
+              double zsigma = zmuij(z,sigma,zi,zj);
+              sigma2[0] = rij[0]*fij[0]*zsigma;
+              sigma2[1] = rij[0]*fij[1]*zsigma;
+              sigma2[2] = rij[0]*fij[2]*zsigma;
+              sigma2[3] = rij[1]*fij[0]*zsigma;
+              sigma2[4] = rij[1]*fij[1]*zsigma;
+              sigma2[5] = rij[1]*fij[2]*zsigma;
+              sigma2[6] = rij[2]*fij[0]*zsigma;
+              sigma2[7] = rij[2]*fij[1]*zsigma;
+              sigma2[8] = rij[2]*fij[2]*zsigma;
+
               for (int k=0;k<9;k++)
-                MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k];
+                MesoSigma2->data[sigma*MesoSigma2->tda+k] += sigma2[k];
             }
-            else if (mu > nu)
-            {
-              // {
-              // NEVER APPLIED (bc there are no interacting type2 particles between the walls)
-              if (mu - nu > NNodes/2)
-                printf("ERROR! Boundary conditions ij applied! between %d and %d!\n", i, Verlet[j]);
-
-              //   // z is out of range for mu = NNodes-1
-              //   // zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/zij;
-              //   int bin = ( mu+1 > NNodes - 1 ? (int) Lz : mu+1 );
-              //   zmu = (gsl_vector_get(z,bin)-gsl_matrix_get(Positions,i,3))/zij;
-              //   MesoSigma2->data[mu*MesoSigma2->stride] += val*zmu;
-              //   // out of range issue
-              //   // for (int sigma=mu+1;sigma<=NNodes-1;sigma++)
-              //   for (int sigma=bin;sigma<=NNodes-1;sigma++)
-              //   {
-              //     zsigma = (NNodes-1 == bin ? 0.0 : dz/zij);
-              //     MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
-              //   }
-              //   for (int sigma=0;sigma<=nu-1;sigma++)
-              //   {
-              //     zsigma = (nu-1 == 0 ? 0.0 : dz/zij);
-              //     MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
-              //   }
-              //   znu = (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/zij;
-              //   MesoSigma2->data[nu*MesoSigma2->stride] += val*znu;
-              // }
-              // else 
-              // {
-              
-              // We should consider mu == NNodes
-              //  zmu = (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/zij;
-              double zmu = (mu == NNodes ? gsl_matrix_get(Positions,i,3)/rij[2] : (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/rij[2]);
-              for (int k=0;k<9;k++)
-                MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zmu;
-              for (int sigma=mu-1;sigma>nu;sigma--)
-              {
-                double zsigma = (nu == mu-1 ? 0.0 : dz/rij[2]);
-                for (int k=0;k<9;k++)
-                  MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zsigma;
-              }
-              double znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/rij[2];
-              for (int k=0;k<9;k++)
-                MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*znu;
-
-              // }
-            } 
-            else 
-            {
-              // NEVER APPLIED (bc there are no interacting type2 particles between the walls)
-              if (nu-mu > NNodes/2)
-              // {
-                printf("ERROR! Boundary conditions ji applied! between %d and %d!\n", i, Verlet[j]);
-              //   // z is out of range for nu = NNodes-1
-              //   // znu = (gsl_vector_get(z,nu+1)-gsl_matrix_get(Positions,Verlet[j],3))/rij[2];
-              //   int bin = ( nu+1 > NNodes - 1 ? (int) Lz : nu+1 );
-              //   znu = (gsl_vector_get(z,bin)-gsl_matrix_get(Positions,Verlet[j],3))/rij[2];
-              //   MesoSigma2->data[nu*MesoSigma2->stride] += val*znu;
-              //   //for (int sigma=nu+1;sigma<=NNodes-1;sigma++)
-              //   for (int sigma=bin;sigma<=NNodes-1;sigma++)
-              //   {
-              //     zsigma = (NNodes-1 == bin ? 0.0 : dz/rij[2]);
-              //     MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
-              //   }
-              //   for (int sigma=0;sigma<=mu-1;sigma++)
-              //   {
-              //     zsigma = (mu-1 == 0 ? 0.0 : dz/rij[2]);
-              //     MesoSigma2->data[sigma*MesoSigma2->stride] += val*zsigma;
-              //   }
-              //   zmu = (gsl_matrix_get(Positions,i,3)-gsl_vector_get(z,mu))/rij[2];
-              //   MesoSigma2->data[mu*MesoSigma2->stride] += val*zmu;
-              // }
-              // else
-              // {
-
-              // Note that nu > mu implies that rij[2] < 0
-
-              // We should consider nu == NNodes
-              // znu = (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/rij[2];
-              double znu = (nu == NNodes ? gsl_matrix_get(Positions,Verlet[j],3)/fabs(rij[2]) : (gsl_matrix_get(Positions,Verlet[j],3)-gsl_vector_get(z,nu))/fabs(rij[2]));
-              for (int k=0;k<9;k++)
-                MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*znu;
-              for (int sigma=nu-1;sigma>mu;sigma--)
-              {
-                double zsigma = (mu == nu-1 ? 0.0 : dz/fabs(rij[2]));
-                for (int k=0;k<9;k++)
-                  MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zsigma;
-              }
-              double zmu = (gsl_vector_get(z,mu+1)-gsl_matrix_get(Positions,i,3))/fabs(rij[2]);
-              for (int k=0;k<9;k++)
-                MesoSigma2->data[mu*MesoSigma2->tda+k] += sigma2[k]*zmu;
-              // }
-            }
+            
             free(fij);
             free(rij);
             free(sigma2);
@@ -503,3 +414,24 @@ void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum,
   gsl_vector_free(GMod2);
 }
 
+double zmuij(gsl_vector * z, int mu, double zi, double zj)
+{
+ 
+  double val;
+  double z1 = gsl_vector_get(z,mu);
+  double z2 = gsl_vector_get(z,mu+1);
+
+  if (fabs(zi-zj) <= 1e-10)
+  {
+    val = Heaviside(z2-zi)*Heaviside(zi-z1);  
+  } 
+  else
+  {
+    val = ( (zj-z1)*Heaviside(z2-zj)*Heaviside(z1-zj)
+           -(zi-z1)*Heaviside(z2-zi)*Heaviside(z1-zi)
+           -(zj-z2)*Heaviside(z2-zj)
+           +(zi-z2)*Heaviside(z2-zi)) / (zi-zj);
+  }
+        
+  return val;
+}
