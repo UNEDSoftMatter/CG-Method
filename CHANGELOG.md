@@ -1,6 +1,13 @@
 HISTORICAL MILESTONES
 =====================
 
+Rev#007 by @DiegoDZ
+-------
+- Added macrofunctions.c
+- Added computation of MacroEnergy, MacroMomentum and module of the momentum. 
+- Added some lines in order to compute the center of mass of the walls. 
+
+
 Rev#007
 -------
 - Added computation of micro and meso momentum.
