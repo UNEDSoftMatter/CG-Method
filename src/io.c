@@ -190,3 +190,9 @@ void PrepareInputFiles(void)
   PrintMsg("Creating snapshot list in file 'sim'...");
   system("for i in $(ls data/positions/ | grep .pos); do basename $i .pos; done > sim");
 }
+
+
+void PrintScalarWithIndex(int Step, double Value, FILE*fileptr):
+{
+    fprintf(fileptr, "%10d\t%8.6e\n", Step, Value);
+}

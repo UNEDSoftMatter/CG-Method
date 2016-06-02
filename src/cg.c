@@ -288,6 +288,21 @@ int main (int argc, char *argv[]) {
   strcat (str, ".MesoInternalEnergy.dat");
   oFile.MesoInternalEnergy = fopen(str, "w");
 
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MacroEnergySolid.dat");
+  oFile.MacroEnergy = fopen(str, "w");
+  
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".MacroMomentumSolid.dat");
+  oFile.MacroMomentumSolid = fopen(str, "w");
+
+  strcpy (str, "./output/");
+  strcat (str, filestr);
+  strcat (str, ".CenterOfMassSolid.dat");
+  oFile.CenterOfMassSolid = fopen(str, "w");
+  
   // END OF BLOCK. All output files created
 
   // INIT OF BLOCK. Computing vectors and matrices that
@@ -419,7 +434,27 @@ int main (int argc, char *argv[]) {
     
     PrintMsg("Computing forces in the fluid (type 2 particles) due to the wall (type 1 particles)");
     Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 2, 1, Force, Energy, Kinetic);
-   
+    
+    
+    PrintMsg("Computing the energy of the walls (MacroEnergy Solid)");
+    double MacroEnergy = 0.0;
+    Compute_MacroEnergy(Energy, Positions, 1, MacroEnergy);
+    
+
+    PrintMsg("Computing the module of the momentum");
+    Compute_Momentum_Module(Momentum, Mmod);
+    
+    PrintMsg("Computing the momemtum of the walls (MacroMomentum Solid)");
+    double MacroMomentum = 0.0;
+    Compute_MacroMomentum(Mmod, Positions, 1, MacroMomentum);
+    
+
+    PrintMsg("Computeing the center of mass of the wall (Center of mass solid)");
+    double CenterOfMass = 0.0
+    Compute_CenterOfMass(Momentum, Positions, 1, CenterOfMass);
+
+
+
     // Checkpoint: Compare velocities and momentum
     //     gsl_vector_view  gx = gsl_matrix_column(Momentum,0);
     //     gsl_vector_view  vx = gsl_matrix_column(Velocities,0);
@@ -720,6 +755,10 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesoVelocity_2);
   
   fclose(oFile.MesoInternalEnergy);
+
+  fclose(oFile.MacroEnergySolid);
+  fclose(oFile.MacroMomentumSolid);
+  fclose(oFile.CenterOfMassSolid);
 
   // SECOND COMPUTATION. OBTAIN MEAN VALUES
 

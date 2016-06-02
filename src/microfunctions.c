@@ -272,3 +272,17 @@ void Compute_Momentum(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
     }
   }
 }
+
+
+void Compute_Momentum_Module (gsl_matrix * Momentum, gsl_vector * Mmod)
+{
+  double mx, my, mz;
+  for (int i=0;i<NParticles;i++)
+  {
+    mx = gsl_matrix_get(Momentum,i,0);
+    my = gsl_matrix_get(Momentum,i,1);
+    mz = gsl_matrix_get(Momentum,i,2);
+
+    gsl_vector_set(Mmod,i,sqrt(mx*mx+my*my+mz*mz));
+  }
+}
