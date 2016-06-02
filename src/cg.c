@@ -360,6 +360,7 @@ int main (int argc, char *argv[]) {
   
   gsl_vector * MesoInternalEnergy = gsl_vector_calloc (NNodes);
 
+
   // END OF BLOCK
 
   // START COMPUTATION
@@ -449,9 +450,9 @@ int main (int argc, char *argv[]) {
     Compute_MacroMomentum(Mmod, Positions, 1, MacroMomentum);
     
 
-    PrintMsg("Computeing the center of mass of the wall (Center of mass solid)");
+    PrintMsg("Computing the center of mass of the wall (Center of mass solid)");
     double CenterOfMass = 0.0
-    Compute_CenterOfMass(Momentum, Positions, 1, CenterOfMass);
+    Compute_CenterOfMass(Positions, 1, CenterOfMass);
 
 
 

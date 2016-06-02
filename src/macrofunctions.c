@@ -35,8 +35,20 @@ void Compute_MacroMomentum(gsl_vector * Mmod, gsl_matrix * Positions, int type, 
     }
 }
 
-
-void Compute_CenterOfMass(gsl_matrix * Positions, int type, double * CenterOfMass)
+// ¿Cómo sé la masa que tienen los átomos? ¿Y TotalMass?
+// Estoy operando con CenterOfMass como si fuera un vector, aunque es un array ¿?¿?¿?
+void Compute_CenterOfMass(gsl_matrix * Positions, int type, gsl_vector * Position, double * CenterOfMass)
 {
+    gsl_vector_zero(CenterOfMass);
+    gsl_vector_zero(Position);
+    for(int i=0;i<NParticles;i++)
+    {
+        if ((int)gsl_matrix_get (Positions, i, 0) == type)
+            gsl_matrix_get_row(gsl_vector * Position, gls_matrix * Positions, i)
+            gsl_vector_scale(gsl_vector * Position , mass)
+    
+    gsl_vector_add(gsl_vector * CenterOfMass, gsl_vector * Position)
+    gsl_vector_scale(gsl_vector * CenterOfMass, 1 / TotalMass)
+    }
 
 }
