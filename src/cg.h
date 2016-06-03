@@ -197,9 +197,12 @@ struct OutputFiles
   FILE * MesoVelocity_1;
   FILE * MesoVelocity_2;
   FILE * MesoInternalEnergy;
-  FILE * MacroEnergy;
-  FILE * MacroMomentum;
-  FILE * CenterOfMass;
+  FILE * MacroEnergyUpperWall;
+  FILE * MacroEnergyLowerWall;
+  FILE * MacroMomentumUpperWall;
+  FILE * MacroMomentumLowerWall;
+  FILE * CenterOfMassUpperWall;
+  FILE * CenterOfMassLowerWall;
 };
 
 // Print  a row in  *fileptr with the  information stored in  vector.  The first
@@ -252,12 +255,7 @@ void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector
 void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum, 
                             gsl_vector * MesoDensity, gsl_vector * InternalEnergy);
 
-void Compute_MacroEnergy(gsl_vector * MicroEnergy, gsl_matrix * Positions, 
-                         int type, double MacroEnergy);
+double Compute_Macro(gsl_vector * Micro, gsl_matrix * Positions, 
+                         int type, char *str);
 
-void Compute_MacroMomentum(gsl_vector * MicroMomentum, gsl_matrix * Positions, 
-                           int type, double MacroMomentum);
-
-void Compute_Momentum_Module (gsl_matrix * Momentum, gsl_vector * Mmod)
-
-void Compute_CenterOfMass(gsl_matrix * Positions, int type, double * CenterOfMass)
+void Compute_CenterOfMass(gsl_matrix * Positions, int type, char *str, gsl_vector * CenterOfMass);

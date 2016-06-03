@@ -192,7 +192,7 @@ void PrepareInputFiles(void)
 }
 
 
-void PrintScalarWithIndex(int Step, double Value, FILE*fileptr):
+void PrintScalarWithIndex(int Step, double Value, FILE*fileptr)
 {
     fprintf(fileptr, "%10d\t%8.6e\n", Step, Value);
 }
