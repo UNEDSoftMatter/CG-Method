@@ -149,9 +149,9 @@ void PrepareInputFiles(void)
   char NLines[6];
   int SizeOfChunk = NParticles+9;
 
-  #pragma omp parallel sections num_threads(2)
+  //#pragma omp parallel sections num_threads(2)
   {
-    #pragma omp section
+    //#pragma omp section
     {
       // Processing positions file
       PrintMsg("Processing positions file...");
@@ -168,7 +168,7 @@ void PrepareInputFiles(void)
       system("cd data/positions; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; rm $i ; done");
       system("rm data/positions/output.positions");
     }
-    #pragma omp section
+    //#pragma omp section
     {
       // Processing velocities file
       PrintMsg("Processing velocities file...");
@@ -194,5 +194,5 @@ void PrepareInputFiles(void)
 
 void PrintScalarWithIndex(int Step, double Value, FILE*fileptr)
 {
-    fprintf(fileptr, "%10d\t%8.6e\n", Step, Value);
+    fprintf(fileptr, "%10d\t%8.10e\n", Step, Value);
 }
