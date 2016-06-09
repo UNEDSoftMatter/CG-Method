@@ -1,6 +1,12 @@
 HISTORICAL MILESTONES
 =====================
 
+Rev#008 by @DiegoDZ
+-------
+- Changed parallel processing of velocities and positions in io.c. I had problems whith it. 
+- Changed the number of decimals in PrintScalarWithIndex (in io.c) from 6 to 10. 
+
+
 Rev#007 by @DiegoDZ
 -------
 - Added macrofunctions.c
