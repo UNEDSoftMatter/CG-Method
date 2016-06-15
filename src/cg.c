@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 19 may 2016 18:51:44 CEST
+ * Modified   : mié 15 jun 2016 16:24:57 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -578,7 +578,7 @@ int main (int argc, char *argv[]) {
       #pragma omp section
       {
         PrintMsg("Obtaining node energies...");
-        Compute_Meso_Profile(Positions, Energy, z, MesoEnergy, 1);
+        Compute_Meso_Profile(Positions, Energy, z, MesoEnergy, 2);
         PrintInfo(Step, MesoEnergy, oFile.MesoEnergy);
       }
       #pragma omp section
@@ -618,77 +618,77 @@ int main (int argc, char *argv[]) {
         Compute_Meso_Profile(Positions, Kinetic, z, MesoKinetic, 2);
         PrintInfo(Step, MesoKinetic, oFile.MesoKinetic);
       }
-      #pragma omp section
-      {
-        PrintMsg("Obtaining node kinetic stress tensors...");
-        Compute_Meso_Sigma1(Positions, Velocities, MesoSigma1);
-        gsl_matrix_memcpy(MesoSigma,MesoSigma1);
-
-        gsl_vector_view  MesoSigma1_00 = gsl_matrix_column(MesoSigma1,0);
-        PrintInfo(Step, &MesoSigma1_00.vector, oFile.MesoSigma1_00);
-        gsl_vector_view  MesoSigma1_01 = gsl_matrix_column(MesoSigma1,1);
-        PrintInfo(Step, &MesoSigma1_01.vector, oFile.MesoSigma1_01);
-        gsl_vector_view  MesoSigma1_02 = gsl_matrix_column(MesoSigma1,2);
-        PrintInfo(Step, &MesoSigma1_02.vector, oFile.MesoSigma1_02);
-        gsl_vector_view  MesoSigma1_10 = gsl_matrix_column(MesoSigma1,3);
-        PrintInfo(Step, &MesoSigma1_10.vector, oFile.MesoSigma1_10);
-        gsl_vector_view  MesoSigma1_11 = gsl_matrix_column(MesoSigma1,4);
-        PrintInfo(Step, &MesoSigma1_11.vector, oFile.MesoSigma1_11);
-        gsl_vector_view  MesoSigma1_12 = gsl_matrix_column(MesoSigma1,5);
-        PrintInfo(Step, &MesoSigma1_12.vector, oFile.MesoSigma1_12);
-        gsl_vector_view  MesoSigma1_20 = gsl_matrix_column(MesoSigma1,6);
-        PrintInfo(Step, &MesoSigma1_20.vector, oFile.MesoSigma1_20);
-        gsl_vector_view  MesoSigma1_21 = gsl_matrix_column(MesoSigma1,7);
-        PrintInfo(Step, &MesoSigma1_21.vector, oFile.MesoSigma1_21);
-        gsl_vector_view  MesoSigma1_22 = gsl_matrix_column(MesoSigma1,8);
-        PrintInfo(Step, &MesoSigma1_22.vector, oFile.MesoSigma1_22);
-      }
-    }
-
-    PrintMsg("Obtaining node virial stress tensor...");
-
-    Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, MesoSigma2, z);
-    gsl_matrix_add (MesoSigma, MesoSigma2);
-
-    gsl_vector_view  MesoSigma2_00 = gsl_matrix_column(MesoSigma2,0);
-    PrintInfo(Step, &MesoSigma2_00.vector, oFile.MesoSigma2_00);
-    gsl_vector_view  MesoSigma2_01 = gsl_matrix_column(MesoSigma2,1);
-    PrintInfo(Step, &MesoSigma2_01.vector, oFile.MesoSigma2_01);
-    gsl_vector_view  MesoSigma2_02 = gsl_matrix_column(MesoSigma2,2);
-    PrintInfo(Step, &MesoSigma2_02.vector, oFile.MesoSigma2_02);
-    gsl_vector_view  MesoSigma2_10 = gsl_matrix_column(MesoSigma2,3);
-    PrintInfo(Step, &MesoSigma2_10.vector, oFile.MesoSigma2_10);
-    gsl_vector_view  MesoSigma2_11 = gsl_matrix_column(MesoSigma2,4);
-    PrintInfo(Step, &MesoSigma2_11.vector, oFile.MesoSigma2_11);
-    gsl_vector_view  MesoSigma2_12 = gsl_matrix_column(MesoSigma2,5);
-    PrintInfo(Step, &MesoSigma2_12.vector, oFile.MesoSigma2_12);
-    gsl_vector_view  MesoSigma2_20 = gsl_matrix_column(MesoSigma2,6);
-    PrintInfo(Step, &MesoSigma2_20.vector, oFile.MesoSigma2_20);
-    gsl_vector_view  MesoSigma2_21 = gsl_matrix_column(MesoSigma2,7);
-    PrintInfo(Step, &MesoSigma2_21.vector, oFile.MesoSigma2_21);
-    gsl_vector_view  MesoSigma2_22 = gsl_matrix_column(MesoSigma2,8);
-    PrintInfo(Step, &MesoSigma2_22.vector, oFile.MesoSigma2_22);
-
-    PrintMsg("Saving stress tensors...");
-
-    gsl_vector_view  MesoSigma_00 = gsl_matrix_column(MesoSigma,0);
-    PrintInfo(Step, &MesoSigma_00.vector, oFile.MesoSigma_00);
-    gsl_vector_view  MesoSigma_01 = gsl_matrix_column(MesoSigma,1);
-    PrintInfo(Step, &MesoSigma_01.vector, oFile.MesoSigma_01);
-    gsl_vector_view  MesoSigma_02 = gsl_matrix_column(MesoSigma,2);
-    PrintInfo(Step, &MesoSigma_02.vector, oFile.MesoSigma_02);
-    gsl_vector_view  MesoSigma_10 = gsl_matrix_column(MesoSigma,3);
-    PrintInfo(Step, &MesoSigma_10.vector, oFile.MesoSigma_10);
-    gsl_vector_view  MesoSigma_11 = gsl_matrix_column(MesoSigma,4);
-    PrintInfo(Step, &MesoSigma_11.vector, oFile.MesoSigma_11);
-    gsl_vector_view  MesoSigma_12 = gsl_matrix_column(MesoSigma,5);
-    PrintInfo(Step, &MesoSigma_12.vector, oFile.MesoSigma_12);
-    gsl_vector_view  MesoSigma_20 = gsl_matrix_column(MesoSigma,6);
-    PrintInfo(Step, &MesoSigma_20.vector, oFile.MesoSigma_20);
-    gsl_vector_view  MesoSigma_21 = gsl_matrix_column(MesoSigma,7);
-    PrintInfo(Step, &MesoSigma_21.vector, oFile.MesoSigma_21);
-    gsl_vector_view  MesoSigma_22 = gsl_matrix_column(MesoSigma,8);
-    PrintInfo(Step, &MesoSigma_22.vector, oFile.MesoSigma_22);
+//       #pragma omp section
+//       {
+//         PrintMsg("Obtaining node kinetic stress tensors...");
+//         Compute_Meso_Sigma1(Positions, Velocities, MesoSigma1);
+//         gsl_matrix_memcpy(MesoSigma,MesoSigma1);
+// 
+//         gsl_vector_view  MesoSigma1_00 = gsl_matrix_column(MesoSigma1,0);
+//         PrintInfo(Step, &MesoSigma1_00.vector, oFile.MesoSigma1_00);
+//         gsl_vector_view  MesoSigma1_01 = gsl_matrix_column(MesoSigma1,1);
+//         PrintInfo(Step, &MesoSigma1_01.vector, oFile.MesoSigma1_01);
+//         gsl_vector_view  MesoSigma1_02 = gsl_matrix_column(MesoSigma1,2);
+//         PrintInfo(Step, &MesoSigma1_02.vector, oFile.MesoSigma1_02);
+//         gsl_vector_view  MesoSigma1_10 = gsl_matrix_column(MesoSigma1,3);
+//         PrintInfo(Step, &MesoSigma1_10.vector, oFile.MesoSigma1_10);
+//         gsl_vector_view  MesoSigma1_11 = gsl_matrix_column(MesoSigma1,4);
+//         PrintInfo(Step, &MesoSigma1_11.vector, oFile.MesoSigma1_11);
+//         gsl_vector_view  MesoSigma1_12 = gsl_matrix_column(MesoSigma1,5);
+//         PrintInfo(Step, &MesoSigma1_12.vector, oFile.MesoSigma1_12);
+//         gsl_vector_view  MesoSigma1_20 = gsl_matrix_column(MesoSigma1,6);
+//         PrintInfo(Step, &MesoSigma1_20.vector, oFile.MesoSigma1_20);
+//         gsl_vector_view  MesoSigma1_21 = gsl_matrix_column(MesoSigma1,7);
+//         PrintInfo(Step, &MesoSigma1_21.vector, oFile.MesoSigma1_21);
+//         gsl_vector_view  MesoSigma1_22 = gsl_matrix_column(MesoSigma1,8);
+//         PrintInfo(Step, &MesoSigma1_22.vector, oFile.MesoSigma1_22);
+//       }
+//     }
+// 
+//     PrintMsg("Obtaining node virial stress tensor...");
+// 
+//     Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, MesoSigma2, z);
+//     gsl_matrix_add (MesoSigma, MesoSigma2);
+// 
+//     gsl_vector_view  MesoSigma2_00 = gsl_matrix_column(MesoSigma2,0);
+//     PrintInfo(Step, &MesoSigma2_00.vector, oFile.MesoSigma2_00);
+//     gsl_vector_view  MesoSigma2_01 = gsl_matrix_column(MesoSigma2,1);
+//     PrintInfo(Step, &MesoSigma2_01.vector, oFile.MesoSigma2_01);
+//     gsl_vector_view  MesoSigma2_02 = gsl_matrix_column(MesoSigma2,2);
+//     PrintInfo(Step, &MesoSigma2_02.vector, oFile.MesoSigma2_02);
+//     gsl_vector_view  MesoSigma2_10 = gsl_matrix_column(MesoSigma2,3);
+//     PrintInfo(Step, &MesoSigma2_10.vector, oFile.MesoSigma2_10);
+//     gsl_vector_view  MesoSigma2_11 = gsl_matrix_column(MesoSigma2,4);
+//     PrintInfo(Step, &MesoSigma2_11.vector, oFile.MesoSigma2_11);
+//     gsl_vector_view  MesoSigma2_12 = gsl_matrix_column(MesoSigma2,5);
+//     PrintInfo(Step, &MesoSigma2_12.vector, oFile.MesoSigma2_12);
+//     gsl_vector_view  MesoSigma2_20 = gsl_matrix_column(MesoSigma2,6);
+//     PrintInfo(Step, &MesoSigma2_20.vector, oFile.MesoSigma2_20);
+//     gsl_vector_view  MesoSigma2_21 = gsl_matrix_column(MesoSigma2,7);
+//     PrintInfo(Step, &MesoSigma2_21.vector, oFile.MesoSigma2_21);
+//     gsl_vector_view  MesoSigma2_22 = gsl_matrix_column(MesoSigma2,8);
+//     PrintInfo(Step, &MesoSigma2_22.vector, oFile.MesoSigma2_22);
+// 
+//     PrintMsg("Saving stress tensors...");
+// 
+//     gsl_vector_view  MesoSigma_00 = gsl_matrix_column(MesoSigma,0);
+//     PrintInfo(Step, &MesoSigma_00.vector, oFile.MesoSigma_00);
+//     gsl_vector_view  MesoSigma_01 = gsl_matrix_column(MesoSigma,1);
+//     PrintInfo(Step, &MesoSigma_01.vector, oFile.MesoSigma_01);
+//     gsl_vector_view  MesoSigma_02 = gsl_matrix_column(MesoSigma,2);
+//     PrintInfo(Step, &MesoSigma_02.vector, oFile.MesoSigma_02);
+//     gsl_vector_view  MesoSigma_10 = gsl_matrix_column(MesoSigma,3);
+//     PrintInfo(Step, &MesoSigma_10.vector, oFile.MesoSigma_10);
+//     gsl_vector_view  MesoSigma_11 = gsl_matrix_column(MesoSigma,4);
+//     PrintInfo(Step, &MesoSigma_11.vector, oFile.MesoSigma_11);
+//     gsl_vector_view  MesoSigma_12 = gsl_matrix_column(MesoSigma,5);
+//     PrintInfo(Step, &MesoSigma_12.vector, oFile.MesoSigma_12);
+//     gsl_vector_view  MesoSigma_20 = gsl_matrix_column(MesoSigma,6);
+//     PrintInfo(Step, &MesoSigma_20.vector, oFile.MesoSigma_20);
+//     gsl_vector_view  MesoSigma_21 = gsl_matrix_column(MesoSigma,7);
+//     PrintInfo(Step, &MesoSigma_21.vector, oFile.MesoSigma_21);
+//     gsl_vector_view  MesoSigma_22 = gsl_matrix_column(MesoSigma,8);
+//     PrintInfo(Step, &MesoSigma_22.vector, oFile.MesoSigma_22);
         
     PrintMsg("Obtaining node temperature...");
     Compute_Meso_Temp(MesoKinetic, MesoDensity_2, MesoTemp);
@@ -846,84 +846,84 @@ int main (int argc, char *argv[]) {
       
       gsl_vector_free(MesoAverage);
     } 
-    #pragma omp section
-    {
-      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
-
-      // Kinetic stress tensor
-      Compute_Mean_Values(filestr, ".MesoSigma1_00.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_00.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_01.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_01.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_02.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_02.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_10.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_10.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_11.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_11.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_12.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_12.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_20.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_20.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_21.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_21.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_22.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_22.avg.dat",  z, MesoAverage);
-      
-      gsl_vector_free(MesoAverage);
-    } 
-    #pragma omp section
-    {
-      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
-  
-      // Virial stress tensor
-      Compute_Mean_Values(filestr, ".MesoSigma2_00.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_00.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_01.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_01.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_02.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_02.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_10.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_10.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_11.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_11.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_12.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_12.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_20.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_20.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_21.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_21.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_22.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_22.avg.dat",  z, MesoAverage);
-      
-      gsl_vector_free(MesoAverage);
-    } 
-    #pragma omp section
-    {
-      gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
-  
-      // Total stress tensor
-      Compute_Mean_Values(filestr, ".MesoSigma_00.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_00.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_01.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_01.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_02.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_02.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_10.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_10.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_11.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_11.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_12.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_12.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_20.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_20.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_21.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_21.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_22.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_22.avg.dat",  z, MesoAverage);
-      
-      gsl_vector_free(MesoAverage);
-    } 
+//     #pragma omp section
+//     {
+//       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
+// 
+//       // Kinetic stress tensor
+//       Compute_Mean_Values(filestr, ".MesoSigma1_00.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma1_00.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma1_01.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma1_01.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma1_02.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma1_02.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma1_10.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma1_10.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma1_11.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma1_11.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma1_12.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma1_12.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma1_20.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma1_20.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma1_21.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma1_21.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma1_22.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma1_22.avg.dat",  z, MesoAverage);
+//       
+//       gsl_vector_free(MesoAverage);
+//     } 
+//     #pragma omp section
+//     {
+//       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
+//   
+//       // Virial stress tensor
+//       Compute_Mean_Values(filestr, ".MesoSigma2_00.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma2_00.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma2_01.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma2_01.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma2_02.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma2_02.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma2_10.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma2_10.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma2_11.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma2_11.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma2_12.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma2_12.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma2_20.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma2_20.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma2_21.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma2_21.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma2_22.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma2_22.avg.dat",  z, MesoAverage);
+//       
+//       gsl_vector_free(MesoAverage);
+//     } 
+//     #pragma omp section
+//     {
+//       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
+//   
+//       // Total stress tensor
+//       Compute_Mean_Values(filestr, ".MesoSigma_00.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma_00.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma_01.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma_01.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma_02.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma_02.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma_10.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma_10.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma_11.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma_11.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma_12.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma_12.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma_20.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma_20.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma_21.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma_21.avg.dat",  z, MesoAverage);
+//       Compute_Mean_Values(filestr, ".MesoSigma_22.dat",         MesoAverage);
+//       SaveVectorWithIndex(filestr, ".MesoSigma_22.avg.dat",  z, MesoAverage);
+//       
+//       gsl_vector_free(MesoAverage);
+//     } 
     #pragma omp section
     {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
