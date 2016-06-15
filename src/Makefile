@@ -1,9 +1,9 @@
 CC       := gcc 
-LIBS     := -lm -lblas -llapack -Wall -lgsl -lgslcblas -fopenmp -O2
+LIBS     := -lm -lblas -llapack -Wall -lgsl -lgslcblas -fopenmp -O3
 DEBUGGER := -O0 -ggdb
 FLAGS    := -std=gnu99
 TARGET   := ./../CG
-OBJS     := cg.c.o microfunctions.c.o mesofunctions.c.o draw.c.o io.c.o verlet.c.o aux.c.o
+OBJS     := cg.c.o microfunctions.c.o mesofunctions.c.o draw.c.o io.c.o verlet.c.o aux.c.o macrofunctions.c.o
 
 .SUFFIXES: .c .o  
 

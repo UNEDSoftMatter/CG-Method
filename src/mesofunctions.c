@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 01 jun 2016 19:08:49 CEST
+ * Modified   : mié 15 jun 2016 17:34:30 CEST
  *
  * Author     : jatorre
  *
@@ -45,11 +45,11 @@ void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, int type,
       if (muLeft < 0) 
       {
         n->data[muRight*n->stride] += zi/dz;
-        n->data[ NNodes*n->stride] += (gsl_vector_get(z,muRight) - zi)/dz;
+        n->data[(NNodes-1)*n->stride] += (gsl_vector_get(z,muRight) - zi)/dz;
       } 
       else if (muRight == NNodes)
       {
-        n->data[ NNodes*n->stride] += 1.0/dz;
+        n->data[(NNodes-1)*n->stride] += 1.0;
       }
       else 
       {
@@ -81,18 +81,18 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces,
     
     if (muLeft < 0) 
     {
-      MesoForce->data[muRight*MesoForce->tda+0] += fx * zi/dz;
-      MesoForce->data[ muLeft*MesoForce->tda+0] += fx * (gsl_vector_get(z,muRight) - zi)/dz;
-      MesoForce->data[muRight*MesoForce->tda+1] += fy * zi/dz;
-      MesoForce->data[ muLeft*MesoForce->tda+1] += fy * (gsl_vector_get(z,muRight) - zi)/dz;
-      MesoForce->data[muRight*MesoForce->tda+2] += fz * zi/dz;
-      MesoForce->data[ muLeft*MesoForce->tda+2] += fz * (gsl_vector_get(z,muRight) - zi)/dz;
+      MesoForce->data[   muRight*MesoForce->tda+0] += fx * zi/dz;
+      MesoForce->data[(NNodes-1)*MesoForce->tda+0] += fx * (gsl_vector_get(z,muRight) - zi)/dz;
+      MesoForce->data[   muRight*MesoForce->tda+1] += fy * zi/dz;
+      MesoForce->data[(NNodes-1)*MesoForce->tda+1] += fy * (gsl_vector_get(z,muRight) - zi)/dz;
+      MesoForce->data[   muRight*MesoForce->tda+2] += fz * zi/dz;
+      MesoForce->data[(NNodes-1)*MesoForce->tda+2] += fz * (gsl_vector_get(z,muRight) - zi)/dz;
     } 
     else if (muRight == NNodes)
     {
-      MesoForce->data[ NNodes*MesoForce->tda+0] += fx/dz;
-      MesoForce->data[ NNodes*MesoForce->tda+1] += fy/dz;
-      MesoForce->data[ NNodes*MesoForce->tda+2] += fz/dz;
+      MesoForce->data[(NNodes-1)*MesoForce->tda+0] += fx;
+      MesoForce->data[(NNodes-1)*MesoForce->tda+1] += fy;
+      MesoForce->data[(NNodes-1)*MesoForce->tda+2] += fz;
     }
     else 
     {
@@ -133,15 +133,20 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities,
       mass = ( (int) gsl_matrix_get(Positions,i,0) == 1 ? 0.0 : m2 );
 
       double * sigma1 = malloc(9*sizeof(double));
-      sigma1[0] = gsl_matrix_get(Velocities,i,0) * gsl_matrix_get(Velocities,i,0);
-      sigma1[1] = gsl_matrix_get(Velocities,i,0) * gsl_matrix_get(Velocities,i,1);
-      sigma1[2] = gsl_matrix_get(Velocities,i,0) * gsl_matrix_get(Velocities,i,2);
-      sigma1[3] = gsl_matrix_get(Velocities,i,1) * gsl_matrix_get(Velocities,i,0);
-      sigma1[4] = gsl_matrix_get(Velocities,i,1) * gsl_matrix_get(Velocities,i,1);
-      sigma1[5] = gsl_matrix_get(Velocities,i,1) * gsl_matrix_get(Velocities,i,2);
-      sigma1[6] = gsl_matrix_get(Velocities,i,2) * gsl_matrix_get(Velocities,i,0);
-      sigma1[7] = gsl_matrix_get(Velocities,i,2) * gsl_matrix_get(Velocities,i,1);
-      sigma1[8] = gsl_matrix_get(Velocities,i,2) * gsl_matrix_get(Velocities,i,2);
+
+      double vx = gsl_matrix_get(Velocities,i,0);
+      double vy = gsl_matrix_get(Velocities,i,1);
+      double vz = gsl_matrix_get(Velocities,i,2);
+
+      sigma1[0] = vx * vx;
+      sigma1[1] = vx * vy;
+      sigma1[2] = vx * vz;
+      sigma1[3] = vy * vx;
+      sigma1[4] = vy * vy;
+      sigma1[5] = vy * vz;
+      sigma1[6] = vz * vx;
+      sigma1[7] = vz * vy;
+      sigma1[8] = vz * vz;
      
       for (int j=0;j<9;j++)
         MesoSigma1->data[mu*MesoSigma1->tda+j] += mass * sigma1[j];
@@ -159,14 +164,10 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
   gsl_matrix_set_zero(MesoSigma2);
 
   double dv = ((float) Lx * Ly * Lz) / NNodes;
-  double dz = ((float) Lz) / NNodes;
   
-  int omp_get_max_threads();
-  int chunks = NParticles / omp_get_max_threads();
-  
-  #pragma omp parallel
+  #pragma omp parallel num_threads(8)
   {
-    #pragma omp for schedule (dynamic,chunks) 
+    #pragma omp for schedule (static) 
     // Forall i particles
     for (int i=0;i<NParticles;i++)
     {
@@ -178,9 +179,9 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
         int mu = floor(zi*NNodes/Lz) - 1;
         // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
         // Checkpoint
-        if (mu == -1) 
-          printf("ERROR! Fluid particle %d in bin %d!\n", i, mu);
-        // ( mu == -1 ) ? mu = NNodes-1 : mu ;
+        // if (mu == -1) 
+        //   printf("ERROR! Fluid particle %d in bin %d!\n", i, mu);
+        ( mu == -1 ) ? mu = NNodes-1 : mu ;
 
         // Find the cell to which the particle i belongs and all its neighboring cells
         int iCell = FindParticle(Positions,i);
@@ -201,9 +202,9 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
             int nu = floor(zj*NNodes/Lz) - 1;
             // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
             // Checkpoint
-            if (nu == -1) 
-              printf("ERROR! Fluid particle %d in bin %d!\n", Verlet[j], nu);
-            // ( nu == -1 ) ? nu = NNodes-1 : nu ;
+            // if (nu == -1) 
+            //   printf("ERROR! Fluid particle %d in bin %d!\n", Verlet[j], nu);
+            ( nu == -1 ) ? nu = NNodes-1 : nu ;
 
             // Compute only the force between  particles of type 2 and particle of
             // type 2 (fluid-fluid interaction)
@@ -271,12 +272,12 @@ void Compute_Meso_Energy(gsl_matrix * Micro, gsl_vector * MicroEnergy, gsl_vecto
     muLeft  = muRight-1;
     if (muLeft < 0) 
     {
-      MesoEnergy->data[muRight*MesoEnergy->stride] += ei * zi/dz;
-      MesoEnergy->data[ NNodes*MesoEnergy->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
+      MesoEnergy->data[   muRight*MesoEnergy->stride] += ei * zi/dz;
+      MesoEnergy->data[(NNodes-1)*MesoEnergy->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
     } 
     else if (muRight == NNodes)
     {
-      MesoEnergy->data[ NNodes*MesoEnergy->stride] += ei * 1.0/dz;
+      MesoEnergy->data[(NNodes-1)*MesoEnergy->stride] += ei;
     }
     else 
     {
@@ -371,12 +372,12 @@ void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector
       muLeft  = muRight-1;
       if (muLeft < 0) 
       {
-        Meso->data[muRight*Meso->stride] += ei * zi/dz;
-        Meso->data[ NNodes*Meso->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
+        Meso->data[   muRight*Meso->stride] += ei * zi/dz;
+        Meso->data[(NNodes-1)*Meso->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
       } 
       else if (muRight == NNodes)
       {
-        Meso->data[ NNodes*Meso->stride] += ei * 1.0/dz;
+        Meso->data[(NNodes-1)*Meso->stride] += ei;
       }
       else 
       {

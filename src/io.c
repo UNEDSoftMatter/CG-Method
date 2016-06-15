@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mar 31 may 2016 16:01:46 CEST
+ * Modified   : mié 15 jun 2016 17:10:58 CEST
  *
  * Author     : jatorre
  *
@@ -145,57 +145,16 @@ void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr)
 
 void PrepareInputFiles(void)
 {
-//   char str[100];
-//   char NLines[6];
-//   int SizeOfChunk = NParticles+9;
-// 
-//   #pragma omp parallel sections num_threads(2)
-//   {
-//     #pragma omp section
-//     {
-//       // Processing positions file
-//       PrintMsg("Processing positions file...");
-//       system("if [ ! -d data/positions ]; then mkdir -p data/positions; fi");
-//       strcpy(str,"cd data/positions; ln -s ../../");
-//       strcat(str,PositionsFileStr);
-//       strcat(str," ./output.positions");
-//       system(str);
-//       sprintf(NLines,"%d",SizeOfChunk);
-//       strcpy(str,"cd data/positions; split -a 5 -d --lines=");
-//       strcat(str,NLines);
-//       strcat(str," output.positions");
-//       system(str);
-//       system("cd data/positions; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $2,$3,$4,$5}' > $i.pos ; rm $i ; done");
-//       system("rm data/positions/output.positions");
-//     }
-//     #pragma omp section
-//     {
-//       // Processing velocities file
-//       PrintMsg("Processing velocities file...");
-//       system("if [ ! -d data/velocities ]; then mkdir -p data/velocities; fi");
-//       strcpy(str,"cd data/velocities; ln -s ../../");
-//       strcat(str,VelocitiesFileStr);
-//       strcat(str," ./output.velocities");
-//       system(str);
-//       strcpy(str,"cd data/velocities; split -a 5 -d --lines=");
-//       strcat(str,NLines);
-//       strcat(str," output.velocities");
-//       system(str);
-//       system("cd data/velocities/; for i in $(ls |grep x); do cat $i | tail -n +10 | sort -n |awk '{print $3,$4,$5}' > $i.vel ; rm $i ; done");
-//       system("rm data/velocities/output.velocities");
-//     }
-//   }
-
   struct stat status;
  
-  if (stat("./data", &status) != 0) // && S_ISDIR(status.st_mode)))
+  if (stat("./data", &status) != 0) 
     mkdir("./data",0755);
   
-  if (stat("./data/positions",  &status) == 0) // && S_ISDIR(status.st_mode)))
+  if (stat("./data/positions",  &status) == 0)
     system("rm -r ./data/positions");
   mkdir("./data/positions",0755);
   
-  if (stat("./data/velocities", &status) == 0) // && S_ISDIR(status.st_mode)))
+  if (stat("./data/velocities", &status) == 0)
     system("rm -r ./data/velocities");
   mkdir("./data/velocities",0755);
 
@@ -204,7 +163,6 @@ void PrepareInputFiles(void)
 
   // Create snapshot list
   PrintMsg("Creating snapshot list in file 'sim'...");
-  //system("for i in $(ls data/positions/ | grep .pos); do basename $i .pos; done > sim");
   system("for i in $(ls data/positions/); do echo $i; done > sim");
 }
 
@@ -224,7 +182,6 @@ void Split_File(char *directory, char *iFile)
   ptr_oFile = fopen(oFileName, "w");
   while (fgets(line, sizeof(line), ptr_iFile) != NULL)
   {
-//    printf("Line: %d\n", linecounter);
 
     if (linecounter == SizeOfChunk)
     {
@@ -302,4 +259,9 @@ void PrintComputingOptions(void)
   #else
     printf("false\n");
   #endif
+}
+
+void PrintScalarWithIndex(int Step, double Value, FILE*fileptr)
+{
+    fprintf(fileptr, "%10d\t%8.10e\n", Step, Value);
 }

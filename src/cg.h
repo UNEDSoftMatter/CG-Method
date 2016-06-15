@@ -206,12 +206,23 @@ struct OutputFiles
   FILE * MesoVelocity_1;
   FILE * MesoVelocity_2;
   FILE * MesoInternalEnergy;
+  FILE * MacroEnergyUpperWall;
+  FILE * MacroEnergyLowerWall;
+  FILE * MacroMomentumUpperWall;
+  FILE * MacroMomentumLowerWall;
+  FILE * CenterOfMassUpperWall;
+  FILE * CenterOfMassLowerWall;
 };
 
 // Print  a row in  *fileptr with the  information stored in  vector.  The first
 // column corresponds to the current step
 
 void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr);
+
+// Print a row in *fileptr with the information store in a double . The firs column
+// corresponds to the current step. 
+
+void PrintScalarWithIndex(int Step, double Value, FILE*fileptr);
 
 // Process the input files (lammps trajectories) into snapshots
 
@@ -262,5 +273,13 @@ void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum,
                             gsl_vector * MesoDensity, gsl_vector * InternalEnergy);
 
 double zmuij(gsl_vector * z, int mu, double zi, double zj);
+
+/* #############################################################################
+#  Macroscopic functions in macrofunctions.c 
+############################################################################# */
+
+double Compute_Macro(gsl_vector * Micro, gsl_matrix * Positions, int type, char *str);
+
+void Compute_CenterOfMass(gsl_matrix * Positions, int type, char *str, gsl_vector * CenterOfMass);
 
 #endif
