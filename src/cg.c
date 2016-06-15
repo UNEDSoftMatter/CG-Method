@@ -695,7 +695,7 @@ int main (int argc, char *argv[]) {
     PrintInfo(Step, MesoTemp, oFile.MesoTemp);
         
     PrintMsg("Obtaining node internal energies...");
-    Compute_InternalEnergy(MesoEnergy, MesoMomentum, MesoDensity_2, MesoInternalEnergy);
+    Compute_InternalEnergy(MesoEnergy, MesoMomentum, MesoDensity_2, 2,  MesoInternalEnergy);
     PrintInfo(Step, MesoInternalEnergy, oFile.MesoInternalEnergy);
     
     // Computing "Macrothings"
