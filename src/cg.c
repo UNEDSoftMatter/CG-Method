@@ -689,7 +689,9 @@ int main (int argc, char *argv[]) {
 //     PrintInfo(Step, &MesoSigma_21.vector, oFile.MesoSigma_21);
 //     gsl_vector_view  MesoSigma_22 = gsl_matrix_column(MesoSigma,8);
 //     PrintInfo(Step, &MesoSigma_22.vector, oFile.MesoSigma_22);
-        
+       
+
+  }  
     PrintMsg("Obtaining node temperature...");
     Compute_Meso_Temp(MesoKinetic, MesoDensity_2, MesoTemp);
     PrintInfo(Step, MesoTemp, oFile.MesoTemp);
