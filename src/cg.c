@@ -3,12 +3,15 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 15 jun 2016 17:26:57 CEST
+ * Modified   : jue 16 jun 2016 15:42:51 CEST
  *
  * Author     : jatorre@fisfun.uned.es
+ *              d.duque@fisfun.uned.es
  *
  * Purpose    : Obtain mesoscopic variables
  *              from microscopic details
+ *
+ * Info       : http://github.com/UNEDSoftMatter/CG-Method
  *
  */
 
@@ -22,6 +25,7 @@ int main (int argc, char *argv[]) {
 
   PrintMsg("INIT");
 
+  // If argv[1] is provided, use it as filelist
   char * filestr;
   if (argc == 2)
   {
@@ -46,10 +50,10 @@ int main (int argc, char *argv[]) {
   ReadInputFiles(filestr, Snapshot);
  
   // INIT OF BLOCK. Create output files
+  
   struct OutputFiles oFile;
   
   // Create output directory if it does not exist
-  // system("if [ ! -d output ]; then mkdir output; fi");
   struct stat status;
   if (stat("./output", &status) != 0) // && S_ISDIR(status.st_mode)))
     mkdir("./output",0755);
@@ -191,6 +195,7 @@ int main (int argc, char *argv[]) {
     oFile.MesoInternalEnergy = fopen(str, "w");
   #endif
     
+  // Macroscopic files
   #if __COMPUTE_MACRO_ENERGY__
     sprintf(str, "./output/%s.MacroEnergyUpperWall.dat", filestr);
     oFile.MacroEnergyUpperWall = fopen(str, "w");
@@ -236,7 +241,6 @@ int main (int argc, char *argv[]) {
   gsl_matrix * VelocitiesBase = gsl_matrix_calloc (NParticles,5);
 
   gsl_matrix * Positions  = gsl_matrix_calloc (NParticles,4);
-
   gsl_matrix * Velocities = gsl_matrix_calloc (NParticles,3);
   gsl_matrix * Momentum   = gsl_matrix_calloc (NParticles,3);
 

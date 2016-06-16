@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mié 15 jun 2016 17:10:58 CEST
+ * Modified   : jue 16 jun 2016 15:29:16 CEST
  *
  * Author     : jatorre
  *
@@ -83,7 +83,7 @@ void PrintInitInfo(void)
   printf("#                                                                            #\n");
   printf("# This program computes mesoscopic variables from microscopic configurations #\n");
   printf("#                                                                            #\n");
-  printf("# Last stable version can be found in                                        #\n");
+  printf("# Lastest stable version can be found on                                     #\n");
   printf("#    https://github.com/UNEDSoftMatter/CG-Method.git                         #\n");
   printf("#                                                                            #\n");
   printf("##############################################################################\n");
@@ -94,9 +94,10 @@ void PrintInitInfo(void)
   printf("# If called with an argument, CG-Method will use the argument as an input    #\n");
   printf("# file which contains the list of snapshots                                  #\n");
   printf("#                                                                            #\n");
-  printf("# In both cases, the snapshots are located in data/positions/x?????.pos      #\n");
-  printf("# with the format 'TYPE x y z' for the positions, and                        #\n");
-  printf("# in data/velocities/*.vel with the format 'vx vy vz' for the velocities     #\n");
+  printf("# In both cases, the snapshots are (or will be) located in                   #\n");
+  printf("# data/positions/x????? with the format 'ID TYPE x y z' for the positions,   #\n");
+  printf("# and in data/velocities/*.vel with the format 'ID TYPE vx vy vz' for the    #\n");
+  printf("# velocities                                                                 #\n");
   printf("#                                                                            #\n");
   printf("# (See README.md to know how to format lammps dump files)                    #\n");
   printf("#                                                                            #\n");
@@ -259,6 +260,28 @@ void PrintComputingOptions(void)
   #else
     printf("false\n");
   #endif
+  
+  printf("\tMacroscopic energy:\t\t\t\t");
+  #if __COMPUTE_MACRO_ENERGY__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tMacroscopic momentum:\t\t\t\t");
+  #if __COMPUTE_MACRO_MOMENTUM__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+
+  printf("\tCenter of mass:\t\t\t\t");
+  #if __COMPUTE_CENTER_OF_MASS__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+
 }
 
 void PrintScalarWithIndex(int Step, double Value, FILE*fileptr)

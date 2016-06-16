@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 15 jun 2016 17:34:30 CEST
+ * Modified   : jue 16 jun 2016 15:42:02 CEST
  *
  * Author     : jatorre
  *
@@ -14,10 +14,23 @@
 
 void Compute_Node_Positions(gsl_vector * z)
 {
-  // Valid only for a regular lattice
+  // Valid only for a regular lattices
   // TODO: Consider irregular lattices
+  //
+  // Nodes are built in the following way
+  // z[  0] =   0
+  // z[  1] =   a
+  // z[  2] =  2a
+  // .      .
+  // .      .
+  // .      .
+  // z[N-1] = (N-1)a
+  //
+  // Here, a is the lattice spacing, a = Lz/NNodes
+  //
+
   for (int mu=0;mu<NNodes;mu++)
-    gsl_vector_set(z,mu,(double) (mu+1)*Lz/NNodes);
+    gsl_vector_set(z,mu,((double) mu)*Lz/NNodes);
 }
 
 void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, int type, 

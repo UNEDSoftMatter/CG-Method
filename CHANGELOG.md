@@ -6,6 +6,14 @@ Rev#009
 - Merged macro and Rev#008 branches.
 - Fixed an issue computing Meso_Profiles with PBC.
 - Added flags for macrocomputations.
+- Changed parallel processing of velocities and positions in io.c (@DiegoDZ) 
+- Changed the number of decimals in  PrintScalarWithIndex (in io.c) from 6 to 10
+  (@DiegoDZ)
+- Added macrofunctions.c (@DiegoDZ)
+- Added computation  of MacroEnergy,  MacroMomentum and  module of  the momentum
+  (@DiegoDZ)
+- Added  some  lines in  order to  compute  the  center  of  mass  of  the walls
+  (@DiegoDZ)
 
 Rev#008
 -------
@@ -19,18 +27,6 @@ Rev#008
   `Compute_Sigma2` that avoid the use of  conditional (mu < nu,  nu < mu,  nu ==
   mu).
 - Added `.gitignore` file to the repo.
-
-Rev#008 by @DiegoDZ
--------
-- Changed parallel processing of velocities and positions in io.c. I had problems whith it. 
-- Changed the number of decimals in PrintScalarWithIndex (in io.c) from 6 to 10. 
-
-
-Rev#007 by @DiegoDZ
--------
-- Added macrofunctions.c
-- Added computation of MacroEnergy, MacroMomentum and module of the momentum. 
-- Added some lines in order to compute the center of mass of the walls. 
 
 Rev#007
 -------
