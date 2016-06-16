@@ -797,12 +797,12 @@ int main (int argc, char *argv[]) {
       #endif
 
       #if __COMPUTE_FORCE__
-      Compute_Mean_Values(filestr, ".MesoxForce.dat",           MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoxForce.avg.dat",    z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoyForce.dat",           MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoyForce.avg.dat",    z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesozForce.dat",           MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesozForce.avg.dat",    z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoForce_x.dat",           MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoForce_x.avg.dat",    z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoForce_y.dat",           MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoForce_y.avg.dat",    z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoForce_z.dat",           MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoForce_z.avg.dat",    z, MesoAverage);
       #endif
 
       #if __COMPUTE_ENERGY__
@@ -825,24 +825,24 @@ int main (int argc, char *argv[]) {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
 
       // Kinetic stress tensor
-      Compute_Mean_Values(filestr, ".MesoSigma1_00.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_00.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_01.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_01.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_02.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_02.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_10.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_10.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_11.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_11.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_12.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_12.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_20.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_20.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_21.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_21.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma1_22.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_22.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma1_xx.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma1_xx.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma1_xy.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma1_xy.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma1_xz.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma1_xz.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma1_yx.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma1_yx.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma1_yy.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma1_yy.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma1_yz.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma1_yz.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma1_zx.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma1_zx.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma1_zy.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma1_zy.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma1_zz.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma1_z.avg.dat",  z, MesoAverage);
       
       gsl_vector_free(MesoAverage);
     } 
@@ -851,24 +851,24 @@ int main (int argc, char *argv[]) {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
   
       // Virial stress tensor
-      Compute_Mean_Values(filestr, ".MesoSigma2_00.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_00.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_01.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_01.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_02.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_02.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_10.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_10.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_11.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_11.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_12.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_12.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_20.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_20.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_21.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_21.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma2_22.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma2_22.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma2_xx.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma2_xx.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma2_xy.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma2_xy.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma2_xz.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma2_xz.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma2_yx.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma2_yx.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma2_yy.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma2_yy.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma2_yz.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma2_yz.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma2_zx.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma2_zx.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma2_zy.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma2_zy.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma2_zz.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma2_zz.avg.dat",  z, MesoAverage);
       
       gsl_vector_free(MesoAverage);
     } 
@@ -877,24 +877,24 @@ int main (int argc, char *argv[]) {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
   
       // Total stress tensor
-      Compute_Mean_Values(filestr, ".MesoSigma_00.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_00.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_01.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_01.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_02.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_02.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_10.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_10.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_11.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_11.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_12.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_12.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_20.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_20.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_21.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_21.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoSigma_22.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma_22.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma_xx.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma_xx.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma_xy.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma_xy.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma_xz.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma_xz.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma_yx.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma_yx.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma_yy.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma_yy.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma_yz.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma_yz.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma_zx.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma_zx.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma_zy.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma_zy.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoSigma_zz.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma_zz.avg.dat",  z, MesoAverage);
       
       gsl_vector_free(MesoAverage);
     } 
@@ -904,21 +904,21 @@ int main (int argc, char *argv[]) {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
 
       #if __COMPUTE_MOMENTUM__
-      Compute_Mean_Values(filestr, ".MesoMomentum_0.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoMomentum_0.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoMomentum_1.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoMomentum_1.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoMomentum_2.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoMomentum_2.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoMomentum_x.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoMomentum_x.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoMomentum_y.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoMomentum_y.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoMomentum_z.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoMomentum_z.avg.dat",  z, MesoAverage);
       #endif
 
       #if __COMPUTE_VELOCITY__
-      Compute_Mean_Values(filestr, ".MesoVelocity_0.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoVelocity_0.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoVelocity_1.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoVelocity_1.avg.dat",  z, MesoAverage);
-      Compute_Mean_Values(filestr, ".MesoVelocity_2.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoVelocity_2.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoVelocity_x.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoVelocity_x.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoVelocity_y.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoVelocity_y.avg.dat",  z, MesoAverage);
+      Compute_Mean_Values(filestr, ".MesoVelocity_z.dat",         MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoVelocity_z.avg.dat",  z, MesoAverage);
       #endif
 
       #if __COMPUTE_INTERNAL_ENERGY__
