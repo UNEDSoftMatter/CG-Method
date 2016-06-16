@@ -6,3 +6,4 @@ CG
 *.swp
 /povray
 *.log
+/src/params.h

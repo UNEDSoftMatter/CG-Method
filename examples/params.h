@@ -3,8 +3,7 @@
 ############################################################################# */
 
 // Relative path (from ~/CG-Method) where positions and velocites can be found
-#define PositionsFileStr  "../Nanopore/output.positions"
-#define VelocitiesFileStr "../Nanopore/output.velocities"
+#define FileStr  "./output.data"
 
 // Total number of particles (type1+type2) in the simulation
 #define NParticles 18086

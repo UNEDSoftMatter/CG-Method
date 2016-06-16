@@ -282,4 +282,17 @@ double Compute_Macro(gsl_vector * Micro, gsl_matrix * Positions, int type, char 
 
 void Compute_CenterOfMass(gsl_matrix * Positions, int type, char *str, gsl_vector * CenterOfMass);
 
+/* #############################################################################
+#  Checkpoint functions that appear in checkpoints.c 
+############################################################################# */
+
+void Check_Neighboring_Cells(int iCell);
+
+void Check_Particles_in_Cell(int iCell, gsl_vector * ListHead, gsl_vector * List);
+
+void Check_Draw_Temperature(gsl_vector * Vmod, gsl_matrix * Positions, char * basename);
+
+void Check_Neighbors_of_a_Particle(gsl_matrix * Positions, int iParticle, gsl_matrix * NeighboringCells, 
+                                   int iCell, gsl_vector * ListHead, gsl_vector * List);
+
 #endif

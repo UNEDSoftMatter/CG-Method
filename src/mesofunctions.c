@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 15 jun 2016 17:34:30 CEST
+ * Modified   : jue 16 jun 2016 16:51:09 CEST
  *
  * Author     : jatorre
  *
@@ -212,7 +212,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
             // loop for particles different from type 2
             double * fij = malloc(3*sizeof(double));
             
-            double eij = Compute_Force_ij (Positions, i, Verlet[j], 2, 2, fij);
+            Compute_Force_ij (Positions, i, Verlet[j], 2, 2, fij);
     
             double * rij = malloc(3*sizeof(double));
 

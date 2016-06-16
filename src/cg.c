@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 15 jun 2016 17:26:57 CEST
+ * Modified   : jue 16 jun 2016 16:51:33 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -232,16 +232,13 @@ int main (int argc, char *argv[]) {
   // BEGIN OF BLOCK. Definition of needed vectors, matrices, and so on
 
   // Positions, velocities and momentum
-  gsl_matrix * PositionsBase  = gsl_matrix_calloc (NParticles,5);
-  gsl_matrix * VelocitiesBase = gsl_matrix_calloc (NParticles,5);
+  gsl_matrix * BaseData   = gsl_matrix_calloc (NParticles,8);
 
   gsl_matrix * Positions  = gsl_matrix_calloc (NParticles,4);
-
   gsl_matrix * Velocities = gsl_matrix_calloc (NParticles,3);
   gsl_matrix * Momentum   = gsl_matrix_calloc (NParticles,3);
 
-  FILE *PositionsFile;
-  FILE *VelocitiesFile;
+  FILE *BaseFile;
 
   // Linked list
   gsl_vector * List      = gsl_vector_calloc (NParticles);
@@ -280,92 +277,49 @@ int main (int argc, char *argv[]) {
   {
     strcpy(basename,Snapshot[Step]);
 
-    //pragma omp parallel sections num_threads(2)
-    {
-      //pragma omp section
-      {
-        // Positions is a matrix that stores: 
-        // TYPE x y z 
-        // The ID of a particle corresponds to the row
-        PrintMsg("Reading microscopic positions");
-        gsl_matrix_set_zero(PositionsBase);
-        sprintf(str, "./data/positions/%s", basename);
-        printf("\tInput file: %s\n", str);
-        PositionsFile = fopen(str, "r");
-        gsl_matrix_fscanf(PositionsFile, PositionsBase);
+    // BaseData is a matrix that stores: 
+    // ID TYPE x y z vx vy vz
+    // The ID of a particle corresponds to the row
+    PrintMsg("Reading microscopic data");
+    gsl_matrix_set_zero(BaseData);
+    sprintf(str, "./data/%s", basename);
+    printf("\tInput file: %s\n", str);
+    BaseFile = fopen(str, "r");
 
-        gsl_vector_view Position_0      = gsl_matrix_column(PositionsBase,1);
-        gsl_matrix_set_col(Positions,0,&Position_0.vector);
-        gsl_vector_view Position_1      = gsl_matrix_column(PositionsBase,2);
-        gsl_matrix_set_col(Positions,1,&Position_1.vector);
-        gsl_vector_view Position_2      = gsl_matrix_column(PositionsBase,3);
-        gsl_matrix_set_col(Positions,2,&Position_2.vector);
-        gsl_vector_view Position_3      = gsl_matrix_column(PositionsBase,4);
-        gsl_matrix_set_col(Positions,3,&Position_3.vector);
+      gsl_matrix_fscanf(BaseFile, BaseData);
 
-        fclose(PositionsFile);
+      gsl_vector_view Position_0      = gsl_matrix_column(BaseData,1);
+      gsl_matrix_set_col(Positions,0,&Position_0.vector);
+      gsl_vector_view Position_1      = gsl_matrix_column(BaseData,2);
+      gsl_matrix_set_col(Positions,1,&Position_1.vector);
+      gsl_vector_view Position_2      = gsl_matrix_column(BaseData,3);
+      gsl_matrix_set_col(Positions,2,&Position_2.vector);
+      gsl_vector_view Position_3      = gsl_matrix_column(BaseData,4);
+      gsl_matrix_set_col(Positions,3,&Position_3.vector);
+      gsl_vector_view Velocity_0      = gsl_matrix_column(BaseData,5);
+      gsl_matrix_set_col(Velocities,0,&Velocity_0.vector);
+      gsl_vector_view Velocity_1      = gsl_matrix_column(BaseData,6);
+      gsl_matrix_set_col(Velocities,1,&Velocity_1.vector);
+      gsl_vector_view Velocity_2      = gsl_matrix_column(BaseData,7);
+      gsl_matrix_set_col(Velocities,2,&Velocity_2.vector);
 
-        // There are some positions coordinates  that are outside the box lammps can
-        // deal  with this issue without  major problems.  Here,  we use  PBC to put
-        // all the atom inside the box
-        PrintMsg("Fixing PBC in the positions file...");
-        FixPBC(Positions);
-      }
-      //pragma omp section
-      {
-        // Velocities is a matrix that stores:
-        // vx vy vz
-        // The ID of a particle corresponds to the row
-        PrintMsg("Reading microscopic velocities");
-        gsl_matrix_set_zero(VelocitiesBase);
-        sprintf(str, "./data/velocities/%s", basename);
-        printf("\tInput file: %s\n", str);
-        VelocitiesFile = fopen(str, "r");
-        gsl_matrix_fscanf(VelocitiesFile, VelocitiesBase);
+    fclose(BaseFile);
 
-        gsl_vector_view Velocity_0      = gsl_matrix_column(VelocitiesBase,2);
-        gsl_matrix_set_col(Velocities,0,&Velocity_0.vector);
-        gsl_vector_view Velocity_1      = gsl_matrix_column(VelocitiesBase,3);
-        gsl_matrix_set_col(Velocities,1,&Velocity_1.vector);
-        gsl_vector_view Velocity_2      = gsl_matrix_column(VelocitiesBase,4);
-        gsl_matrix_set_col(Velocities,2,&Velocity_2.vector);
+    // There are some positions coordinates  that are outside the box lammps can
+    // deal  with this issue without  major problems.  Here,  we use  PBC to put
+    // all the atom inside the box
+    PrintMsg("Fixing PBC in the positions file...");
+    FixPBC(Positions);
 
-        fclose(VelocitiesFile);
-
-        // Compute microscopic momentum
-        Compute_Momentum(Positions,Velocities,Momentum);
-      }
-    }
-
+    #if __COMPUTE_MOMENTUM__
+      Compute_Momentum(Positions,Velocities,Momentum);
+    #endif
+    
     PrintMsg("Obtaining linked list...");
     Compute_Linked_List(Positions, List, ListHead);
 
-    // Checkpoint: Compute neighboring cells of a TestCell
-    //     int TestCell = 60;
-    //     printf("Compute neighbors of cell %d:\n", TestCell);
-    //     gsl_vector * neighbors = gsl_vector_calloc (27);
-    //     Compute_NeighborCells(TestCell, neighbors, Mx, My, Mz);
-    //     for (int i=0; i<27; i++)
-    //         printf("%f, ", gsl_vector_get(neighbors,i));
-    //     printf("\n");
-    
-    // Checkpoint: Find particles that belong to TestCell
-    //
-    //     int j = gsl_vector_get(ListHead,TestCell);
-    //     while (j >= 0)
-    //     {
-    //      printf("Particle %d is in cell %d\n", j, TestCell);
-    //      j = gsl_vector_get(List,j);
-    //     } 
-    
     PrintMsg("Computing forces in the fluid (type 2 particles) due to the wall (type 1 particles)");
     Compute_Forces(Positions, Velocities, Neighbors, ListHead, List, 2, 1, Force, Energy, Kinetic);
-    
-    // Checkpoint: Compare velocities and momentum
-    //     gsl_vector_view  gx = gsl_matrix_column(Momentum,0);
-    //     gsl_vector_view  vx = gsl_matrix_column(Velocities,0);
-    //     PrintInfo(Step, &gx.vector, oFile.MicroG);
-    //     PrintInfo(Step, &vx.vector, oFile.MicroV);
     
     //  Checkpoint: Print the force exerted on type2 particles
     //              and the energy of all the particles
@@ -386,73 +340,6 @@ int main (int argc, char *argv[]) {
     //     PrintInfo(Step, &zPart.vector, oFile.MicroVmod);
     //     PrintInfo(Step, Vmod,          oFile.MicroVmod);
     //     gsl_vector_free(Vmod);
-
-    // Checkpoint: Draw temperature in povray
-    //     PrintMsg("Drawing the temperature of the particles...");
-    //     gsl_vector * vr = RescaleVector (Vmod);
-    //     strcpy (str, "./povray/");
-    //     strcat (str, basename);
-    //     strcat (str, ".Temperature.inc");
-    //     DrawTemperature (Positions,vr,str);
-    //     gsl_vector_free (vr);
-
-    // Checkpoint: Find the neighboring cells of the cell in which a TestParticle is into
-    //    int TestParticle = 14412;
-    //    printf("TESTING PARTICLE %d (type %d) at (%f,%f,%f)\n", TestParticle, ((int) gsl_matrix_get(Positions,TestParticle,0)), 
-    //        gsl_matrix_get(Positions,TestParticle,1), gsl_matrix_get(Positions,TestParticle,2), gsl_matrix_get(Positions,TestParticle,3));
-    //    int TestCell = FindParticle(Positions,TestParticle);
-    //    gsl_vector * NeighboringCells = gsl_vector_calloc(27);
-    //    gsl_matrix_get_row(NeighboringCells, Neighbors, TestCell);
-    //    printf("Particle %d is in Cell %d\n", TestParticle, TestCell);
-    //    printf("Neighboring cells of cell %d are (", TestCell);
-    //    for (int i=0;i<27;i++)
-    //        printf("%d, ",((int) gsl_vector_get(NeighboringCells,i)));
-    //    printf(")\n");
- 
-    // Checkpoint: Find the Verlet list of TestParticle
-    //    int *Verlet;
-    //     
-    //    Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
-    //    int NumberOfNeighbors = Compute_VerletList(Positions, TestParticle, NeighboringCells, TestCell, ListHead, List, Verlet);
-    //    Verlet = realloc(Verlet, NumberOfNeighbors * sizeof(int));
-    //     
-    //    printf("Particle %d has %d neighbors\n", TestParticle, NumberOfNeighbors);
-    //    for (int i=0;i<NumberOfNeighbors;i++)
-    //        printf("%d (type %d) at (%f,%f,%f)\n", Verlet[i], ((int) gsl_matrix_get(Positions,Verlet[i],0)),
-    //              gsl_matrix_get(Positions,Verlet[i],1), gsl_matrix_get(Positions,Verlet[i],2), gsl_matrix_get(Positions,Verlet[i],3));
-    //    printf(")\n");
-
-    // Checkpoint: Draw a povray script to visualize neighboring cells of particle and its Verlet list.
-    //    DrawSim(Micro, TestParticle, TestCell, NeighboringCells, Verlet, NumberOfNeighbors);
-
-    // Checkpoint: Compute Verlet list of a given particle
-    //    printf("[%s]\tCompute Verlet list...\n",__TIME__);
-    //    //int TestParticle = 172;
-    //    int TestParticle = 533;
-    //    // int TestParticle = 1068;
-    //    int TestCell = FindParticle(Micro,TestParticle);
-    //    gsl_vector * NeighboringCells = gsl_vector_calloc(27);
-    //        
-    //    gsl_matrix_get_row(NeighboringCells, Neighbors, TestCell);
-    //    
-    //    printf("Particle %d is in Cell %d\n", TestParticle, TestCell);
-    //    printf("Neighboring cells of cell %d are (", TestCell);
-    //    for (int i=0;i<27;i++)
-    //        printf("%d, ",((int) gsl_vector_get(NeighboringCells,i)));
-    //    printf(")\n");
-    //  
-    //    int *Verlet;
-    //    
-    //    Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
-    //    int NumberOfNeighbors = Compute_VerletList(Micro, TestParticle, NeighboringCells, TestCell, ListHead, List, Verlet);
-    //    Verlet = realloc(Verlet, NumberOfNeighbors * sizeof(int));
-    //    
-    //    printf("Particle %d has %d neighbors\n", TestParticle, NumberOfNeighbors);
-    //    for (int i=0;i<NumberOfNeighbors;i++)
-    //        printf("%d, ", Verlet[i]);
-    //    printf(")\n");
-    // 
-    //    DrawSim(Micro, TestParticle, TestCell, NeighboringCells, Verlet, NumberOfNeighbors);
 
     // MESOSCOPIC INFORMATION
     
@@ -842,7 +729,7 @@ int main (int argc, char *argv[]) {
       Compute_Mean_Values(filestr, ".MesoSigma1_zy.dat",         MesoAverage);
       SaveVectorWithIndex(filestr, ".MesoSigma1_zy.avg.dat",  z, MesoAverage);
       Compute_Mean_Values(filestr, ".MesoSigma1_zz.dat",         MesoAverage);
-      SaveVectorWithIndex(filestr, ".MesoSigma1_z.avg.dat",  z, MesoAverage);
+      SaveVectorWithIndex(filestr, ".MesoSigma1_zz.avg.dat",  z, MesoAverage);
       
       gsl_vector_free(MesoAverage);
     } 
@@ -947,9 +834,8 @@ int main (int argc, char *argv[]) {
   
   gsl_matrix_free(Positions);
   gsl_matrix_free(Velocities);
-  gsl_matrix_free(PositionsBase);
-  gsl_matrix_free(VelocitiesBase);
   gsl_matrix_free(Momentum);
+  gsl_matrix_free(BaseData);
    
   // Free meso vectors and matrices
   gsl_vector_free(MesoDensity_0);

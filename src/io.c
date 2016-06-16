@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : mié 15 jun 2016 17:10:58 CEST
+ * Modified   : jue 16 jun 2016 16:22:20 CEST
  *
  * Author     : jatorre
  *
@@ -147,23 +147,15 @@ void PrepareInputFiles(void)
 {
   struct stat status;
  
-  if (stat("./data", &status) != 0) 
-    mkdir("./data",0755);
+  if (stat("./data",  &status) == 0)
+    system("rm -r ./data");
+  mkdir("./data",0755);
   
-  if (stat("./data/positions",  &status) == 0)
-    system("rm -r ./data/positions");
-  mkdir("./data/positions",0755);
-  
-  if (stat("./data/velocities", &status) == 0)
-    system("rm -r ./data/velocities");
-  mkdir("./data/velocities",0755);
-
-  Split_File("data/positions",  PositionsFileStr);
-  Split_File("data/velocities", VelocitiesFileStr);
+  Split_File("data", FileStr);
 
   // Create snapshot list
   PrintMsg("Creating snapshot list in file 'sim'...");
-  system("for i in $(ls data/positions/); do echo $i; done > sim");
+  system("for i in $(ls data/); do echo $i; done > sim");
 }
 
 void Split_File(char *directory, char *iFile)
@@ -182,7 +174,6 @@ void Split_File(char *directory, char *iFile)
   ptr_oFile = fopen(oFileName, "w");
   while (fgets(line, sizeof(line), ptr_iFile) != NULL)
   {
-
     if (linecounter == SizeOfChunk)
     {
       fclose(ptr_oFile);
@@ -191,10 +182,8 @@ void Split_File(char *directory, char *iFile)
       sprintf(oFileName, "%s/x%05d", directory, filecounter);
       ptr_oFile = fopen(oFileName, "w");
     }
-    
     if (linecounter > 8 )
       fprintf(ptr_oFile,"%s", line);
-
     linecounter++;
   }
   fclose(ptr_iFile);
@@ -255,6 +244,27 @@ void PrintComputingOptions(void)
   
   printf("\tMesoscopic internal energy:\t\t\t");
   #if __COMPUTE_INTERNAL_ENERGY__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tMacroscopic energy :\t\t\t\t");
+  #if __COMPUTE_MACRO_ENERGY__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tMacroscopic momentum:\t\t\t\t");
+  #if __COMPUTE_MACRO_MOMENTUM__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+  
+  printf("\tCenter of mass:\t\t\t\t");
+  #if __COMPUTE_CENTER_OF_MASS__
     printf("true\n");
   #else
     printf("false\n");
