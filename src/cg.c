@@ -676,11 +676,11 @@ int main (int argc, char *argv[]) {
       
       PrintMsg("Computing Center of Mass upper wall");
       Compute_CenterOfMass(Positions, 1, "top", CenterOfMass);
-      PrintInfo(Step, CenterOfMassUpperWall, oFile.CenterOfMassUpperWall);
+      PrintInfo(Step, CenterOfMass, oFile.CenterOfMassUpperWall);
       
       PrintMsg("Computing Center of Mass lower wall");
       Compute_CenterOfMass(Positions, 1, "bottom", CenterOfMass);
-      PrintInfo(Step, CenterOfMassLowerWall, oFile.CenterOfMass);
+      PrintInfo(Step, CenterOfMass, oFile.CenterOfMassLowerWall);
       
       gsl_vector_free(CenterOfMass);
     #endif
