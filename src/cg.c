@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 16 jun 2016 16:51:33 CEST
+ * Modified   : mar 21 jun 2016 10:34:30 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -343,7 +343,7 @@ int main (int argc, char *argv[]) {
 
     // MESOSCOPIC INFORMATION
     
-    #pragma omp parallel sections
+    #pragma omp parallel sections num_threads(NPROC)
     {
       #if __COMPUTE_DENSITY__
       #pragma omp section
@@ -668,7 +668,7 @@ int main (int argc, char *argv[]) {
 
   PrintMsg("Computing mean values...");
     
-  #pragma omp parallel sections
+  #pragma omp parallel sections num_threads(NPROC)
   {
     #pragma omp section
     {

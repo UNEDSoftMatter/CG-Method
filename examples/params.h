@@ -2,6 +2,9 @@
 #  Parameters of the simulation 
 ############################################################################# */
 
+// Number of OpenMP threads
+#define NPROC    6
+
 // Relative path (from ~/CG-Method) where positions and velocites can be found
 #define FileStr  "./output.data"
 

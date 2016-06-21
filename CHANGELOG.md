@@ -8,6 +8,7 @@ Rev#010
 - Fixed a typo computing `MesoSigma2_zz_avg`.
 - Added `src/checkpoints.c`.
 - `cg.c` cleaned up.
+- Added `NPROC` preprocessor definition to set the number of available threads.
 
 Rev#009
 -------

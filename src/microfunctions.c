@@ -3,7 +3,7 @@
  *
  * Created    : 29.04.2016
  *
- * Modified   : jue 19 may 2016 14:38:55 CEST
+ * Modified   : mar 21 jun 2016 10:34:02 CEST
  *
  * Author     : jatorre
  *
@@ -25,12 +25,9 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
 
   // Begin of parallel region
   
-  int omp_get_max_threads();
-  int chunks = NParticles / omp_get_max_threads();
-
-  #pragma omp parallel
+  #pragma omp parallel num_threads(NPROC)
   {
-    #pragma omp for schedule (dynamic,chunks) 
+    #pragma omp for schedule (static) 
     for (int i=0;i<NParticles;i++)
     {
       gsl_vector_view vi = gsl_matrix_row(Velocities, i);

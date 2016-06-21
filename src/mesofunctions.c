@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : jue 16 jun 2016 16:51:09 CEST
+ * Modified   : mar 21 jun 2016 10:33:42 CEST
  *
  * Author     : jatorre
  *
@@ -165,7 +165,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
 
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
-  #pragma omp parallel num_threads(8)
+  #pragma omp parallel num_threads(NPROC)
   {
     #pragma omp for schedule (static) 
     // Forall i particles
