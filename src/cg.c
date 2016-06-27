@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 27 jun 2016 16:38:46 CEST
+ * Modified   : lun 27 jun 2016 18:35:49 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -249,13 +249,12 @@ int main (int argc, char *argv[]) {
   gsl_vector * Kinetic = gsl_vector_calloc (NParticles);
 
   // Mesoscopic variables
-  gsl_matrix * MesoForce     = gsl_matrix_calloc (NNodes,3);
-  gsl_vector * MesoDensity_0 = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoDensity_1 = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoDensity_2 = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoEnergy    = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoKinetic   = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoTemp      = gsl_vector_calloc (NNodes);
+  gsl_matrix * MesoForce        = gsl_matrix_calloc (NNodes,3);
+  gsl_matrix * MesoDensity      = gsl_matrix_calloc (NNodes,2);
+  gsl_vector * TotalMesoDensity = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoEnergy       = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoKinetic      = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoTemp         = gsl_vector_calloc (NNodes);
   // Sigma matrices will be stored in the following order 
   // 00, 01, 02, 10, 11, 12, 20, 21, 22
   gsl_matrix * MesoSigma1   = gsl_matrix_calloc (NNodes,9);
@@ -348,25 +347,38 @@ int main (int argc, char *argv[]) {
       #pragma omp section
       {
         PrintMsg("Obtaining node densities...");
-        Compute_Meso_Density(Positions, z, 1, MesoDensity_1);
-        PrintInfo(Step, MesoDensity_1, oFile.MesoDensity_1);
-        Compute_Meso_Density(Positions, z, 2, MesoDensity_2);
-        PrintInfo(Step, MesoDensity_2, oFile.MesoDensity_2);
-        gsl_vector_memcpy(MesoDensity_0, MesoDensity_1);
-        gsl_vector_add(MesoDensity_0, MesoDensity_2);
-        PrintInfo(Step, MesoDensity_0, oFile.MesoDensity_0);
+        // Perform the calculation
+        Compute_Meso_Density(Positions, z, MesoDensity);
+
+        // Define a few views to print vectors
+        gsl_vector_view MesoDensity_1 = gsl_matrix_column(MesoDensity,0);
+        gsl_vector_view MesoDensity_2 = gsl_matrix_column(MesoDensity,1);
+
+        // Sum the two types of densities
+        gsl_vector_memcpy(TotalMesoDensity, &MesoDensity_1.vector);
+        gsl_vector_add   (TotalMesoDensity, &MesoDensity_2.vector);
+
+        // Print result
+        PrintInfo(Step, &MesoDensity_1.vector, oFile.MesoDensity_1);
+        PrintInfo(Step, &MesoDensity_2.vector, oFile.MesoDensity_2);
+        PrintInfo(Step,      TotalMesoDensity, oFile.MesoDensity_0);
       }
       #endif
       #if __COMPUTE_FORCE__
       #pragma omp section
       {
         PrintMsg("Obtaining node forces...");
+        // Perform the calculation
         Compute_Meso_Force(Positions, Force, z, MesoForce);
+
+        // Define a few views to print vectors
         gsl_vector_view MesoxForce = gsl_matrix_column(MesoForce,0);
-        PrintInfo(Step, &MesoxForce.vector, oFile.MesoxForce);
         gsl_vector_view MesoyForce = gsl_matrix_column(MesoForce,1);
-        PrintInfo(Step, &MesoyForce.vector, oFile.MesoyForce);
         gsl_vector_view MesozForce = gsl_matrix_column(MesoForce,2);
+
+        // Print result
+        PrintInfo(Step, &MesoxForce.vector, oFile.MesoxForce);
+        PrintInfo(Step, &MesoyForce.vector, oFile.MesoyForce);
         PrintInfo(Step, &MesozForce.vector, oFile.MesozForce);
       }
       #endif
@@ -382,20 +394,24 @@ int main (int argc, char *argv[]) {
       #pragma omp section
       {
         PrintMsg("Obtaining node momentum...");
-
-        gsl_vector_view MesoMomentum_0  = gsl_matrix_column(MesoMomentum,0);
+        // Microscopic views
         gsl_vector_view Momentum_0      = gsl_matrix_column(Momentum,0);
-        Compute_Meso_Profile(Positions, &Momentum_0.vector, z, &MesoMomentum_0.vector, 2);
-        PrintInfo(Step, &MesoMomentum_0.vector, oFile.MesoMomentum_0);
-        
-        gsl_vector_view MesoMomentum_1  = gsl_matrix_column(MesoMomentum,1);
         gsl_vector_view Momentum_1      = gsl_matrix_column(Momentum,1);
-        Compute_Meso_Profile(Positions, &Momentum_1.vector, z, &MesoMomentum_1.vector, 2);
-        PrintInfo(Step, &MesoMomentum_1.vector, oFile.MesoMomentum_1);
-        
-        gsl_vector_view MesoMomentum_2  = gsl_matrix_column(MesoMomentum,2);
         gsl_vector_view Momentum_2      = gsl_matrix_column(Momentum,2);
+
+        // Mesoscopic views
+        gsl_vector_view MesoMomentum_0  = gsl_matrix_column(MesoMomentum,0);
+        gsl_vector_view MesoMomentum_1  = gsl_matrix_column(MesoMomentum,1);
+        gsl_vector_view MesoMomentum_2  = gsl_matrix_column(MesoMomentum,2);
+
+        // Perform the computation
+        Compute_Meso_Profile(Positions, &Momentum_0.vector, z, &MesoMomentum_0.vector, 2);
+        Compute_Meso_Profile(Positions, &Momentum_1.vector, z, &MesoMomentum_1.vector, 2);
         Compute_Meso_Profile(Positions, &Momentum_2.vector, z, &MesoMomentum_2.vector, 2);
+
+        // Print info
+        PrintInfo(Step, &MesoMomentum_0.vector, oFile.MesoMomentum_0);
+        PrintInfo(Step, &MesoMomentum_1.vector, oFile.MesoMomentum_1);
         PrintInfo(Step, &MesoMomentum_2.vector, oFile.MesoMomentum_2);
       }
       #endif
@@ -403,13 +419,18 @@ int main (int argc, char *argv[]) {
       #pragma omp section
       {
         PrintMsg("Obtaining node velocity...");
-        Compute_Meso_Velocity(MesoMomentum,MesoDensity_2,MesoVelocity);
-
+        // Mesoscopic views
+        gsl_vector_view MesoDensity_2  = gsl_matrix_column( MesoDensity,1);
         gsl_vector_view MesoVelocity_0 = gsl_matrix_column(MesoVelocity,0);
-        PrintInfo(Step, &MesoVelocity_0.vector, oFile.MesoVelocity_0);
         gsl_vector_view MesoVelocity_1 = gsl_matrix_column(MesoVelocity,1);
-        PrintInfo(Step, &MesoVelocity_1.vector, oFile.MesoVelocity_1);
         gsl_vector_view MesoVelocity_2 = gsl_matrix_column(MesoVelocity,2);
+       
+        // Perform the computation
+        Compute_Meso_Velocity(MesoMomentum,&MesoDensity_2.vector,MesoVelocity);
+
+        // Print info
+        PrintInfo(Step, &MesoVelocity_0.vector, oFile.MesoVelocity_0);
+        PrintInfo(Step, &MesoVelocity_1.vector, oFile.MesoVelocity_1);
         PrintInfo(Step, &MesoVelocity_2.vector, oFile.MesoVelocity_2);
       }
       #endif
@@ -425,26 +446,33 @@ int main (int argc, char *argv[]) {
       #pragma omp section
       {
         PrintMsg("Obtaining node kinetic stress tensors...");
+        // Perform the computation
         Compute_Meso_Sigma1(Positions, Velocities, MesoSigma1);
+
+        // MesoSigma = MesoSigma1 + MesoSigma2
+        // This is the first part
         gsl_matrix_memcpy(MesoSigma,MesoSigma1);
 
+        // Vector views
         gsl_vector_view  MesoSigma1_00 = gsl_matrix_column(MesoSigma1,0);
-        PrintInfo(Step, &MesoSigma1_00.vector, oFile.MesoSigma1_00);
         gsl_vector_view  MesoSigma1_01 = gsl_matrix_column(MesoSigma1,1);
-        PrintInfo(Step, &MesoSigma1_01.vector, oFile.MesoSigma1_01);
         gsl_vector_view  MesoSigma1_02 = gsl_matrix_column(MesoSigma1,2);
-        PrintInfo(Step, &MesoSigma1_02.vector, oFile.MesoSigma1_02);
         gsl_vector_view  MesoSigma1_10 = gsl_matrix_column(MesoSigma1,3);
-        PrintInfo(Step, &MesoSigma1_10.vector, oFile.MesoSigma1_10);
         gsl_vector_view  MesoSigma1_11 = gsl_matrix_column(MesoSigma1,4);
-        PrintInfo(Step, &MesoSigma1_11.vector, oFile.MesoSigma1_11);
         gsl_vector_view  MesoSigma1_12 = gsl_matrix_column(MesoSigma1,5);
-        PrintInfo(Step, &MesoSigma1_12.vector, oFile.MesoSigma1_12);
         gsl_vector_view  MesoSigma1_20 = gsl_matrix_column(MesoSigma1,6);
-        PrintInfo(Step, &MesoSigma1_20.vector, oFile.MesoSigma1_20);
         gsl_vector_view  MesoSigma1_21 = gsl_matrix_column(MesoSigma1,7);
-        PrintInfo(Step, &MesoSigma1_21.vector, oFile.MesoSigma1_21);
         gsl_vector_view  MesoSigma1_22 = gsl_matrix_column(MesoSigma1,8);
+        
+        // Print info
+        PrintInfo(Step, &MesoSigma1_00.vector, oFile.MesoSigma1_00);
+        PrintInfo(Step, &MesoSigma1_01.vector, oFile.MesoSigma1_01);
+        PrintInfo(Step, &MesoSigma1_02.vector, oFile.MesoSigma1_02);
+        PrintInfo(Step, &MesoSigma1_10.vector, oFile.MesoSigma1_10);
+        PrintInfo(Step, &MesoSigma1_11.vector, oFile.MesoSigma1_11);
+        PrintInfo(Step, &MesoSigma1_12.vector, oFile.MesoSigma1_12);
+        PrintInfo(Step, &MesoSigma1_20.vector, oFile.MesoSigma1_20);
+        PrintInfo(Step, &MesoSigma1_21.vector, oFile.MesoSigma1_21);
         PrintInfo(Step, &MesoSigma1_22.vector, oFile.MesoSigma1_22);
       }
       #endif
@@ -452,60 +480,68 @@ int main (int argc, char *argv[]) {
 
     #if __COMPUTE_STRESS__
       PrintMsg("Obtaining node virial stress tensor...");
-
+      // Perform the computation
       Compute_Meso_Sigma2(Positions, Neighbors, ListHead, List, MesoSigma2, z);
+      // MesoSigma = MesoSigma1 + MesoSigma2
+      // This is the second computation
       gsl_matrix_add (MesoSigma, MesoSigma2);
 
+      // Vector views
       gsl_vector_view  MesoSigma2_00 = gsl_matrix_column(MesoSigma2,0);
-      PrintInfo(Step, &MesoSigma2_00.vector, oFile.MesoSigma2_00);
       gsl_vector_view  MesoSigma2_01 = gsl_matrix_column(MesoSigma2,1);
-      PrintInfo(Step, &MesoSigma2_01.vector, oFile.MesoSigma2_01);
       gsl_vector_view  MesoSigma2_02 = gsl_matrix_column(MesoSigma2,2);
-      PrintInfo(Step, &MesoSigma2_02.vector, oFile.MesoSigma2_02);
       gsl_vector_view  MesoSigma2_10 = gsl_matrix_column(MesoSigma2,3);
-      PrintInfo(Step, &MesoSigma2_10.vector, oFile.MesoSigma2_10);
       gsl_vector_view  MesoSigma2_11 = gsl_matrix_column(MesoSigma2,4);
-      PrintInfo(Step, &MesoSigma2_11.vector, oFile.MesoSigma2_11);
       gsl_vector_view  MesoSigma2_12 = gsl_matrix_column(MesoSigma2,5);
-      PrintInfo(Step, &MesoSigma2_12.vector, oFile.MesoSigma2_12);
       gsl_vector_view  MesoSigma2_20 = gsl_matrix_column(MesoSigma2,6);
-      PrintInfo(Step, &MesoSigma2_20.vector, oFile.MesoSigma2_20);
       gsl_vector_view  MesoSigma2_21 = gsl_matrix_column(MesoSigma2,7);
-      PrintInfo(Step, &MesoSigma2_21.vector, oFile.MesoSigma2_21);
       gsl_vector_view  MesoSigma2_22 = gsl_matrix_column(MesoSigma2,8);
+      
+      // Print info
+      PrintInfo(Step, &MesoSigma2_00.vector, oFile.MesoSigma2_00);
+      PrintInfo(Step, &MesoSigma2_01.vector, oFile.MesoSigma2_01);
+      PrintInfo(Step, &MesoSigma2_02.vector, oFile.MesoSigma2_02);
+      PrintInfo(Step, &MesoSigma2_10.vector, oFile.MesoSigma2_10);
+      PrintInfo(Step, &MesoSigma2_11.vector, oFile.MesoSigma2_11);
+      PrintInfo(Step, &MesoSigma2_12.vector, oFile.MesoSigma2_12);
+      PrintInfo(Step, &MesoSigma2_20.vector, oFile.MesoSigma2_20);
+      PrintInfo(Step, &MesoSigma2_21.vector, oFile.MesoSigma2_21);
       PrintInfo(Step, &MesoSigma2_22.vector, oFile.MesoSigma2_22);
 
       PrintMsg("Saving stress tensors...");
-
+      // More views
       gsl_vector_view  MesoSigma_00 = gsl_matrix_column(MesoSigma,0);
-      PrintInfo(Step, &MesoSigma_00.vector, oFile.MesoSigma_00);
       gsl_vector_view  MesoSigma_01 = gsl_matrix_column(MesoSigma,1);
-      PrintInfo(Step, &MesoSigma_01.vector, oFile.MesoSigma_01);
       gsl_vector_view  MesoSigma_02 = gsl_matrix_column(MesoSigma,2);
-      PrintInfo(Step, &MesoSigma_02.vector, oFile.MesoSigma_02);
       gsl_vector_view  MesoSigma_10 = gsl_matrix_column(MesoSigma,3);
-      PrintInfo(Step, &MesoSigma_10.vector, oFile.MesoSigma_10);
       gsl_vector_view  MesoSigma_11 = gsl_matrix_column(MesoSigma,4);
-      PrintInfo(Step, &MesoSigma_11.vector, oFile.MesoSigma_11);
       gsl_vector_view  MesoSigma_12 = gsl_matrix_column(MesoSigma,5);
-      PrintInfo(Step, &MesoSigma_12.vector, oFile.MesoSigma_12);
       gsl_vector_view  MesoSigma_20 = gsl_matrix_column(MesoSigma,6);
-      PrintInfo(Step, &MesoSigma_20.vector, oFile.MesoSigma_20);
       gsl_vector_view  MesoSigma_21 = gsl_matrix_column(MesoSigma,7);
-      PrintInfo(Step, &MesoSigma_21.vector, oFile.MesoSigma_21);
       gsl_vector_view  MesoSigma_22 = gsl_matrix_column(MesoSigma,8);
+     
+      // Print info
+      PrintInfo(Step, &MesoSigma_00.vector, oFile.MesoSigma_00);
+      PrintInfo(Step, &MesoSigma_01.vector, oFile.MesoSigma_01);
+      PrintInfo(Step, &MesoSigma_02.vector, oFile.MesoSigma_02);
+      PrintInfo(Step, &MesoSigma_10.vector, oFile.MesoSigma_10);
+      PrintInfo(Step, &MesoSigma_11.vector, oFile.MesoSigma_11);
+      PrintInfo(Step, &MesoSigma_12.vector, oFile.MesoSigma_12);
+      PrintInfo(Step, &MesoSigma_20.vector, oFile.MesoSigma_20);
+      PrintInfo(Step, &MesoSigma_21.vector, oFile.MesoSigma_21);
       PrintInfo(Step, &MesoSigma_22.vector, oFile.MesoSigma_22);
     #endif
 
     #if __COMPUTE_TEMPERATURE__
       PrintMsg("Obtaining node temperature...");
-      Compute_Meso_Temp(MesoKinetic, MesoDensity_2, MesoTemp);
+      gsl_vector_view MesoDensity_2 = gsl_matrix_column(MesoDensity,1);
+      Compute_Meso_Temp(MesoKinetic, &MesoDensity_2.vector, MesoTemp);
       PrintInfo(Step, MesoTemp, oFile.MesoTemp);
     #endif
         
     #if __COMPUTE_INTERNAL_ENERGY__
       PrintMsg("Obtaining node internal energies...");
-      Compute_InternalEnergy(MesoEnergy, MesoMomentum, MesoDensity_2, MesoInternalEnergy);
+      Compute_InternalEnergy(MesoEnergy, MesoMomentum, &MesoDensity_2.vector, MesoInternalEnergy);
       PrintInfo(Step, MesoInternalEnergy, oFile.MesoInternalEnergy);
     #endif
     
@@ -513,7 +549,7 @@ int main (int argc, char *argv[]) {
 
     #if __COMPUTE_MACRO_ENERGY__
       double MacroEnergy;
-
+      
       PrintMsg("Computing the energy of upper wall");
       MacroEnergy = Compute_Macro(Energy, Positions, 1, "top");
       PrintScalarWithIndex(Step, MacroEnergy, oFile.MacroEnergyUpperWall); 
@@ -837,9 +873,8 @@ int main (int argc, char *argv[]) {
   gsl_matrix_free(BaseData);
    
   // Free meso vectors and matrices
-  gsl_vector_free(MesoDensity_0);
-  gsl_vector_free(MesoDensity_1);
-  gsl_vector_free(MesoDensity_2);
+  gsl_vector_free(TotalMesoDensity);
+  gsl_matrix_free(MesoDensity);
   gsl_matrix_free(MesoForce);
   gsl_vector_free(MesoEnergy);
   gsl_vector_free(MesoKinetic);

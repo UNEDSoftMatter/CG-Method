@@ -62,3 +62,6 @@
 #define __COMPUTE_MACRO_MOMENTUM__  true
 #define __COMPUTE_CENTER_OF_MASS__  true
 
+// Verbosity level
+// If __VERBOSE__ == true messages will be printed to stdout
+#define __VERBOSE__                 false

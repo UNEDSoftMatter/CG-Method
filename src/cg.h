@@ -246,10 +246,10 @@ void Compute_Meso_Energy (gsl_matrix * Micro, gsl_vector * MicroEnergy,
                           gsl_vector * z, gsl_vector * MesoEnergy);
 
 void Compute_Meso_Density (gsl_matrix * Positions, gsl_vector * z, 
-                           int type, gsl_vector * MesoDensity);
+                           gsl_matrix * MesoDensity);
 
 void Compute_Meso_Force (gsl_matrix * Positions, gsl_matrix * Forces, 
-                         gsl_vector * n, gsl_matrix * MesoForce);
+                         gsl_vector * z, gsl_matrix * MesoForce);
 
 void Compute_Meso_Temp (gsl_vector * MesoKinetic, gsl_vector * MesoDensity, 
                         gsl_vector * MesoTemp);

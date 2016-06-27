@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 27 jun 2016 17:15:56 CEST
+ * Modified   : lun 27 jun 2016 18:45:11 CEST
  *
  * Author     : jatorre
  *
@@ -21,61 +21,43 @@ void Compute_Node_Positions(gsl_vector * z)
     gsl_vector_set(z,mu,((double) mu)*Lz/NNodes);
 }
 
-void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, int type, 
-                          gsl_vector * n)
+void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, gsl_matrix * n)
 {
 
   // RESET vector
-  gsl_vector_set_zero(n);
+  gsl_matrix_set_zero(n);
 
   // Valid for PBC,  this function obtains the  density of a slab of volume Lx *
   //  Ly *  dz The  slab is  build as  a  finite  element  based  on  a Delaunay
   // tessellation
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   double dz = ((float) Lz) / NNodes;
-  double zi;
-  int muRight, muLeft;
 
   for (int i=0;i<NParticles;i++)
   {
-    zi = gsl_matrix_get(Micro,i,3);
-    if ((type == 0)||((int) gsl_matrix_get(Micro,i,0) == type)) 
+    int    type    = (int) gsl_matrix_get(Micro,i,0);
+    double zi      = gsl_matrix_get(Micro,i,3);
+    int    muLeft  = (int) floor(zi*NNodes/Lz);
+    int    muRight = muLeft+1;
+    double zLeft   = gsl_vector_get(z, muLeft);
+    double zRight  = gsl_vector_get(z,muRight);
+
+    if (muRight == NNodes)
     {
-      //  muRight = (int) floor(zi*NNodes/Lz);        
-      //  muLeft  = muRight-1;
-      //  if (muLeft < 0) 
-      //  {
-      //    n->data[muRight*n->stride] += zi/dz;
-      //    n->data[(NNodes-1)*n->stride] += (gsl_vector_get(z,muRight) - zi)/dz;
-      //  } 
-      //  else if (muRight == NNodes)
-      //  {
-      //    n->data[(NNodes-1)*n->stride] += 1.0;
-      //  }
-      //  else 
-      //  {
-      //    n->data[muRight*n->stride] += (zi -  gsl_vector_get(z,muLeft))/dz;
-      //    n->data[ muLeft*n->stride] += (gsl_vector_get(z,muRight) - zi)/dz;
-      //  }
-      muLeft  = (int) floor(zi*NNodes/Lz);
-      muRight = muLeft+1;
-      if (muRight == NNodes)
-      {
-        n->data[     0*n->stride] += (zi -  gsl_vector_get(z,muLeft))/dz;
-        n->data[muLeft*n->stride] += (Lz - zi)/dz;
-      }
-      else if (muLeft == NNodes)
-      {
-        n->data[0*n->stride] += 1.0;
-      }
-      else
-      {
-        n->data[muRight*n->stride] += (zi -  gsl_vector_get(z,muLeft))/dz;
-        n->data[ muLeft*n->stride] += (gsl_vector_get(z,muRight) - zi)/dz;
-      }
+      n->data[     0*n->tda+type] += (zi - zLeft)/dz;
+      n->data[muLeft*n->tda+type] += (Lz    - zi)/dz;
+    }
+    else if (muLeft == NNodes)
+    {
+      n->data[0*n->tda+type] += 1.0;
+    }
+    else
+    {
+      n->data[muRight*n->tda+type] += (zi  - zLeft)/dz;
+      n->data[ muLeft*n->tda+type] += (zRight - zi)/dz;
     }
   }
-  gsl_vector_scale(n,1.0/dv);
+  gsl_matrix_scale(n,1.0/dv);
 }
 
 void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces, 

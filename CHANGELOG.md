@@ -10,6 +10,10 @@ Rev#010
 - `cg.c` cleaned up.
 - Added `NPROC` preprocessor definition to set the number of available threads.
 - Changed positions of nodes. Now `z[0] = 0.0`, `z[N-1] = Lz - dz`.
+- General clean up.
+- Optimized `Compute_Meso_Density` function to  avoid repeated computation and a
+  nested loop.
+- Added a `__VERBOSE__` flag in `params.h`.
 
 Rev#009
 -------

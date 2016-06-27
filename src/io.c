@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : lun 27 jun 2016 14:08:36 CEST
+ * Modified   : lun 27 jun 2016 18:15:26 CEST
  *
  * Author     : jatorre
  *
@@ -14,13 +14,15 @@
 
 void PrintMsg(char *msg)
 {
-  time_t rawtime;
-  struct tm * timeinfo;
-  time (&rawtime);
-  timeinfo = localtime (&rawtime);
-  char * timestamp = asctime(timeinfo);
-  timestamp[strlen(timestamp)-1] = '\0';
-  printf("[%s]\t%s\n", timestamp, msg);
+  #if __VERBOSE__
+    time_t rawtime;
+    struct tm * timeinfo;
+    time (&rawtime);
+    timeinfo = localtime (&rawtime);
+    char * timestamp = asctime(timeinfo);
+    timestamp[strlen(timestamp)-1] = '\0';
+    printf("[%s]\t%s\n", timestamp, msg);
+  #endif
 }
     
 void SaveMatrixWithIndex(gsl_vector * z, gsl_matrix * Matrix, char * File)
