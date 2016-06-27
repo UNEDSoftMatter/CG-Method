@@ -9,6 +9,7 @@ Rev#010
 - Added `src/checkpoints.c`.
 - `cg.c` cleaned up.
 - Added `NPROC` preprocessor definition to set the number of available threads.
+- Changed positions of nodes. Now `z[0] = 0.0`, `z[N-1] = Lz - dz`.
 
 Rev#009
 -------

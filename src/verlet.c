@@ -3,7 +3,7 @@
  *
  * Created    : 22.04.2016
  *
- * Modified   : vie 06 may 2016 10:43:09 CEST
+ * Modified   : lun 27 jun 2016 14:17:02 CEST
  *
  * Author     : jatorre
  *
@@ -175,17 +175,14 @@ int Compute_VerletList(gsl_matrix * Micro, int TestParticle, gsl_vector * Neighb
       x1      = gsl_matrix_get(Micro,j,1);
       deltax  = x1 - x0;
       deltax -= Lx*round(deltax/Lx);
-      // (dx > Lx/2) ? dx-= Lx : dx;
 
       y1      = gsl_matrix_get(Micro,j,2);
       deltay  = y1 - y0;
       deltay -= Ly*round(deltay/Ly);
-      // (dy > Ly/2) ? dy-= Ly : dy;
 
       z1      = gsl_matrix_get(Micro,j,3);
       deltaz  = z1 - z0;
       deltaz -= Lz*round(deltaz/Lz);
-      // (dz > Lz/2) ? dz-= Lz : dz;
 
       r2  = deltax*deltax + deltay*deltay + deltaz*deltaz;
 

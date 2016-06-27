@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mar 21 jun 2016 10:34:30 CEST
+ * Modified   : lun 27 jun 2016 16:38:46 CEST
  *
  * Author     : jatorre@fisfun.uned.es
  *
@@ -49,9 +49,8 @@ int main (int argc, char *argv[]) {
   struct OutputFiles oFile;
   
   // Create output directory if it does not exist
-  // system("if [ ! -d output ]; then mkdir output; fi");
   struct stat status;
-  if (stat("./output", &status) != 0) // && S_ISDIR(status.st_mode)))
+  if (stat("./output", &status) != 0) 
     mkdir("./output",0755);
   
   // Microscopic files
@@ -281,7 +280,7 @@ int main (int argc, char *argv[]) {
     // ID TYPE x y z vx vy vz
     // The ID of a particle corresponds to the row
     PrintMsg("Reading microscopic data");
-    gsl_matrix_set_zero(BaseData);
+    // REDUNDANT? gsl_matrix_set_zero(BaseData);
     sprintf(str, "./data/%s", basename);
     printf("\tInput file: %s\n", str);
     BaseFile = fopen(str, "r");

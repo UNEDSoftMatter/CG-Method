@@ -3,7 +3,7 @@
  *
  * Created    : 29.04.2016
  *
- * Modified   : mar 21 jun 2016 10:34:02 CEST
+ * Modified   : lun 27 jun 2016 14:19:19 CEST
  *
  * Author     : jatorre
  *
@@ -21,7 +21,7 @@ void Compute_Forces(gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix 
   // TODO: Redundant?
   gsl_matrix_set_zero(Forces);
   gsl_vector_set_zero(Energy);
-  gsl_vector_set_zero(Kinetic);
+  // gsl_vector_set_zero(Kinetic);
 
   // Begin of parallel region
   
