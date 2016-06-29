@@ -199,17 +199,23 @@ struct OutputFiles
   FILE * MesoSigma_20;
   FILE * MesoSigma_21;
   FILE * MesoSigma_22;
-  FILE * MesoMomentum_0;
-  FILE * MesoMomentum_1;
-  FILE * MesoMomentum_2;
-  FILE * MesoVelocity_0;
-  FILE * MesoVelocity_1;
-  FILE * MesoVelocity_2;
+  FILE * MesoMomentum_x;
+  FILE * MesoMomentum_y;
+  FILE * MesoMomentum_z;
+  FILE * MesoVelocity_x;
+  FILE * MesoVelocity_y;
+  FILE * MesoVelocity_z;
   FILE * MesoInternalEnergy;
   FILE * MacroEnergyUpperWall;
   FILE * MacroEnergyLowerWall;
   FILE * MacroMomentumUpperWall;
+  FILE * MacroMomentumUpperWallx;
+  FILE * MacroMomentumUpperWally;
+  FILE * MacroMomentumUpperWallz;
   FILE * MacroMomentumLowerWall;
+  FILE * MacroMomentumLowerWallx;
+  FILE * MacroMomentumLowerWally;
+  FILE * MacroMomentumLowerWallz;
   FILE * CenterOfMassUpperWall;
   FILE * CenterOfMassLowerWall;
 };
@@ -295,4 +301,5 @@ void Check_Draw_Temperature(gsl_vector * Vmod, gsl_matrix * Positions, char * ba
 void Check_Neighbors_of_a_Particle(gsl_matrix * Positions, int iParticle, gsl_matrix * NeighboringCells, 
                                    int iCell, gsl_vector * ListHead, gsl_vector * List);
 
+void LoadInfo(void);
 #endif

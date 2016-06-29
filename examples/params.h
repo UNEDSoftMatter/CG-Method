@@ -65,3 +65,7 @@
 // Verbosity level
 // If __VERBOSE__ == true messages will be printed to stdout
 #define __VERBOSE__                 false
+
+// Binary output files are not human readable, but IO operations are faster
+// that writting plain text files
+#define __BINARY_OUTPUT__           true

@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : lun 27 jun 2016 18:45:11 CEST
+ * Modified   : mié 29 jun 2016 16:37:49 CEST
  *
  * Author     : jatorre
  *
@@ -17,7 +17,6 @@ void Compute_Node_Positions(gsl_vector * z)
   // Valid only for a regular lattice
   // TODO: Consider irregular lattices
   for (int mu=0;mu<NNodes;mu++)
-    // gsl_vector_set(z,mu,(double) (mu+1)*Lz/NNodes);
     gsl_vector_set(z,mu,((double) mu)*Lz/NNodes);
 }
 
@@ -75,8 +74,6 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces,
     fy      = gsl_matrix_get(Forces,i,1);
     fz      = gsl_matrix_get(Forces,i,2);
     
-    // muRight = (int) floor(zi*NNodes/Lz);        
-    // muLeft  = muRight-1;
     muLeft  = (int) floor(zi*NNodes/Lz);
     muRight = muLeft+1;
     double zLeft  = gsl_vector_get(z, muLeft);
@@ -106,31 +103,6 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces,
       MesoForce->data[muRight*MesoForce->tda+2] += fz * (zi -  zLeft)/dz;
       MesoForce->data[ muLeft*MesoForce->tda+2] += fz * (zRight - zi)/dz;
     }
-    
-    //     if (muLeft < 0) 
-    //     {
-    //       MesoForce->data[   muRight*MesoForce->tda+0] += fx * zi/dz;
-    //       MesoForce->data[(NNodes-1)*MesoForce->tda+0] += fx * (gsl_vector_get(z,muRight) - zi)/dz;
-    //       MesoForce->data[   muRight*MesoForce->tda+1] += fy * zi/dz;
-    //       MesoForce->data[(NNodes-1)*MesoForce->tda+1] += fy * (gsl_vector_get(z,muRight) - zi)/dz;
-    //       MesoForce->data[   muRight*MesoForce->tda+2] += fz * zi/dz;
-    //       MesoForce->data[(NNodes-1)*MesoForce->tda+2] += fz * (gsl_vector_get(z,muRight) - zi)/dz;
-    //     } 
-    //     else if (muRight == NNodes)
-    //     {
-    //       MesoForce->data[(NNodes-1)*MesoForce->tda+0] += fx;
-    //       MesoForce->data[(NNodes-1)*MesoForce->tda+1] += fy;
-    //       MesoForce->data[(NNodes-1)*MesoForce->tda+2] += fz;
-    //     }
-    //     else 
-    //     {
-    //       MesoForce->data[muRight*MesoForce->tda+0] += fx * (zi -  gsl_vector_get(z,muLeft))/dz;
-    //       MesoForce->data[ muLeft*MesoForce->tda+0] += fx * (gsl_vector_get(z,muRight) - zi)/dz;
-    //       MesoForce->data[muRight*MesoForce->tda+1] += fy * (zi -  gsl_vector_get(z,muLeft))/dz;
-    //       MesoForce->data[ muLeft*MesoForce->tda+1] += fy * (gsl_vector_get(z,muRight) - zi)/dz;
-    //       MesoForce->data[muRight*MesoForce->tda+2] += fz * (zi -  gsl_vector_get(z,muLeft))/dz;
-    //       MesoForce->data[ muLeft*MesoForce->tda+2] += fz * (gsl_vector_get(z,muRight) - zi)/dz;
-    //     }
   }
   gsl_matrix_scale(MesoForce,1.0/dv);
 }
@@ -138,8 +110,6 @@ void Compute_Meso_Force(gsl_matrix * Positions, gsl_matrix * Forces,
 void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities, 
                           gsl_matrix * MesoSigma1)
 {
-  int mu = 0;
-  // double mass = 0.0;
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
   gsl_matrix_set_zero(MesoSigma1);
@@ -152,15 +122,7 @@ void Compute_Meso_Sigma1 (gsl_matrix * Positions, gsl_matrix * Velocities,
     if ((int) gsl_matrix_get(Positions,i,0) == 2)
     {
       // Obtain the bin to where the i-particle belongs to
-      // mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz) - 1;
-      mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz);
-      // PBC: If mu == -1, the particle belongs to the upper bin
-      // ( mu == -1 ) ? mu = NNodes-1 : mu ;
-
-      // mass = ( gsl_matrix_get(Positions,i,0) == 1 ? m1 : m2 );
-      // If type of atom == 1 then it is a wall particle, so it does not contribute to the
-      // stress tensor
-      // mass = ( (int) gsl_matrix_get(Positions,i,0) == 1 ? 0.0 : m2 );
+      int mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz);
 
       double * sigma1 = malloc(9*sizeof(double));
 
@@ -196,130 +158,74 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
 
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
-  #pragma omp parallel num_threads(NPROC)
+  // Forall i particles
+  for (int i=0;i<NParticles;i++)
   {
-    #pragma omp for schedule (static) 
-    // Forall i particles
-    for (int i=0;i<NParticles;i++)
+    // Only for fluid (type 2) particle
+    if ((int) gsl_matrix_get(Positions,i,0) == 2)
     {
-      // Only for fluid (type 2) particle
-      if ((int) gsl_matrix_get(Positions,i,0) == 2)
+      double zi = gsl_matrix_get(Positions,i,3);
+      // Find the bin mu to which the particle i belongs
+      int mu = floor(zi*NNodes/Lz);
+
+      // Find the cell to which the particle i belongs and all its neighboring cells
+      int iCell = FindParticle(Positions,i);
+      gsl_vector_view NeighboringCells = gsl_matrix_row(Neighbors, iCell);
+      
+      // Find the neighbors of particle i
+      int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
+      int NNeighbors = Compute_VerletList(Positions, i, &NeighboringCells.vector, iCell, ListHead, List, Verlet);
+      
+      // Forall Verlet[j] neighboring particles
+      for (int j=0;j<NNeighbors;j++)
       {
-        double zi = gsl_matrix_get(Positions,i,3);
-        // Find the bin mu to which the particle i belongs
-        // int mu = floor(zi*NNodes/Lz) - 1;
-        int mu = floor(zi*NNodes/Lz);
-        // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
-        // Checkpoint
-        // if (mu == -1) 
-        //   printf("ERROR! Fluid particle %d in bin %d!\n", i, mu);
-        // ( mu == -1 ) ? mu = NNodes-1 : mu ;
-
-        // Find the cell to which the particle i belongs and all its neighboring cells
-        int iCell = FindParticle(Positions,i);
-        gsl_vector_view NeighboringCells = gsl_matrix_row(Neighbors, iCell);
-        
-        // Find the neighbors of particle i
-        int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
-        int NNeighbors = Compute_VerletList(Positions, i, &NeighboringCells.vector, iCell, ListHead, List, Verlet);
-        
-        // Forall Verlet[j] neighboring particles
-        for (int j=0;j<NNeighbors;j++)
+        // Only for fluid (type 2) particles
+        if ((int) gsl_matrix_get(Positions,Verlet[j],0) == 2)
         {
-          // Only for fluid (type 2) particles
-          if ((int) gsl_matrix_get(Positions,Verlet[j],0) == 2)
+          double zj = gsl_matrix_get(Positions,Verlet[j],3);
+          // Find the bin nu to which the particle Verlet[j] belongs
+          int nu = floor(zj*NNodes/Lz);
+
+          double * fij = malloc(3*sizeof(double));
+          Compute_Force_ij (Positions, i, Verlet[j], 2, 2, fij);
+  
+          double * rij = malloc(3*sizeof(double));
+          rij[0]  = gsl_matrix_get(Positions,i,1) - gsl_matrix_get(Positions,Verlet[j],1);
+          rij[0] -= Lx*round(rij[0]/Lx);
+          rij[1]  = gsl_matrix_get(Positions,i,2) - gsl_matrix_get(Positions,Verlet[j],2);
+          rij[1] -= Ly*round(rij[1]/Ly);
+          rij[2]  = zi - zj;
+          rij[2] -= Lz*round(rij[2]/Lz);
+
+          double * sigma2 = malloc(9*sizeof(double));
+
+          for (int sigma=((int)min(mu,nu)); sigma<=((int)max(mu,nu));sigma++)
           {
-            double zj = gsl_matrix_get(Positions,Verlet[j],3);
-            // Find the bin nu to which the particle Verlet[j] belongs
-            // int nu = floor(zj*NNodes/Lz) - 1;
-            int nu = floor(zj*NNodes/Lz);
-            // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
-            // Checkpoint
-            // if (nu == -1) 
-            //   printf("ERROR! Fluid particle %d in bin %d!\n", Verlet[j], nu);
-            // ( nu == -1 ) ? nu = NNodes-1 : nu ;
+            double zsigma = zmuij(z,sigma,zi,zj);
+            sigma2[0] = rij[0]*fij[0]*zsigma;
+            sigma2[1] = rij[0]*fij[1]*zsigma;
+            sigma2[2] = rij[0]*fij[2]*zsigma;
+            sigma2[3] = rij[1]*fij[0]*zsigma;
+            sigma2[4] = rij[1]*fij[1]*zsigma;
+            sigma2[5] = rij[1]*fij[2]*zsigma;
+            sigma2[6] = rij[2]*fij[0]*zsigma;
+            sigma2[7] = rij[2]*fij[1]*zsigma;
+            sigma2[8] = rij[2]*fij[2]*zsigma;
 
-            // Compute only the force between  particles of type 2 and particle of
-            // type 2 (fluid-fluid interaction)
-            // This  portion is  redundant,  the program does  not enter  into the
-            // loop for particles different from type 2
-            double * fij = malloc(3*sizeof(double));
-            
-            Compute_Force_ij (Positions, i, Verlet[j], 2, 2, fij);
-    
-            double * rij = malloc(3*sizeof(double));
-
-            rij[0]  = gsl_matrix_get(Positions,i,1) - gsl_matrix_get(Positions,Verlet[j],1);
-            rij[0] -= Lx*round(rij[0]/Lx);
-            rij[1]  = gsl_matrix_get(Positions,i,2) - gsl_matrix_get(Positions,Verlet[j],2);
-            rij[1] -= Ly*round(rij[1]/Ly);
-            rij[2]  = zi - zj;
-            rij[2] -= Lz*round(rij[2]/Lz);
-
-            double * sigma2 = malloc(9*sizeof(double));
-
-            for (int sigma=((int)min(mu,nu)); sigma<=((int)max(mu,nu));sigma++)
-            {
-              double zsigma = zmuij(z,sigma,zi,zj);
-              sigma2[0] = rij[0]*fij[0]*zsigma;
-              sigma2[1] = rij[0]*fij[1]*zsigma;
-              sigma2[2] = rij[0]*fij[2]*zsigma;
-              sigma2[3] = rij[1]*fij[0]*zsigma;
-              sigma2[4] = rij[1]*fij[1]*zsigma;
-              sigma2[5] = rij[1]*fij[2]*zsigma;
-              sigma2[6] = rij[2]*fij[0]*zsigma;
-              sigma2[7] = rij[2]*fij[1]*zsigma;
-              sigma2[8] = rij[2]*fij[2]*zsigma;
-
-              for (int k=0;k<9;k++)
-                MesoSigma2->data[sigma*MesoSigma2->tda+k] += sigma2[k];
-            }
-            
-            free(fij);
-            free(rij);
-            free(sigma2);
+            for (int k=0;k<9;k++)
+              MesoSigma2->data[sigma*MesoSigma2->tda+k] += sigma2[k];
           }
+          
+          free(fij);
+          free(rij);
+          free(sigma2);
         }
-        free(Verlet);
       }
+      free(Verlet);
     }
   }
   gsl_matrix_scale(MesoSigma2,0.5/dv);
 }
-          
-// void Compute_Meso_Energy(gsl_matrix * Micro, gsl_vector * MicroEnergy, gsl_vector * z, gsl_vector * MesoEnergy)
-// {
-//   double dv = ((float) Lx * Ly * Lz) / NNodes;
-//   double dz = ((float) Lz) / NNodes;
-//   double zi, ei;
-//   int muRight, muLeft;
-// 
-//   // RESET vector
-//   gsl_vector_set_zero(MesoEnergy);
-// 
-//   for (int i=0;i<NParticles;i++)
-//   {
-//     zi      = gsl_matrix_get(Micro,i,3);
-//     ei      = gsl_vector_get(MicroEnergy,i);
-//     muRight = (int) floor(zi*NNodes/Lz);        
-//     muLeft  = muRight-1;
-//     if (muLeft < 0) 
-//     {
-//       MesoEnergy->data[   muRight*MesoEnergy->stride] += ei * zi/dz;
-//       MesoEnergy->data[(NNodes-1)*MesoEnergy->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
-//     } 
-//     else if (muRight == NNodes)
-//     {
-//       MesoEnergy->data[(NNodes-1)*MesoEnergy->stride] += ei;
-//     }
-//     else 
-//     {
-//       MesoEnergy->data[muRight*MesoEnergy->stride] += ei * (zi -  gsl_vector_get(z,muLeft))/dz;
-//       MesoEnergy->data[ muLeft*MesoEnergy->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
-//     }
-//   }
-//   gsl_vector_scale(MesoEnergy,1.0/dv);
-// }
 
 void Compute_Meso_Temp(gsl_vector * MesoKinetic, gsl_vector * MesoDensity, gsl_vector * MesoTemp)
 {
@@ -342,24 +248,31 @@ void Compute_Meso_Temp(gsl_vector * MesoKinetic, gsl_vector * MesoDensity, gsl_v
   
 void Compute_Mean_Values(char * basename, char * filename, gsl_vector * MeanValues)
 {
-  gsl_matrix * InputMatrix = gsl_matrix_calloc (NSteps,NNodes+1);     
+
+  gsl_matrix * InputMatrix = gsl_matrix_calloc (NSteps,NNodes);     
   
   FILE *iFile;
   char str[100]; 
-  strcpy (str, "./output/");
-  strcat (str, basename);
-  strcat (str, filename);
+  memset(str,'\0',sizeof(str));
+  sprintf(str, "./output/%s%s", basename,filename);
   iFile = fopen(str, "r");
+
+  #if __BINARY_OUTPUT__
+    gsl_matrix_fread(iFile, InputMatrix);
+  #else
     gsl_matrix_fscanf(iFile, InputMatrix);
+  #endif
+
   fclose(iFile);
 
   gsl_vector_set_zero(MeanValues);
 
   for (int i=0;i<NSteps;i++)
   {
-    for (int mu=1;mu<NNodes+1;mu++)
+    for (int mu=0;mu<NNodes;mu++)
     {
-      MeanValues->data[(mu-1)*MeanValues->stride] += gsl_matrix_get(InputMatrix,i,mu); 
+      // MeanValues->data[(mu-1)*MeanValues->stride] += gsl_matrix_get(InputMatrix,i,mu); 
+      MeanValues->data[mu*MeanValues->stride] += gsl_matrix_get(InputMatrix,i,mu); 
     }
   }
 
@@ -420,23 +333,6 @@ void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector
         Meso->data[muRight*Meso->stride] += ei * (zi -  zLeft)/dz;
         Meso->data[ muLeft*Meso->stride] += ei * (zRight - zi)/dz;
       }
-    
-      // muRight = (int) floor(zi*NNodes/Lz);        
-      // muLeft  = muRight-1;
-      //   if (muLeft < 0) 
-      //   {
-      //     Meso->data[   muRight*Meso->stride] += ei * zi/dz;
-      //     Meso->data[(NNodes-1)*Meso->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
-      //   } 
-      //   else if (muRight == NNodes)
-      //   {
-      //     Meso->data[(NNodes-1)*Meso->stride] += ei;
-      //   }
-      //   else 
-      //   {
-      //     Meso->data[muRight*Meso->stride] += ei * (zi -  gsl_vector_get(z,muLeft))/dz;
-      //     Meso->data[ muLeft*Meso->stride] += ei * (gsl_vector_get(z,muRight) - zi)/dz;
-      //   }
     }
   }
   gsl_vector_scale(Meso,1.0/dv);
@@ -449,7 +345,9 @@ void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum,
 
   for (int mu=0;mu<NNodes;mu++)
   {
-    double gmu2 = pow(gsl_matrix_get(MesoMomentum,mu,0),2) + pow(gsl_matrix_get(MesoMomentum,mu,1),2) + pow(gsl_matrix_get(MesoMomentum,mu,2),2);
+    double gmu2 =   pow(gsl_matrix_get(MesoMomentum,mu,0),2) 
+                  + pow(gsl_matrix_get(MesoMomentum,mu,1),2) 
+                  + pow(gsl_matrix_get(MesoMomentum,mu,2),2);
     gsl_vector_set(GMod2,mu,gmu2);
   }
 

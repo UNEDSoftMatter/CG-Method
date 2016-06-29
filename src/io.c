@@ -3,7 +3,7 @@
  *
  * Created    : 19.04.2016
  *
- * Modified   : lun 27 jun 2016 18:15:26 CEST
+ * Modified   : mié 29 jun 2016 16:38:13 CEST
  *
  * Author     : jatorre
  *
@@ -137,12 +137,32 @@ void ReadInputFiles(char * iFileStr, char iFiles[][7])
 
 void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr)
 {
-  fprintf(fileptr, "%10d", Step);
+  // fprintf(fileptr, "%10d", Step);
 
   for (int i=0;i<vector->size;i++)
     fprintf(fileptr, "\t%8.6e", gsl_vector_get(vector,i));
 
   fprintf(fileptr,"\n");
+//      gsl_vector_fwrite(fileptr, vector);
+}
+
+void LoadInfo(void)
+{
+  FILE *fileptr = fopen("./output/sim.MesoSigma2_zz.dat", "r");
+  gsl_matrix * Matrix = gsl_matrix_calloc(NSteps,NNodes);
+  gsl_matrix_fread(fileptr,Matrix);
+
+  int Nrows = Matrix->size1;
+  int Ncols = Matrix->size2;
+  for (int i=0;i<Nrows;i++)
+  {
+    for (int j=0;j<Ncols;j++)
+      fprintf(stdout, "\t%20.14f",gsl_matrix_get(Matrix,i,j));
+    fprintf(stdout, "\n");
+  }
+
+  gsl_matrix_free(Matrix);
+  fclose(fileptr);
 }
 
 void PrepareInputFiles(void)

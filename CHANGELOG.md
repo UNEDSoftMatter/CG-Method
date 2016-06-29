@@ -14,6 +14,7 @@ Rev#010
 - Optimized `Compute_Meso_Density` function to  avoid repeated computation and a
   nested loop.
 - Added a `__VERBOSE__` flag in `params.h`.
+- Added a `__BINARY_OUTPUT__` flag in `params.h`.
 
 Rev#009
 -------
