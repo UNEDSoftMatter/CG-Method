@@ -114,3 +114,67 @@ void Compute_CenterOfMass(gsl_matrix * Positions, int type, char *str, gsl_vecto
     gsl_vector_free(Position);
     gsl_vector_scale(CenterOfMass, 1.0 / TotalMass);
 }
+
+
+double Compute_TotalMass(gsl_matrix * Positions, int type, char *str)
+{
+    double TotalMass = 0.0;
+    for(int i=0;i<NParticles;i++)
+    {
+        if ((int)gsl_matrix_get (Positions, i, 0) == type)
+        {
+            if (strcmp(str,"top") == 0)
+            {
+                if (gsl_matrix_get(Positions,i,3) >= Lz/2.0)
+                {
+                    if ((int)gsl_matrix_get (Positions, i, 0) == 1)
+                    {
+                        TotalMass += m1;
+                    }
+                    else 
+                    {
+                        TotalMass += m2;
+                    }
+
+                }
+            }
+            else if (strcmp(str, "bottom") == 0)
+            {
+                if (gsl_matrix_get(Positions,i,3) < Lz/2.0)
+                {
+                    if ((int)gsl_matrix_get (Positions, i, 0) == 1)
+                    {
+                        TotalMass += m1;
+                    }
+                    else 
+                    {
+                        TotalMass += m2;
+                    }
+                }
+            }
+            else
+            {
+                if ((int)gsl_matrix_get (Positions, i, 0) == 1)
+                {
+                    TotalMass += m1;
+                }
+                else 
+                {
+                    TotalMass += m2;
+                }
+            }
+        }
+    }
+    return TotalMass;
+}
+
+
+double Compute_MacroInternalEnergy(double MacroEnergy, gsl_vector * Momentum, double TotalMass, int type, char *str)
+{
+    double MacroInternalEnergy;
+    double ModMomentum = sqrt(pow(gsl_vector_get(Momentum,0),2) + pow(gsl_vector_get(Momentum,1),2) + pow(gsl_vector_get(Momentum,2),2));
+    
+    MacroInternalEnergy = MacroEnergy - pow(ModMomentum,2) / (2 * TotalMass);
+return MacroInternalEnergy;
+}
+

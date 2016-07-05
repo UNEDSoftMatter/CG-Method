@@ -212,6 +212,8 @@ struct OutputFiles
   FILE * MacroMomentumLowerWall;
   FILE * CenterOfMassUpperWall;
   FILE * CenterOfMassLowerWall;
+  FILE * MacroInternalEnergyUpperWall;
+  FILE * MacroInternalEnergyLowerWall;
 };
 
 // Print  a row in  *fileptr with the  information stored in  vector.  The first
@@ -281,5 +283,9 @@ double zmuij(gsl_vector * z, int mu, double zi, double zj);
 double Compute_Macro(gsl_vector * Micro, gsl_matrix * Positions, int type, char *str);
 
 void Compute_CenterOfMass(gsl_matrix * Positions, int type, char *str, gsl_vector * CenterOfMass);
+
+double Compute_TotalMass(gsl_matrix * Positions, int type, char *str);
+
+double Compute_MacroInternalEnergy(double MacroEnergy, gsl_vector * Momentum, double TotalMass, int type, char *str);
 
 #endif

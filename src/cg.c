@@ -197,7 +197,14 @@ int main (int argc, char *argv[]) {
     sprintf(str, "./output/%s.MacroEnergyLowerWall.dat", filestr);
     oFile.MacroEnergyLowerWall = fopen(str, "w");
   #endif
-  
+
+  #if __COMPUTE_MACRO_INTERNAL_ENERGY__
+    sprintf(str, "./output/%s.MacroInternalEnergyUpperWall.dat", filestr);
+    oFile.MacroInternalEnergyUpperWall = fopen(str, "w");
+    sprintf(str, "./output/%s.MacroInternalEnergyLowerWall.dat", filestr);
+    oFile.MacroInternalEnergyLowerWall = fopen(str, "w");
+  #endif
+
   #if __COMPUTE_MACRO_MOMENTUM__
     sprintf(str, "./output/%s.MacroMomentumUpperWall.dat", filestr);
     oFile.MacroMomentumUpperWall = fopen(str, "w");
@@ -270,7 +277,10 @@ int main (int argc, char *argv[]) {
   gsl_matrix * MesoVelocity = gsl_matrix_calloc (NNodes,3);
   
   gsl_vector * MesoInternalEnergy = gsl_vector_calloc (NNodes);
-
+  
+  // Macroscopic variables
+  gsl_vector * MacroMomentumUpper = gsl_vector_calloc(3);
+  gsl_vector * MacroMomentumLower = gsl_vector_calloc(3);
 
   // END OF BLOCK
 
@@ -626,21 +636,24 @@ int main (int argc, char *argv[]) {
     // MACROSCOPIC INFORMATION
 
     #if __COMPUTE_MACRO_ENERGY__
-      double MacroEnergy;
+      double MacroEnergyUpper;
+      double MacroEnergyLower;
 
       PrintMsg("Computing the energy of upper wall");
-      MacroEnergy = Compute_Macro(Energy, Positions, 1, "top");
-      PrintScalarWithIndex(Step, MacroEnergy, oFile.MacroEnergyUpperWall); 
+      MacroEnergyUpper = Compute_Macro(Energy, Positions, 1, "top");
+      PrintScalarWithIndex(Step, MacroEnergyUpper, oFile.MacroEnergyUpperWall); 
 
       PrintMsg("Computing the energy of lower wall");
-      MacroEnergy = Compute_Macro(Energy, Positions, 1, "bottom");
-      PrintScalarWithIndex(Step, MacroEnergy, oFile.MacroEnergyLowerWall); 
+      MacroEnergyLower = Compute_Macro(Energy, Positions, 1, "bottom");
+      PrintScalarWithIndex(Step, MacroEnergyLower, oFile.MacroEnergyLowerWall); 
     #endif
 
     #if __COMPUTE_MACRO_MOMENTUM__
-      double TemporalMomentum;
+      double TemporalMomentumUpper;
+      double TemporalMomentumLower;
 
-      gsl_vector * MacroMomentum = gsl_vector_calloc(3);
+      //gsl_vector * MacroMomentumUpper = gsl_vector_calloc(3);
+      //gsl_vector * MacroMomentumLower = gsl_vector_calloc(3);
     
       gsl_vector_view Momentum_0 = gsl_matrix_column(Momentum,0);
       gsl_vector_view Momentum_1 = gsl_matrix_column(Momentum,1);
@@ -648,27 +661,28 @@ int main (int argc, char *argv[]) {
       
       PrintMsg("Computing the momentum of upper wall");
       
-      TemporalMomentum = Compute_Macro(&Momentum_0.vector, Positions, 1, "top"); 
-      gsl_vector_set(MacroMomentum,0,TemporalMomentum);
-      TemporalMomentum = Compute_Macro(&Momentum_1.vector, Positions, 1, "top"); 
-      gsl_vector_set(MacroMomentum,1,TemporalMomentum);
-      TemporalMomentum = Compute_Macro(&Momentum_2.vector, Positions, 1, "top"); 
-      gsl_vector_set(MacroMomentum,2,TemporalMomentum);
+      TemporalMomentumUpper = Compute_Macro(&Momentum_0.vector, Positions, 1, "top"); 
+      gsl_vector_set(MacroMomentumUpper,0,TemporalMomentumUpper);
+      TemporalMomentumUpper = Compute_Macro(&Momentum_1.vector, Positions, 1, "top"); 
+      gsl_vector_set(MacroMomentumUpper,1,TemporalMomentumUpper);
+      TemporalMomentumUpper = Compute_Macro(&Momentum_2.vector, Positions, 1, "top"); 
+      gsl_vector_set(MacroMomentumUpper,2,TemporalMomentumUpper);
       
-      PrintInfo(Step, MacroMomentum, oFile.MacroMomentumUpperWall);
+      PrintInfo(Step, MacroMomentumUpper, oFile.MacroMomentumUpperWall);
     
       PrintMsg("Computing the momentum of lower wall");
 
-      TemporalMomentum = Compute_Macro(&Momentum_0.vector, Positions, 1, "bottom"); 
-      gsl_vector_set(MacroMomentum,0,TemporalMomentum);
-      TemporalMomentum = Compute_Macro(&Momentum_1.vector, Positions, 1, "bottom"); 
-      gsl_vector_set(MacroMomentum,1,TemporalMomentum);
-      TemporalMomentum = Compute_Macro(&Momentum_2.vector, Positions, 1, "bottom"); 
-      gsl_vector_set(MacroMomentum,2,TemporalMomentum);
+      TemporalMomentumLower = Compute_Macro(&Momentum_0.vector, Positions, 1, "bottom"); 
+      gsl_vector_set(MacroMomentumLower,0,TemporalMomentumLower);
+      TemporalMomentumLower = Compute_Macro(&Momentum_1.vector, Positions, 1, "bottom"); 
+      gsl_vector_set(MacroMomentumLower,1,TemporalMomentumLower);
+      TemporalMomentumLower = Compute_Macro(&Momentum_2.vector, Positions, 1, "bottom"); 
+      gsl_vector_set(MacroMomentumLower,2,TemporalMomentumLower);
 
-      PrintInfo(Step, MacroMomentum, oFile.MacroMomentumLowerWall);
+      PrintInfo(Step, MacroMomentumLower, oFile.MacroMomentumLowerWall);
     
-      gsl_vector_free(MacroMomentum);
+      //gsl_vector_free(MacroMomentumUpper);
+      //gsl_vector_free(MacroMomentumLower);
     #endif
 
     #if __COMPUTE_CENTER_OF_MASS__
@@ -683,6 +697,27 @@ int main (int argc, char *argv[]) {
       PrintInfo(Step, CenterOfMass, oFile.CenterOfMassLowerWall);
       
       gsl_vector_free(CenterOfMass);
+    #endif
+
+
+    #if __COMPUTE_MACRO_INTERNAL_ENERGY__
+      double MacroInternalEnergy;
+      double TotalMass;
+
+      PrintMsg("Computing Total Mass upper wall");
+      TotalMass = Compute_TotalMass(Positions, 1, "top");
+
+      PrintMsg("Computing the internal energy of upper wall");
+      MacroInternalEnergy = Compute_MacroInternalEnergy(MacroEnergyUpper, MacroMomentumUpper, TotalMass, 1, "top");
+      PrintScalarWithIndex(Step, MacroInternalEnergy, oFile.MacroInternalEnergyUpperWall); 
+
+      PrintMsg("Computing Total Mass lower wall");
+      TotalMass = Compute_TotalMass(Positions,1, "bottom");
+      
+      PrintMsg("Computing the internal energy of lower wall");
+      MacroInternalEnergy = Compute_MacroInternalEnergy(MacroEnergyLower, MacroMomentumLower, TotalMass, 1, "bottom");
+      PrintScalarWithIndex(Step, MacroInternalEnergy, oFile.MacroInternalEnergyLowerWall); 
+
     #endif
   }
  
@@ -775,6 +810,11 @@ int main (int argc, char *argv[]) {
   #if __COMPUTE_CENTER_OF_MASS__
   fclose(oFile.CenterOfMassUpperWall);
   fclose(oFile.CenterOfMassLowerWall);
+  #endif
+  
+  #if __COMPUTE_MACRO_INTERNAL_ENERGY__
+  fclose(oFile.MacroInternalEnergyUpperWall);
+  fclose(oFile.MacroInternalEnergyLowerWall);
   #endif
 
   // SECOND COMPUTATION. OBTAIN MEAN VALUES
@@ -966,7 +1006,10 @@ int main (int argc, char *argv[]) {
   gsl_matrix_free(MesoMomentum);
   gsl_matrix_free(MesoVelocity);
   gsl_vector_free(MesoInternalEnergy);
-
+  
+  // Free macro vectors
+  gsl_vector_free(MacroMomentumUpper);
+  gsl_vector_free(MacroMomentumLower);
   // END OF BLOCK. MEM FREE
   
   PrintMsg("EOF. Have a nice day.");
