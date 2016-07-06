@@ -15,6 +15,7 @@ Rev#010
   nested loop.
 - Added a `__VERBOSE__` flag in `params.h`.
 - Added a `__BINARY_OUTPUT__` flag in `params.h`.
+- Fixed an issue computing `MesoDensity`.
 
 Rev#009
 -------

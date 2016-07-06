@@ -3,7 +3,7 @@
  *
  * Created    : 07.04.2016
  *
- * Modified   : mié 29 jun 2016 16:37:49 CEST
+ * Modified   : mié 06 jul 2016 14:25:23 CEST
  *
  * Author     : jatorre
  *
@@ -34,7 +34,7 @@ void Compute_Meso_Density(gsl_matrix * Micro, gsl_vector * z, gsl_matrix * n)
 
   for (int i=0;i<NParticles;i++)
   {
-    int    type    = (int) gsl_matrix_get(Micro,i,0);
+    int    type    = (int) gsl_matrix_get(Micro,i,0)-1;
     double zi      = gsl_matrix_get(Micro,i,3);
     int    muLeft  = (int) floor(zi*NNodes/Lz);
     int    muRight = muLeft+1;
