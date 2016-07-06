@@ -702,14 +702,14 @@ int main (int argc, char *argv[]) {
       TotalMass = Compute_TotalMass(Positions, 1, "top");
 
       PrintMsg("Computing the internal energy of upper wall");
-      MacroInternalEnergy = Compute_MacroInternalEnergy(MacroEnergyUpper, MacroMomentumUpper, TotalMass, 1, "top");
+      MacroInternalEnergy = Compute_MacroInternalEnergy(MacroEnergyUpper, MacroMomentumUpper, TotalMass);
       PrintScalarWithIndex(Step, MacroInternalEnergy, oFile.MacroInternalEnergyUpperWall); 
 
       PrintMsg("Computing Total Mass lower wall");
-      TotalMass = Compute_TotalMass(Positions,1, "bottom");
+      TotalMass = Compute_TotalMass(Positions, 1, "bottom");
       
       PrintMsg("Computing the internal energy of lower wall");
-      MacroInternalEnergy = Compute_MacroInternalEnergy(MacroEnergyLower, MacroMomentumLower, TotalMass, 1, "bottom");
+      MacroInternalEnergy = Compute_MacroInternalEnergy(MacroEnergyLower, MacroMomentumLower, TotalMass);
       PrintScalarWithIndex(Step, MacroInternalEnergy, oFile.MacroInternalEnergyLowerWall); 
 
     #endif

@@ -169,7 +169,7 @@ double Compute_TotalMass(gsl_matrix * Positions, int type, char *str)
 }
 
 
-double Compute_MacroInternalEnergy(double MacroEnergy, gsl_vector * Momentum, double TotalMass, int type, char *str)
+double Compute_MacroInternalEnergy(double MacroEnergy, gsl_vector * Momentum, double TotalMass)
 {
     double MacroInternalEnergy;
     double ModMomentum = sqrt(pow(gsl_vector_get(Momentum,0),2) + pow(gsl_vector_get(Momentum,1),2) + pow(gsl_vector_get(Momentum,2),2));
