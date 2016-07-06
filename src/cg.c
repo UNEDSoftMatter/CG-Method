@@ -649,40 +649,34 @@ int main (int argc, char *argv[]) {
     #endif
 
     #if __COMPUTE_MACRO_MOMENTUM__
-      double TemporalMomentumUpper;
-      double TemporalMomentumLower;
+      double TemporalMomentum;
 
-      //gsl_vector * MacroMomentumUpper = gsl_vector_calloc(3);
-      //gsl_vector * MacroMomentumLower = gsl_vector_calloc(3);
-    
       gsl_vector_view Momentum_0 = gsl_matrix_column(Momentum,0);
       gsl_vector_view Momentum_1 = gsl_matrix_column(Momentum,1);
       gsl_vector_view Momentum_2 = gsl_matrix_column(Momentum,2);
       
       PrintMsg("Computing the momentum of upper wall");
       
-      TemporalMomentumUpper = Compute_Macro(&Momentum_0.vector, Positions, 1, "top"); 
-      gsl_vector_set(MacroMomentumUpper,0,TemporalMomentumUpper);
-      TemporalMomentumUpper = Compute_Macro(&Momentum_1.vector, Positions, 1, "top"); 
-      gsl_vector_set(MacroMomentumUpper,1,TemporalMomentumUpper);
-      TemporalMomentumUpper = Compute_Macro(&Momentum_2.vector, Positions, 1, "top"); 
-      gsl_vector_set(MacroMomentumUpper,2,TemporalMomentumUpper);
+      TemporalMomentum = Compute_Macro(&Momentum_0.vector, Positions, 1, "top"); 
+      gsl_vector_set(MacroMomentumUpper,0,TemporalMomentum);
+      TemporalMomentum = Compute_Macro(&Momentum_1.vector, Positions, 1, "top"); 
+      gsl_vector_set(MacroMomentumUpper,1,TemporalMomentum);
+      TemporalMomentum = Compute_Macro(&Momentum_2.vector, Positions, 1, "top"); 
+      gsl_vector_set(MacroMomentumUpper,2,TemporalMomentum);
       
       PrintInfo(Step, MacroMomentumUpper, oFile.MacroMomentumUpperWall);
     
       PrintMsg("Computing the momentum of lower wall");
 
-      TemporalMomentumLower = Compute_Macro(&Momentum_0.vector, Positions, 1, "bottom"); 
-      gsl_vector_set(MacroMomentumLower,0,TemporalMomentumLower);
-      TemporalMomentumLower = Compute_Macro(&Momentum_1.vector, Positions, 1, "bottom"); 
-      gsl_vector_set(MacroMomentumLower,1,TemporalMomentumLower);
-      TemporalMomentumLower = Compute_Macro(&Momentum_2.vector, Positions, 1, "bottom"); 
-      gsl_vector_set(MacroMomentumLower,2,TemporalMomentumLower);
+      TemporalMomentum = Compute_Macro(&Momentum_0.vector, Positions, 1, "bottom"); 
+      gsl_vector_set(MacroMomentumLower,0,TemporalMomentum);
+      TemporalMomentum = Compute_Macro(&Momentum_1.vector, Positions, 1, "bottom"); 
+      gsl_vector_set(MacroMomentumLower,1,TemporalMomentum);
+      TemporalMomentum = Compute_Macro(&Momentum_2.vector, Positions, 1, "bottom"); 
+      gsl_vector_set(MacroMomentumLower,2,TemporalMomentum);
 
       PrintInfo(Step, MacroMomentumLower, oFile.MacroMomentumLowerWall);
     
-      //gsl_vector_free(MacroMomentumUpper);
-      //gsl_vector_free(MacroMomentumLower);
     #endif
 
     #if __COMPUTE_CENTER_OF_MASS__
