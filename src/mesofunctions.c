@@ -168,7 +168,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
   #pragma omp parallel num_threads(8)
   {
     #pragma omp for schedule (static) 
-    // Forall i particles
+    // For all i particles
     for (int i=0;i<NParticles;i++)
     {
       // Only for fluid (type 2) particle
@@ -191,7 +191,7 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
         int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
         int NNeighbors = Compute_VerletList(Positions, i, &NeighboringCells.vector, iCell, ListHead, List, Verlet);
         
-        // Forall Verlet[j] neighboring particles
+        // For all Verlet[j] neighboring particles
         for (int j=0;j<NNeighbors;j++)
         {
           // Only for fluid (type 2) particles
@@ -254,14 +254,14 @@ void Compute_Meso_Sigma2 (gsl_matrix * Positions, gsl_matrix * Neighbors, gsl_ve
   gsl_matrix_scale(MesoSigma2,0.5/dv);
 }
           
-void Compute_Meso_HeatFlux1 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_vector * Energy, 
-                          gsl_matrix * MesoHeatFlux1)
+void Compute_Meso_Q1 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_vector * Energy, 
+                          gsl_matrix * MesoQ1)
 {
   int mu = 0;
   double mass = 0.0;
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
-  gsl_matrix_set_zero(MesoHeatFlux1);
+  gsl_matrix_set_zero(MesoQ1);
   
   // Loop over all i-particles
   for (int i=0;i<NParticles;i++)
@@ -279,7 +279,7 @@ void Compute_Meso_HeatFlux1 (gsl_matrix * Positions, gsl_matrix * Velocities, gs
       // stress tensor
       mass = ( (int) gsl_matrix_get(Positions,i,0) == 1 ? 0.0 : m2 );
 
-      double * HeatFlux1 = malloc(3*sizeof(double));
+      double * Q1 = malloc(3*sizeof(double));
 
       double vx = gsl_matrix_get(Velocities,i,0);
       double vy = gsl_matrix_get(Velocities,i,1);
@@ -287,24 +287,24 @@ void Compute_Meso_HeatFlux1 (gsl_matrix * Positions, gsl_matrix * Velocities, gs
       
       double e = gsl_vector_get(Energy, i);
 
-      HeatFlux1[0] = vx * e;
-      HeatFlux1[1] = vy * e;
-      HeatFlux1[2] = vz * e;
+      Q1[0] = vx * e;
+      Q1[1] = vy * e;
+      Q1[2] = vz * e;
      
-      for (int j=0;j<9;j++)
-        MesoHeatFlux1->data[mu*MesoHeatFlux1->tda+j] += mass * HeatFlux1[j];
+      for (int j=0;j<3;j++)
+        MesoQ1->data[mu*MesoQ1->tda+j] += Q1[j];
 
-      free(HeatFlux1);
+      free(Q1);
     }
   }
-  gsl_matrix_scale(MesoHeatFlux1,1.0/dv);
+  gsl_matrix_scale(MesoQ1,1.0/dv);
 }
 
-void Compute_Meso_HeatFlux2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * Neighbors, gsl_vector * ListHead,
-                          gsl_vector * List, gsl_matrix * MesoHeatFlux2, gsl_vector * z)
+void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * Neighbors, gsl_vector * ListHead,
+                          gsl_vector * List, gsl_matrix * MesoQ2, gsl_vector * z)
 {
 
-  gsl_matrix_set_zero(MesoHeatFlux2);
+  gsl_matrix_set_zero(MesoQ2);
 
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
@@ -374,55 +374,117 @@ void Compute_Meso_HeatFlux2 (gsl_matrix * Positions, gsl_matrix * Velocities, gs
             vij[1]  = gsl_matrix_get(Positions,i,2) + gsl_matrix_get(Positions,Verlet[j],2);
             vij[2]  = vzi + vzj;
 
-            double * HeatFlux2 = malloc(9*sizeof(double));
+            double * Q2 = malloc(3*sizeof(double));
 
             for (int sigma=((int)min(mu,nu)); sigma<=((int)max(mu,nu));sigma++)
             {
               double zsigma = zmuij(z,sigma,zi,zj);
               
-              HeatFlux2[0] =vij[0]*rij[0]*fij[0]*zsigma;
-              HeatFlux2[1] =vij[0]*rij[0]*fij[1]*zsigma;
-              HeatFlux2[2] =vij[0]*rij[0]*fij[2]*zsigma;
-              HeatFlux2[3] =vij[0]*rij[1]*fij[0]*zsigma;
-              HeatFlux2[4] =vij[0]*rij[1]*fij[1]*zsigma;
-              HeatFlux2[5] =vij[0]*rij[1]*fij[2]*zsigma;
-              HeatFlux2[6] =vij[0]*rij[2]*fij[0]*zsigma;
-              HeatFlux2[7] =vij[0]*rij[2]*fij[1]*zsigma;
-              HeatFlux2[8] =vij[0]*rij[2]*fij[2]*zsigma;
-              HeatFlux2[9] =vij[1]*rij[0]*fij[0]*zsigma;
-              HeatFlux2[10] =vij[1]*rij[0]*fij[1]*zsigma;
-              HeatFlux2[11] =vij[1]*rij[0]*fij[2]*zsigma;
-              HeatFlux2[12] =vij[1]*rij[1]*fij[0]*zsigma;
-              HeatFlux2[13] =vij[1]*rij[1]*fij[1]*zsigma;
-              HeatFlux2[14] =vij[1]*rij[1]*fij[2]*zsigma;
-              HeatFlux2[15] =vij[1]*rij[2]*fij[0]*zsigma;
-              HeatFlux2[16] =vij[1]*rij[2]*fij[1]*zsigma;
-              HeatFlux2[17] =vij[1]*rij[2]*fij[2]*zsigma;
-              HeatFlux2[18] =vij[2]*rij[0]*fij[0]*zsigma;
-              HeatFlux2[19] =vij[2]*rij[0]*fij[1]*zsigma;
-              HeatFlux2[20] =vij[2]*rij[0]*fij[2]*zsigma;
-              HeatFlux2[21] =vij[2]*rij[1]*fij[0]*zsigma;
-              HeatFlux2[22] =vij[2]*rij[1]*fij[1]*zsigma;
-              HeatFlux2[23] =vij[2]*rij[1]*fij[2]*zsigma;
-              HeatFlux2[24] =vij[2]*rij[2]*fij[0]*zsigma;
-              HeatFlux2[25] =vij[2]*rij[2]*fij[1]*zsigma;
-              HeatFlux2[26] =vij[2]*rij[2]*fij[2]*zsigma;
+              Q2[0] =(vij[0]*fij[0]*rij[0] + vij[1]*fij[1]*rij[0] + vij[2]*fij[2]*rij[0])*zsigma;
+              Q2[1] =(vij[0]*fij[0]*rij[1] + vij[1]*fij[1]*rij[1] + vij[2]*fij[2]*rij[1])*zsigma;
+              Q2[2] =(vij[0]*fij[0]*rij[2] + vij[1]*fij[1]*rij[2] + vij[2]*fij[2]*rij[2])*zsigma;
 
-              for (int k=0;k<27;k++)
-                MesoHeatFlux2->data[sigma*MesoHeatFlux2->tda+k] += HeatFlux2[k];
+              for (int k=0;k<3;k++)
+                MesoQ2->data[sigma*MesoQ2->tda+k] += Q2[k];
             }
             
             free(fij);
             free(rij);
-            free(HeatFlux2);
+            free(Q2);
           }
         }
         free(Verlet);
       }
     }
   }
-  gsl_matrix_scale(MesoHeatFlux2,0.25/dv);
+  gsl_matrix_scale(MesoQ2,0.25/dv);
 }
+
+
+void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * Neighbors, gsl_vector * ListHead,
+                          gsl_vector * List, gsl_matrix * MesoPi, gsl_vector * z)
+{
+
+  gsl_matrix_set_zero(MesoPi);
+
+  double dv = ((float) Lx * Ly * Lz) / NNodes;
+  
+  #pragma omp parallel num_threads(8)
+  {
+    #pragma omp for schedule (static) 
+    // For all i particles
+    for (int i=0;i<NParticles;i++)
+    {
+      // Only for fluid (type 2) particle
+      if ((int) gsl_matrix_get(Positions,i,0) == 2)
+      {
+        double zi = gsl_matrix_get(Positions,i,3);
+        double vzi = gsl_matrix_get(Velocities,i,3);
+        // Find the bin mu to which the particle i belongs
+        int mu = floor(zi*NNodes/Lz) - 1;
+        // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
+        // Checkpoint
+        // if (mu == -1) 
+        //   printf("ERROR! Fluid particle %d in bin %d!\n", i, mu);
+        ( mu == -1 ) ? mu = NNodes-1 : mu ;
+
+        // Find the cell to which the particle i belongs and all its neighboring cells
+        int iCell = FindParticle(Positions,i);
+        gsl_vector_view NeighboringCells = gsl_matrix_row(Neighbors, iCell);
+        
+        // Find the neighbors of particle i
+        int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
+        int NNeighbors = Compute_VerletList(Positions, i, &NeighboringCells.vector, iCell, ListHead, List, Verlet);
+        
+        // For all Verlet[j] neighboring particles
+        for (int j=0;j<NNeighbors;j++)
+        {
+          // Only for solid (type 1) particles
+          if ((int) gsl_matrix_get(Positions,Verlet[j],0) == 1)
+          {
+            double zj = gsl_matrix_get(Positions,Verlet[j],3);
+            double vzj = gsl_matrix_get(Velocities,Verlet[j],3);
+            // Find the bin nu to which the particle Verlet[j] belongs
+            int nu = floor(zj*NNodes/Lz) - 1;
+            // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
+            // Checkpoint
+            // if (nu == -1) 
+            //   printf("ERROR! Fluid particle %d in bin %d!\n", Verlet[j], nu);
+            ( nu == -1 ) ? nu = NNodes-1 : nu ;
+            
+            // Compute only the force between  particles of type 1 and particle of
+            // type 2 (solid-fluid interaction)
+            double * fij = malloc(3*sizeof(double));
+            
+            double eij = Compute_Force_ij (Positions, i, Verlet[j], 1, 2, fij);
+
+            double * vij = malloc(1*sizeof(double));
+            
+            vij[0]  = gsl_matrix_get(Velocities,i,1) + gsl_matrix_get(Velocities,Verlet[j],1);
+            vij[1]  = gsl_matrix_get(Positions,i,2) + gsl_matrix_get(Positions,Verlet[j],2);
+            vij[2]  = vzi + vzj;
+
+            double * Pi = malloc(3*sizeof(double));
+              
+              Pi[0] =fij[0]*vij[0];
+              Pi[1] =fij[1]*vij[1];
+              Pi[2] =fij[2]*vij[2];
+
+              for (int k=0;k<3;k++)
+                MesoPi->data[mu*MesoPi->tda+k] += Pi[k];
+            
+            free(fij);
+            free(Pi);
+          }
+        }
+        free(Verlet);
+      }
+    }
+  }
+  gsl_matrix_scale(MesoPi,0.25/dv);
+}
+
+
 
 void Compute_Meso_Energy(gsl_matrix * Micro, gsl_vector * MicroEnergy, gsl_vector * z, gsl_vector * MesoEnergy)
 {

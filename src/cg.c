@@ -168,6 +168,39 @@ int main (int argc, char *argv[]) {
     oFile.MesoSigma_22 = fopen(str, "w");
   #endif
 
+  #if __COMPUTE_Q__
+    // First part
+    sprintf(str, "./output/%s.MesoQ1_x.dat", filestr);
+    oFile.MesoQ1_0 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoQ1_y.dat", filestr);
+    oFile.MesoQ1_1 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoQ1_z.dat", filestr);
+    oFile.MesoQ1_2 = fopen(str, "w");
+    // Second part
+    sprintf(str, "./output/%s.MesoQ2_x.dat", filestr);
+    oFile.MesoQ2_0 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoQ2_y.dat", filestr);
+    oFile.MesoQ2_1 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoQ2_z.dat", filestr);
+    oFile.MesoQ2_2 = fopen(str, "w");
+    // Total heat flux fluid-fluid
+    sprintf(str, "./output/%s.MesoQ_x.dat", filestr);
+    oFile.MesoQ_0 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoQ_y.dat", filestr);
+    oFile.MesoQ_1 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoQ_z.dat", filestr);
+    oFile.MesoQ_2 = fopen(str, "w");
+  #endif
+
+  #if __COMPUTE_PI__
+    sprintf(str, "./output/%s.MesoPi_x.dat", filestr);
+    oFile.MesoPi_0 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoPi_y.dat", filestr);
+    oFile.MesoPi_1 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoPi_z.dat", filestr);
+    oFile.MesoPi_2 = fopen(str, "w");
+  #endif
+  
   #if __COMPUTE_MOMENTUM__
     sprintf(str, "./output/%s.MesoMomentum_x.dat", filestr);
     oFile.MesoMomentum_0 = fopen(str, "w");
@@ -272,7 +305,13 @@ int main (int argc, char *argv[]) {
   gsl_matrix * MesoSigma1   = gsl_matrix_calloc (NNodes,9);
   gsl_matrix * MesoSigma2   = gsl_matrix_calloc (NNodes,9);
   gsl_matrix * MesoSigma    = gsl_matrix_calloc (NNodes,9);
+ 
+  gsl_matrix * MesoQ1       = gsl_matrix_calloc (NNodes,3);
+  gsl_matrix * MesoQ2       = gsl_matrix_calloc (NNodes,3);
+  gsl_matrix * MesoQ        = gsl_matrix_calloc (NNodes,3);
   
+  gsl_matrix * MesoPi       = gsl_matrix_calloc (NNodes,3);
+
   gsl_matrix * MesoMomentum = gsl_matrix_calloc (NNodes,3);
   gsl_matrix * MesoVelocity = gsl_matrix_calloc (NNodes,3);
   
@@ -621,6 +660,54 @@ int main (int argc, char *argv[]) {
       PrintInfo(Step, &MesoSigma_22.vector, oFile.MesoSigma_22);
     #endif
 
+    #if __COMPUTE_Q__
+      PrintMsg("Obtaining node heat flux fluid-fluid (Q1)...");
+      
+      Compute_Meso_Q1(Positions, Velocities, Energy, MesoQ1);
+      gsl_matrix_memcpy(MesoQ,MesoQ1);
+      
+      gsl_vector_view  MesoQ1_0 = gsl_matrix_column(MesoQ1,0);
+      PrintInfo(Step, &MesoQ1_0.vector, oFile.MesoQ1_0);
+      gsl_vector_view  MesoQ1_1 = gsl_matrix_column(MesoQ1,1);
+      PrintInfo(Step, &MesoQ1_1.vector, oFile.MesoQ1_1);
+      gsl_vector_view  MesoQ1_2 = gsl_matrix_column(MesoQ1,2);
+      PrintInfo(Step, &MesoQ1_2.vector, oFile.MesoQ1_2);
+      
+      PrintMsg("Obtaining node heat flux fluid-fluid (Q2)...");
+
+      Compute_Meso_Q2(Positions, Velocities, Neighbors, ListHead, List, MesoQ2, z);
+      gsl_matrix_add (MesoQ, MesoQ2);
+
+      gsl_vector_view  MesoQ2_0 = gsl_matrix_column(MesoQ2,0);
+      PrintInfo(Step, &MesoQ2_0.vector, oFile.MesoQ2_0);
+      gsl_vector_view  MesoQ2_1 = gsl_matrix_column(MesoQ2,1);
+      PrintInfo(Step, &MesoQ2_1.vector, oFile.MesoQ2_1);
+      gsl_vector_view  MesoQ2_2 = gsl_matrix_column(MesoQ2,2);
+      PrintInfo(Step, &MesoQ2_2.vector, oFile.MesoQ2_2);
+      
+      PrintMsg("Saving heat flux fluid-fluid...");
+
+      gsl_vector_view  MesoQ_0 = gsl_matrix_column(MesoQ,0);
+      PrintInfo(Step, &MesoQ_0.vector, oFile.MesoQ_0);
+      gsl_vector_view  MesoQ_1 = gsl_matrix_column(MesoQ,1);
+      PrintInfo(Step, &MesoQ_1.vector, oFile.MesoQ_1);
+      gsl_vector_view  MesoQ_2 = gsl_matrix_column(MesoQ,2);
+      PrintInfo(Step, &MesoQ_2.vector, oFile.MesoQ_2);
+    #endif
+
+    #if __COMPUTE_PI__
+      PrintMsg("Obtaining and saving node heat flux solid-fluid (Pi)...");
+      
+      Compute_Meso_Pi(Positions, Velocities, Neighbors, ListHead, List, MesoPi, z);
+      
+      gsl_vector_view  MesoPi_0 = gsl_matrix_column(MesoPi,0);
+      PrintInfo(Step, &MesoPi_0.vector, oFile.MesoPi_0);
+      gsl_vector_view  MesoPi_1 = gsl_matrix_column(MesoPi,1);
+      PrintInfo(Step, &MesoPi_1.vector, oFile.MesoPi_1);
+      gsl_vector_view  MesoPi_2 = gsl_matrix_column(MesoPi,2);
+      PrintInfo(Step, &MesoPi_2.vector, oFile.MesoPi_2);
+    #endif
+
     #if __COMPUTE_TEMPERATURE__
       PrintMsg("Obtaining node temperature...");
       Compute_Meso_Temp(MesoKinetic, MesoDensity_2, MesoTemp);
@@ -676,7 +763,6 @@ int main (int argc, char *argv[]) {
       gsl_vector_set(MacroMomentumLower,2,TemporalMomentum);
 
       PrintInfo(Step, MacroMomentumLower, oFile.MacroMomentumLowerWall);
-    
     #endif
 
     #if __COMPUTE_CENTER_OF_MASS__
@@ -711,7 +797,6 @@ int main (int argc, char *argv[]) {
       PrintMsg("Computing the internal energy of lower wall");
       MacroInternalEnergy = Compute_MacroInternalEnergy(MacroEnergyLower, MacroMomentumLower, TotalMass);
       PrintScalarWithIndex(Step, MacroInternalEnergy, oFile.MacroInternalEnergyLowerWall); 
-
     #endif
   }
  
@@ -773,6 +858,26 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesoSigma_20);
   fclose(oFile.MesoSigma_21);
   fclose(oFile.MesoSigma_22);
+  #endif
+
+  #if __COMPUTE_Q_
+  fclose(oFile.MesoQ1_0);
+  fclose(oFile.MesoQ1_1);
+  fclose(oFile.MesoQ1_2);
+  
+  fclose(oFile.MesoQ2_0);
+  fclose(oFile.MesoQ2_1);
+  fclose(oFile.MesoQ2_2);
+  
+  fclose(oFile.MesoQ_0);
+  fclose(oFile.MesoQ_1);
+  fclose(oFile.MesoQ_2);
+  #endif
+  
+  #if __COMPUTE_PI_
+  fclose(oFile.MesoPi_0);
+  fclose(oFile.MesoPi_1);
+  fclose(oFile.MesoPi_2);
   #endif
 
   #if __COMPUTE_MOMENTUM__
@@ -933,6 +1038,7 @@ int main (int argc, char *argv[]) {
       gsl_vector_free(MesoAverage);
     } 
     #endif
+    
     #pragma omp section
     {
       gsl_vector * MesoAverage = gsl_vector_calloc(NNodes);
@@ -996,7 +1102,10 @@ int main (int argc, char *argv[]) {
   gsl_matrix_free(MesoSigma1);
   gsl_matrix_free(MesoSigma2);
   gsl_matrix_free(MesoSigma);
-  
+  gsl_matrix_free(MesoQ1);
+  gsl_matrix_free(MesoQ2);
+  gsl_matrix_free(MesoQ);
+  gsl_matrix_free(MesoPi);
   gsl_matrix_free(MesoMomentum);
   gsl_matrix_free(MesoVelocity);
   gsl_vector_free(MesoInternalEnergy);
@@ -1008,4 +1117,4 @@ int main (int argc, char *argv[]) {
   
   PrintMsg("EOF. Have a nice day.");
   return 0;
-}
+  }

@@ -214,6 +214,18 @@ struct OutputFiles
   FILE * CenterOfMassLowerWall;
   FILE * MacroInternalEnergyUpperWall;
   FILE * MacroInternalEnergyLowerWall;
+  FILE * MesoQ1_0;
+  FILE * MesoQ1_1;
+  FILE * MesoQ1_2;
+  FILE * MesoQ2_0;
+  FILE * MesoQ2_1;
+  FILE * MesoQ2_2;
+  FILE * MesoQ_0;
+  FILE * MesoQ_1;
+  FILE * MesoQ_2;
+  FILE * MesoPi_0;
+  FILE * MesoPi_1;
+  FILE * MesoPi_2;
 };
 
 // Print  a row in  *fileptr with the  information stored in  vector.  The first
@@ -275,6 +287,15 @@ void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum,
                             gsl_vector * MesoDensity, gsl_vector * InternalEnergy);
 
 double zmuij(gsl_vector * z, int mu, double zi, double zj);
+
+void Compute_Meso_Q1 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_vector * Energy, 
+                          gsl_matrix * MesoQ1);
+
+void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * Neighbors, gsl_vector * ListHead,
+                          gsl_vector * List, gsl_matrix * MesoQ2, gsl_vector * z);
+
+void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * Neighbors, gsl_vector * ListHead,
+                          gsl_vector * List, gsl_matrix * MesoPi, gsl_vector * z);
 
 /* #############################################################################
 #  Macroscopic functions in macrofunctions.c 
