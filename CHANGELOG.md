@@ -1,6 +1,11 @@
 HISTORICAL MILESTONES
 =====================
 
+
+Rev#010 by @DiegoDZ
+-------
+- Added computation of heat flux (Q and Pi)
+
 Rev#009
 -------
 - Merged macro and Rev#008 branches.
