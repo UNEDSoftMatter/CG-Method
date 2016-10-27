@@ -258,7 +258,6 @@ void Compute_Meso_Q1 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_vecto
                           gsl_matrix * MesoQ1)
 {
   int mu = 0;
-  double mass = 0.0;
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
   gsl_matrix_set_zero(MesoQ1);
@@ -273,11 +272,6 @@ void Compute_Meso_Q1 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_vecto
       mu = floor(gsl_matrix_get(Positions,i,3)*NNodes/Lz) - 1;
       // PBC: If mu == -1, the particle belongs to the upper bin
       ( mu == -1 ) ? mu = NNodes-1 : mu ;
-
-      // mass = ( gsl_matrix_get(Positions,i,0) == 1 ? m1 : m2 );
-      // If type of atom == 1 then it is a wall particle, so it does not contribute to the
-      // stress tensor
-      mass = ( (int) gsl_matrix_get(Positions,i,0) == 1 ? 0.0 : m2 );
 
       double * Q1 = malloc(3*sizeof(double));
 
@@ -311,14 +305,14 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
   #pragma omp parallel num_threads(8)
   {
     #pragma omp for schedule (static) 
-    // Forall i particles
+    // For all i particles
     for (int i=0;i<NParticles;i++)
     {
       // Only for fluid (type 2) particle
       if ((int) gsl_matrix_get(Positions,i,0) == 2)
       {
         double zi = gsl_matrix_get(Positions,i,3);
-        double vzi = gsl_matrix_get(Velocities,i,3);
+        double vzi = gsl_matrix_get(Velocities,i,2);
         // Find the bin mu to which the particle i belongs
         int mu = floor(zi*NNodes/Lz) - 1;
         // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
@@ -335,14 +329,14 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
         int * Verlet = malloc(27 * NParticles * sizeof(int) / (Mx*My*Mz) );
         int NNeighbors = Compute_VerletList(Positions, i, &NeighboringCells.vector, iCell, ListHead, List, Verlet);
         
-        // Forall Verlet[j] neighboring particles
+        // For all Verlet[j] neighboring particles
         for (int j=0;j<NNeighbors;j++)
         {
           // Only for fluid (type 2) particles
           if ((int) gsl_matrix_get(Positions,Verlet[j],0) == 2)
           {
             double zj = gsl_matrix_get(Positions,Verlet[j],3);
-            double vzj = gsl_matrix_get(Velocities,Verlet[j],3);
+            double vzj = gsl_matrix_get(Velocities,Verlet[j],2);
             // Find the bin nu to which the particle Verlet[j] belongs
             int nu = floor(zj*NNodes/Lz) - 1;
             // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
@@ -370,8 +364,8 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
             rij[2]  = zi - zj;
             rij[2] -= Lz*round(rij[2]/Lz);
             
-            vij[0]  = gsl_matrix_get(Velocities,i,1) + gsl_matrix_get(Velocities,Verlet[j],1);
-            vij[1]  = gsl_matrix_get(Positions,i,2) + gsl_matrix_get(Positions,Verlet[j],2);
+            vij[0]  = gsl_matrix_get(Velocities,i,0) + gsl_matrix_get(Velocities,Verlet[j],0);
+            vij[1]  = gsl_matrix_get(Positions,i,1) + gsl_matrix_get(Positions,Verlet[j],1);
             vij[2]  = vzi + vzj;
 
             double * Q2 = malloc(3*sizeof(double));
@@ -391,6 +385,7 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
             free(fij);
             free(rij);
             free(Q2);
+            free(vij);
           }
         }
         free(Verlet);
@@ -419,7 +414,7 @@ void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
       if ((int) gsl_matrix_get(Positions,i,0) == 2)
       {
         double zi = gsl_matrix_get(Positions,i,3);
-        double vzi = gsl_matrix_get(Velocities,i,3);
+        double vzi = gsl_matrix_get(Velocities,i,2);
         // Find the bin mu to which the particle i belongs
         int mu = floor(zi*NNodes/Lz) - 1;
         // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
@@ -443,7 +438,7 @@ void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
           if ((int) gsl_matrix_get(Positions,Verlet[j],0) == 1)
           {
             double zj = gsl_matrix_get(Positions,Verlet[j],3);
-            double vzj = gsl_matrix_get(Velocities,Verlet[j],3);
+            double vzj = gsl_matrix_get(Velocities,Verlet[j],2);
             // Find the bin nu to which the particle Verlet[j] belongs
             int nu = floor(zj*NNodes/Lz) - 1;
             // NEVER APPLIED (bc there is no type2 particles in bin NNodes)
@@ -456,25 +451,27 @@ void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
             // type 2 (solid-fluid interaction)
             double * fij = malloc(3*sizeof(double));
             
-            double eij = Compute_Force_ij (Positions, i, Verlet[j], 1, 2, fij);
+            double eij = Compute_Force_ij (Positions, i, Verlet[j], 2, 1, fij);
 
             double * vij = malloc(1*sizeof(double));
             
-            vij[0]  = gsl_matrix_get(Velocities,i,1) + gsl_matrix_get(Velocities,Verlet[j],1);
-            vij[1]  = gsl_matrix_get(Positions,i,2) + gsl_matrix_get(Positions,Verlet[j],2);
+            vij[0]  = gsl_matrix_get(Velocities,i,0) + gsl_matrix_get(Velocities,Verlet[j],0);
+            vij[1]  = gsl_matrix_get(Velocities,i,1) + gsl_matrix_get(Velocities,Verlet[j],1);
             vij[2]  = vzi + vzj;
 
             double * Pi = malloc(3*sizeof(double));
-              
+            for (int sigma=((int)min(mu,nu)); sigma<=((int)max(mu,nu));sigma++)
+            {
               Pi[0] =fij[0]*vij[0];
               Pi[1] =fij[1]*vij[1];
               Pi[2] =fij[2]*vij[2];
 
               for (int k=0;k<3;k++)
-                MesoPi->data[mu*MesoPi->tda+k] += Pi[k];
-            
+                MesoPi->data[sigma*MesoPi->tda+k] += Pi[k];
+            } 
             free(fij);
             free(Pi);
+            free(vij);
           }
         }
         free(Verlet);
@@ -483,7 +480,6 @@ void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
   }
   gsl_matrix_scale(MesoPi,0.25/dv);
 }
-
 
 
 void Compute_Meso_Energy(gsl_matrix * Micro, gsl_vector * MicroEnergy, gsl_vector * z, gsl_vector * MesoEnergy)

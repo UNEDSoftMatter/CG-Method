@@ -684,7 +684,7 @@ int main (int argc, char *argv[]) {
       PrintInfo(Step, &MesoQ2_1.vector, oFile.MesoQ2_1);
       gsl_vector_view  MesoQ2_2 = gsl_matrix_column(MesoQ2,2);
       PrintInfo(Step, &MesoQ2_2.vector, oFile.MesoQ2_2);
-      
+     
       PrintMsg("Saving heat flux fluid-fluid...");
 
       gsl_vector_view  MesoQ_0 = gsl_matrix_column(MesoQ,0);

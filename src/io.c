@@ -177,6 +177,7 @@ void Split_File(char *directory, char *iFile)
   int  linecounter=0;
   int  SizeOfChunk = NParticles+9;
 
+
   ptr_iFile = fopen(iFile, "r");
   sprintf(oFileName, "%s/x%05d", directory, filecounter);
   ptr_oFile = fopen(oFileName, "w");
@@ -198,6 +199,7 @@ void Split_File(char *directory, char *iFile)
     linecounter++;
   }
   fclose(ptr_iFile);
+  printf("Hi there!\n");
 }
 
 void PrintComputingOptions(void)
@@ -234,6 +236,20 @@ void PrintComputingOptions(void)
   
   printf("\tMesoscopic kinetic and virial stress tensor:\t");
   #if __COMPUTE_STRESS__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+
+  printf("\tMesoscopic heat flux fluid-fluid:\t");
+  #if __COMPUTE_Q__
+    printf("true\n");
+  #else
+    printf("false\n");
+  #endif
+    
+  printf("\tMesoscopic heat flux solid-fluid:\t");
+  #if __COMPUTE_PI__
     printf("true\n");
   #else
     printf("false\n");

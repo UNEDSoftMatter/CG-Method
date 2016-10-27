@@ -3,14 +3,14 @@
 ############################################################################# */
 
 // Relative path (from ~/CG-Method) where positions and velocites can be found
-#define PositionsFileStr  "../simulation/output.positions"
-#define VelocitiesFileStr "../simulation/output.velocities"
+#define PositionsFileStr  "../simulation/production.positions"
+#define VelocitiesFileStr "../simulation/production.velocities"
 
 // Total number of particles (type1+type2) in the simulation
 #define NParticles 11475
 
 // Number of snapshots in dump files
-#define NSteps      201
+#define NSteps      3051
 
 // Number of nodes you want to create
 #define NNodes        64
