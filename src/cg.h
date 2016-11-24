@@ -231,6 +231,8 @@ struct OutputFiles
 
 void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr);
 
+// Print  a row in  *fileptr with the  information stored in  vector.
+
 void PrintInfoWithoutStep(gsl_vector * vector, FILE* fileptr);
 
 // Print a row in *fileptr with the information store in a double . The firs column

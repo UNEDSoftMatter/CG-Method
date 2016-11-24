@@ -195,10 +195,6 @@ int main (int argc, char *argv[]) {
   #if __COMPUTE_PI__
     sprintf(str, "./output/%s.MesoPi.dat", filestr);
     oFile.MesoPi = fopen(str, "w");
-    //sprintf(str, "./output/%s.MesoPi_y.dat", filestr);
-    //oFile.MesoPi_1 = fopen(str, "w");
-    //sprintf(str, "./output/%s.MesoPi_z.dat", filestr);
-    //oFile.MesoPi_2 = fopen(str, "w");
   #endif
   
   #if __COMPUTE_MOMENTUM__
@@ -311,7 +307,6 @@ int main (int argc, char *argv[]) {
   gsl_matrix * MesoQ        = gsl_matrix_calloc (NNodes,3);
   
   gsl_vector * MesoPi       = gsl_vector_calloc (NNodes);
-  //gsl_matrix * MesoPi       = gsl_matrix_calloc (NNodes,3);
 
   gsl_matrix * MesoMomentum = gsl_matrix_calloc (NNodes,3);
   gsl_matrix * MesoVelocity = gsl_matrix_calloc (NNodes,3);
@@ -582,7 +577,7 @@ int main (int argc, char *argv[]) {
       {
         PrintMsg("Obtaining node kinetic energies...");
         Compute_Meso_Profile(Positions, Kinetic, z, MesoKinetic, 2);
-        PrintInfo(Step, MesoKinetic, oFile.MesoKinetic);
+        PrintInfoWithoutStep( MesoKinetic, oFile.MesoKinetic);
       }
       #endif
       #if __COMPUTE_STRESS__
@@ -668,11 +663,11 @@ int main (int argc, char *argv[]) {
       gsl_matrix_memcpy(MesoQ,MesoQ1);
       
       gsl_vector_view  MesoQ1_0 = gsl_matrix_column(MesoQ1,0);
-      PrintInfo(Step, &MesoQ1_0.vector, oFile.MesoQ1_0);
+      PrintInfoWithoutStep( &MesoQ1_0.vector, oFile.MesoQ1_0);
       gsl_vector_view  MesoQ1_1 = gsl_matrix_column(MesoQ1,1);
       PrintInfoWithoutStep(&MesoQ1_1.vector, oFile.MesoQ1_1);
       gsl_vector_view  MesoQ1_2 = gsl_matrix_column(MesoQ1,2);
-      PrintInfoWithoutStep(&MesoQ1_2.vector, oFile.MesoQ1_2);
+      PrintInfoWithoutStep( &MesoQ1_2.vector, oFile.MesoQ1_2);
       
       PrintMsg("Obtaining node heat flux fluid-fluid (Q2)...");
 
@@ -702,7 +697,7 @@ int main (int argc, char *argv[]) {
       //Compute_Meso_Pi(Positions, Velocities, Neighbors, ListHead, List, MesoPi, z);
       
       Compute_Meso_Pi(Positions, Velocities, Neighbors, ListHead, List, MesoPi, z);
-      PrintInfoWithoutStep( MesoPi, oFile.MesoPi);
+      PrintInfoWithoutStep(MesoPi, oFile.MesoPi);
       //gsl_vector_view  MesoPi_0 = gsl_matrix_column(MesoPi,0);
       //PrintInfoWithoutStep(&MesoPi_0.vector, oFile.MesoPi_0);
       //gsl_vector_view  MesoPi_1 = gsl_matrix_column(MesoPi,1);
@@ -879,9 +874,6 @@ int main (int argc, char *argv[]) {
   
   #if __COMPUTE_PI_
   fclose(oFile.MesoPi);
-  //fclose(oFile.MesoPi_0);
-  //fclose(oFile.MesoPi_1);
-  //fclose(oFile.MesoPi_2);
   #endif
 
   #if __COMPUTE_MOMENTUM__
@@ -921,9 +913,9 @@ int main (int argc, char *argv[]) {
   #endif
 
   // SECOND COMPUTATION. OBTAIN MEAN VALUES
-
+/*
   PrintMsg("Computing mean values...");
-    
+
   #pragma omp parallel sections
   {
     #pragma omp section
@@ -962,6 +954,7 @@ int main (int argc, char *argv[]) {
       
       gsl_vector_free(MesoAverage);
     } 
+    
     #if __COMPUTE_STRESS__
     #pragma omp section
     {
@@ -1073,6 +1066,7 @@ int main (int argc, char *argv[]) {
       gsl_vector_free(MesoAverage);
     }
   }
+  */
   // END OF BLOCK. COMPUTATION DONE
 
   // BEGIN OF BLOCK. FREE MEM

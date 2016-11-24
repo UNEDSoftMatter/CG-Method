@@ -401,7 +401,6 @@ void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
 {
 
   gsl_vector_set_zero(MesoPi);
-  //gsl_matrix_set_zero(MesoPi);
 
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
