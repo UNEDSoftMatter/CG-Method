@@ -10,7 +10,7 @@
 #define NParticles 11475
 
 // Number of snapshots in dump files
-#define NSteps      3051
+#define NSteps      4
 
 // Number of nodes you want to create
 #define NNodes        64
@@ -49,11 +49,11 @@
 #define false 0
 
 #define __COMPUTE_DENSITY__                 true
-#define __COMPUTE_FORCE__                   true
+#define __COMPUTE_FORCE__                   false
 #define __COMPUTE_ENERGY__                  true
 #define __COMPUTE_TEMPERATURE__             true
 #define __COMPUTE_STRESS__                  false
-#define __COMPUTE_MOMENTUM__                true
+#define __COMPUTE_MOMENTUM__                false
 #define __COMPUTE_VELOCITY__                true
 #define __COMPUTE_INTERNAL_ENERGY__         true
 #define __COMPUTE_MACRO_ENERGY__            true

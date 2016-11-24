@@ -135,12 +135,19 @@ void ReadInputFiles(char * iFileStr, char iFiles[][7])
 
 void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr)
 {
-  fprintf(fileptr, "%10d", Step);
+    fprintf(fileptr, "%10d", Step);
 
-  for (int i=0;i<vector->size;i++)
-    fprintf(fileptr, "\t%8.6e", gsl_vector_get(vector,i));
+    for (int i =0;i<vector->size;i++)
+        fprintf(fileptr, "\t%8.6e", gsl_vector_get(vector,i));
 
-  fprintf(fileptr,"\n");
+    fprintf(fileptr,"\n");
+}
+
+void PrintInfoWithoutStep(gsl_vector * vector, FILE* fileptr)
+{
+    for (int i=0;i<vector->size;i++)
+        fprintf(fileptr, "\t%8.6e", gsl_vector_get(vector,i));
+    fprintf(fileptr, "\n");
 }
 
 void PrepareInputFiles(void)

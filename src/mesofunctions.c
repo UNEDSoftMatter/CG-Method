@@ -397,10 +397,11 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
 
 
 void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * Neighbors, gsl_vector * ListHead,
-                          gsl_vector * List, gsl_matrix * MesoPi, gsl_vector * z)
+                          gsl_vector * List, gsl_vector * MesoPi, gsl_vector * z)
 {
 
-  gsl_matrix_set_zero(MesoPi);
+  gsl_vector_set_zero(MesoPi);
+  //gsl_matrix_set_zero(MesoPi);
 
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
@@ -453,24 +454,17 @@ void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
             
             double eij = Compute_Force_ij (Positions, i, Verlet[j], 2, 1, fij);
 
-            double * vij = malloc(1*sizeof(double));
+            double * vij = malloc(3*sizeof(double));
             
             vij[0]  = gsl_matrix_get(Velocities,i,0) + gsl_matrix_get(Velocities,Verlet[j],0);
             vij[1]  = gsl_matrix_get(Velocities,i,1) + gsl_matrix_get(Velocities,Verlet[j],1);
             vij[2]  = vzi + vzj;
 
-            double * Pi = malloc(3*sizeof(double));
-            for (int sigma=((int)min(mu,nu)); sigma<=((int)max(mu,nu));sigma++)
-            {
-              Pi[0] =fij[0]*vij[0];
-              Pi[1] =fij[1]*vij[1];
-              Pi[2] =fij[2]*vij[2];
-
-              for (int k=0;k<3;k++)
-                MesoPi->data[sigma*MesoPi->tda+k] += Pi[k];
-            } 
+            double Pi=fij[0]*vij[0] + fij[1]*vij[1] + fij[2]*vij[2];
+              
+            MesoPi->data[mu*MesoPi->stride] += Pi;
+             
             free(fij);
-            free(Pi);
             free(vij);
           }
         }
@@ -478,7 +472,7 @@ void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
       }
     }
   }
-  gsl_matrix_scale(MesoPi,0.25/dv);
+  gsl_vector_scale(MesoPi,0.5/dv);
 }
 
 

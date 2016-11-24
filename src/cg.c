@@ -193,12 +193,12 @@ int main (int argc, char *argv[]) {
   #endif
 
   #if __COMPUTE_PI__
-    sprintf(str, "./output/%s.MesoPi_x.dat", filestr);
-    oFile.MesoPi_0 = fopen(str, "w");
-    sprintf(str, "./output/%s.MesoPi_y.dat", filestr);
-    oFile.MesoPi_1 = fopen(str, "w");
-    sprintf(str, "./output/%s.MesoPi_z.dat", filestr);
-    oFile.MesoPi_2 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoPi.dat", filestr);
+    oFile.MesoPi = fopen(str, "w");
+    //sprintf(str, "./output/%s.MesoPi_y.dat", filestr);
+    //oFile.MesoPi_1 = fopen(str, "w");
+    //sprintf(str, "./output/%s.MesoPi_z.dat", filestr);
+    //oFile.MesoPi_2 = fopen(str, "w");
   #endif
   
   #if __COMPUTE_MOMENTUM__
@@ -310,7 +310,8 @@ int main (int argc, char *argv[]) {
   gsl_matrix * MesoQ2       = gsl_matrix_calloc (NNodes,3);
   gsl_matrix * MesoQ        = gsl_matrix_calloc (NNodes,3);
   
-  gsl_matrix * MesoPi       = gsl_matrix_calloc (NNodes,3);
+  gsl_vector * MesoPi       = gsl_vector_calloc (NNodes);
+  //gsl_matrix * MesoPi       = gsl_matrix_calloc (NNodes,3);
 
   gsl_matrix * MesoMomentum = gsl_matrix_calloc (NNodes,3);
   gsl_matrix * MesoVelocity = gsl_matrix_calloc (NNodes,3);
@@ -669,9 +670,9 @@ int main (int argc, char *argv[]) {
       gsl_vector_view  MesoQ1_0 = gsl_matrix_column(MesoQ1,0);
       PrintInfo(Step, &MesoQ1_0.vector, oFile.MesoQ1_0);
       gsl_vector_view  MesoQ1_1 = gsl_matrix_column(MesoQ1,1);
-      PrintInfo(Step, &MesoQ1_1.vector, oFile.MesoQ1_1);
+      PrintInfoWithoutStep(&MesoQ1_1.vector, oFile.MesoQ1_1);
       gsl_vector_view  MesoQ1_2 = gsl_matrix_column(MesoQ1,2);
-      PrintInfo(Step, &MesoQ1_2.vector, oFile.MesoQ1_2);
+      PrintInfoWithoutStep(&MesoQ1_2.vector, oFile.MesoQ1_2);
       
       PrintMsg("Obtaining node heat flux fluid-fluid (Q2)...");
 
@@ -679,33 +680,35 @@ int main (int argc, char *argv[]) {
       gsl_matrix_add (MesoQ, MesoQ2);
 
       gsl_vector_view  MesoQ2_0 = gsl_matrix_column(MesoQ2,0);
-      PrintInfo(Step, &MesoQ2_0.vector, oFile.MesoQ2_0);
+      PrintInfoWithoutStep(&MesoQ2_0.vector, oFile.MesoQ2_0);
       gsl_vector_view  MesoQ2_1 = gsl_matrix_column(MesoQ2,1);
-      PrintInfo(Step, &MesoQ2_1.vector, oFile.MesoQ2_1);
+      PrintInfoWithoutStep(&MesoQ2_1.vector, oFile.MesoQ2_1);
       gsl_vector_view  MesoQ2_2 = gsl_matrix_column(MesoQ2,2);
-      PrintInfo(Step, &MesoQ2_2.vector, oFile.MesoQ2_2);
+      PrintInfoWithoutStep(&MesoQ2_2.vector, oFile.MesoQ2_2);
      
       PrintMsg("Saving heat flux fluid-fluid...");
 
       gsl_vector_view  MesoQ_0 = gsl_matrix_column(MesoQ,0);
-      PrintInfo(Step, &MesoQ_0.vector, oFile.MesoQ_0);
+      PrintInfoWithoutStep(&MesoQ_0.vector, oFile.MesoQ_0);
       gsl_vector_view  MesoQ_1 = gsl_matrix_column(MesoQ,1);
-      PrintInfo(Step, &MesoQ_1.vector, oFile.MesoQ_1);
+      PrintInfoWithoutStep(&MesoQ_1.vector, oFile.MesoQ_1);
       gsl_vector_view  MesoQ_2 = gsl_matrix_column(MesoQ,2);
-      PrintInfo(Step, &MesoQ_2.vector, oFile.MesoQ_2);
+      PrintInfoWithoutStep(&MesoQ_2.vector, oFile.MesoQ_2);
     #endif
 
     #if __COMPUTE_PI__
       PrintMsg("Obtaining and saving node heat flux solid-fluid (Pi)...");
       
-      Compute_Meso_Pi(Positions, Velocities, Neighbors, ListHead, List, MesoPi, z);
+      //Compute_Meso_Pi(Positions, Velocities, Neighbors, ListHead, List, MesoPi, z);
       
-      gsl_vector_view  MesoPi_0 = gsl_matrix_column(MesoPi,0);
-      PrintInfo(Step, &MesoPi_0.vector, oFile.MesoPi_0);
-      gsl_vector_view  MesoPi_1 = gsl_matrix_column(MesoPi,1);
-      PrintInfo(Step, &MesoPi_1.vector, oFile.MesoPi_1);
-      gsl_vector_view  MesoPi_2 = gsl_matrix_column(MesoPi,2);
-      PrintInfo(Step, &MesoPi_2.vector, oFile.MesoPi_2);
+      Compute_Meso_Pi(Positions, Velocities, Neighbors, ListHead, List, MesoPi, z);
+      PrintInfoWithoutStep( MesoPi, oFile.MesoPi);
+      //gsl_vector_view  MesoPi_0 = gsl_matrix_column(MesoPi,0);
+      //PrintInfoWithoutStep(&MesoPi_0.vector, oFile.MesoPi_0);
+      //gsl_vector_view  MesoPi_1 = gsl_matrix_column(MesoPi,1);
+      //PrintInfoWithoutStep(&MesoPi_1.vector, oFile.MesoPi_1);
+      //gsl_vector_view  MesoPi_2 = gsl_matrix_column(MesoPi,2);
+      //PrintInfoWithoutStep(&MesoPi_2.vector, oFile.MesoPi_2);
     #endif
 
     #if __COMPUTE_TEMPERATURE__
@@ -875,9 +878,10 @@ int main (int argc, char *argv[]) {
   #endif
   
   #if __COMPUTE_PI_
-  fclose(oFile.MesoPi_0);
-  fclose(oFile.MesoPi_1);
-  fclose(oFile.MesoPi_2);
+  fclose(oFile.MesoPi);
+  //fclose(oFile.MesoPi_0);
+  //fclose(oFile.MesoPi_1);
+  //fclose(oFile.MesoPi_2);
   #endif
 
   #if __COMPUTE_MOMENTUM__
@@ -1105,7 +1109,8 @@ int main (int argc, char *argv[]) {
   gsl_matrix_free(MesoQ1);
   gsl_matrix_free(MesoQ2);
   gsl_matrix_free(MesoQ);
-  gsl_matrix_free(MesoPi);
+  gsl_vector_free(MesoPi);
+  //gsl_matrix_free(MesoPi);
   gsl_matrix_free(MesoMomentum);
   gsl_matrix_free(MesoVelocity);
   gsl_vector_free(MesoInternalEnergy);

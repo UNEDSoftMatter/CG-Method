@@ -223,15 +223,15 @@ struct OutputFiles
   FILE * MesoQ_0;
   FILE * MesoQ_1;
   FILE * MesoQ_2;
-  FILE * MesoPi_0;
-  FILE * MesoPi_1;
-  FILE * MesoPi_2;
+  FILE * MesoPi;
 };
 
 // Print  a row in  *fileptr with the  information stored in  vector.  The first
 // column corresponds to the current step
 
 void PrintInfo(int Step, gsl_vector * vector, FILE* fileptr);
+
+void PrintInfoWithoutStep(gsl_vector * vector, FILE* fileptr);
 
 // Print a row in *fileptr with the information store in a double . The firs column
 // corresponds to the current step. 
@@ -295,7 +295,7 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
                           gsl_vector * List, gsl_matrix * MesoQ2, gsl_vector * z);
 
 void Compute_Meso_Pi (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matrix * Neighbors, gsl_vector * ListHead,
-                          gsl_vector * List, gsl_matrix * MesoPi, gsl_vector * z);
+                          gsl_vector * List, gsl_vector * MesoPi, gsl_vector * z);
 
 /* #############################################################################
 #  Macroscopic functions in macrofunctions.c 
