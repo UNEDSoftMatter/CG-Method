@@ -240,6 +240,10 @@ void PrintInfoWithoutStep(gsl_vector * vector, FILE* fileptr);
 
 void PrintScalarWithIndex(int Step, double Value, FILE*fileptr);
 
+// Print a row in *fileptr with the information store in a double .
+
+void PrintScalarWithoutIndex( double Value, FILE*fileptr);
+
 // Process the input files (lammps trajectories) into snapshots
 
 void PrepareInputFiles(void);

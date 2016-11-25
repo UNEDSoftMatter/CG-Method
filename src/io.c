@@ -284,6 +284,11 @@ void PrintComputingOptions(void)
   #endif
 }
 
+void PrintScalarWithoutIndex( double Value, FILE*fileptr)
+{
+    fprintf(fileptr, "\t%8.10e\n", Value);
+}
+
 void PrintScalarWithIndex(int Step, double Value, FILE*fileptr)
 {
     fprintf(fileptr, "%10d\t%8.10e\n", Step, Value);
