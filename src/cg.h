@@ -206,6 +206,7 @@ struct OutputFiles
   FILE * MesoVelocity_1;
   FILE * MesoVelocity_2;
   FILE * MesoInternalEnergy;
+  FILE * MesoDerivativeInternalEnergy;
   FILE * MacroEnergyUpperWall;
   FILE * MacroEnergyLowerWall;
   FILE * MacroMomentumUpperWall;
@@ -291,6 +292,9 @@ void Compute_Meso_Profile(gsl_matrix * Positions, gsl_vector * Micro, gsl_vector
 
 void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum, 
                             gsl_vector * MesoDensity, gsl_vector * InternalEnergy);
+
+void Compute_DerivativeInternalEnergy(gsl_vector * Pi, gsl_matrix * Q,
+                                      gsl_vector * DerivativeInternalEnergy);
 
 double zmuij(gsl_vector * z, int mu, double zi, double zj);
 
