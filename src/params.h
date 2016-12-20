@@ -51,10 +51,10 @@
 #define __COMPUTE_DENSITY__                 true
 #define __COMPUTE_FORCE__                   false
 #define __COMPUTE_ENERGY__                  true
-#define __COMPUTE_TEMPERATURE__             true
+#define __COMPUTE_TEMPERATURE__             false
 #define __COMPUTE_STRESS__                  false
 #define __COMPUTE_MOMENTUM__                false
-#define __COMPUTE_VELOCITY__                true
+#define __COMPUTE_VELOCITY__                false
 #define __COMPUTE_INTERNAL_ENERGY__         true
 #define __COMPUTE_MACRO_ENERGY__            true
 #define __COMPUTE_MACRO_MOMENTUM__          true

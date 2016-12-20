@@ -706,7 +706,7 @@ int main (int argc, char *argv[]) {
     #if __COMPUTE_TEMPERATURE__
       PrintMsg("Obtaining node temperature...");
       Compute_Meso_Temp(MesoKinetic, MesoDensity_2, MesoTemp);
-      PrintInfo(Step, MesoTemp, oFile.MesoTemp);
+      PrintInfoWithoutStep( MesoTemp, oFile.MesoTemp);
     #endif
         
     #if __COMPUTE_INTERNAL_ENERGY__
@@ -716,6 +716,9 @@ int main (int argc, char *argv[]) {
       PrintMsg("Obtaining node derivative internal energies...");
       Compute_DerivativeInternalEnergy(MesoPi,MesoQ, MesoDerivativeInternalEnergy);
       PrintInfoWithoutStep(MesoDerivativeInternalEnergy, oFile.MesoDerivativeInternalEnergy);
+      //gsl_matrix_get_col(MesoDerivativeInternalEnergy, MesoQ, 2);
+      //gsl_vector_add(MesoDerivativeInternalEnergy, MesoPi);
+      //PrintInfoWithoutStep(MesoDerivativeInternalEnergy, oFile.MesoDerivativeInternalEnergy);
     #endif
     
     // MACROSCOPIC INFORMATION
