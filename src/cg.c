@@ -548,17 +548,17 @@ int main (int argc, char *argv[]) {
         gsl_vector_view MesoMomentum_0  = gsl_matrix_column(MesoMomentum,0);
         gsl_vector_view Momentum_0      = gsl_matrix_column(Momentum,0);
         Compute_Meso_Profile(Positions, &Momentum_0.vector, z, &MesoMomentum_0.vector, 2);
-        PrintInfo(Step, &MesoMomentum_0.vector, oFile.MesoMomentum_0);
+        PrintInfoWithoutStep( &MesoMomentum_0.vector, oFile.MesoMomentum_0);
         
         gsl_vector_view MesoMomentum_1  = gsl_matrix_column(MesoMomentum,1);
         gsl_vector_view Momentum_1      = gsl_matrix_column(Momentum,1);
         Compute_Meso_Profile(Positions, &Momentum_1.vector, z, &MesoMomentum_1.vector, 2);
-        PrintInfo(Step, &MesoMomentum_1.vector, oFile.MesoMomentum_1);
+        PrintInfoWithoutStep( &MesoMomentum_1.vector, oFile.MesoMomentum_1);
         
         gsl_vector_view MesoMomentum_2  = gsl_matrix_column(MesoMomentum,2);
         gsl_vector_view Momentum_2      = gsl_matrix_column(Momentum,2);
         Compute_Meso_Profile(Positions, &Momentum_2.vector, z, &MesoMomentum_2.vector, 2);
-        PrintInfo(Step, &MesoMomentum_2.vector, oFile.MesoMomentum_2);
+        PrintInfoWithoutStep(&MesoMomentum_2.vector, oFile.MesoMomentum_2);
       }
       #endif
       #if __COMPUTE_VELOCITY__
@@ -568,11 +568,11 @@ int main (int argc, char *argv[]) {
         Compute_Meso_Velocity(MesoMomentum,MesoDensity_2,MesoVelocity);
 
         gsl_vector_view MesoVelocity_0 = gsl_matrix_column(MesoVelocity,0);
-        PrintInfo(Step, &MesoVelocity_0.vector, oFile.MesoVelocity_0);
+        PrintInfoWithoutStep( &MesoVelocity_0.vector, oFile.MesoVelocity_0);
         gsl_vector_view MesoVelocity_1 = gsl_matrix_column(MesoVelocity,1);
-        PrintInfo(Step, &MesoVelocity_1.vector, oFile.MesoVelocity_1);
+        PrintInfoWithoutStep( &MesoVelocity_1.vector, oFile.MesoVelocity_1);
         gsl_vector_view MesoVelocity_2 = gsl_matrix_column(MesoVelocity,2);
-        PrintInfo(Step, &MesoVelocity_2.vector, oFile.MesoVelocity_2);
+        PrintInfoWithoutStep( &MesoVelocity_2.vector, oFile.MesoVelocity_2);
       }
       #endif
       #if __COMPUTE_ENERGY__
