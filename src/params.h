@@ -7,13 +7,13 @@
 #define VelocitiesFileStr "../simulation/production.velocities"
 
 // Total number of particles (type1+type2) in the simulation
-#define NParticles 11475
+#define NParticles 11025
 
 // Number of snapshots in dump files
-#define NSteps      4
+#define NSteps      50
 
 // Number of nodes you want to create
-#define NNodes        64
+#define NNodes        100
 
 // Size of the simulation box
 #define Lx            17.3162

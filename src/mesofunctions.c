@@ -637,11 +637,11 @@ void Compute_InternalEnergy(gsl_vector * MesoEnergy, gsl_matrix * MesoMomentum,
 }
 
 
-void Compute_DerivativeInternalEnergy(gsl_vector * Pi, gsl_matrix * Q, 
-                                      gsl_vector * DerivativeInternalEnergy)
+void Compute_DerivativeMesoEnergy(gsl_vector * Pi, gsl_matrix * Q, 
+                                      gsl_vector * DerivativeMesoEnergy)
 {
     double dz = ((float) Lz) / NNodes;
-    gsl_vector_set_zero(DerivativeInternalEnergy);
+    gsl_vector_set_zero(DerivativeMesoEnergy);
     gsl_vector * Die = gsl_vector_calloc(NNodes);
 
     for (int mu=0;mu<NNodes;mu++)
@@ -657,7 +657,7 @@ void Compute_DerivativeInternalEnergy(gsl_vector * Pi, gsl_matrix * Q,
             gsl_vector_set(Die,mu,dev);
         }
     }
-    gsl_vector_add(DerivativeInternalEnergy, Die);
+    gsl_vector_add(DerivativeMesoEnergy, Die);
 
     gsl_vector_free(Die);
 }

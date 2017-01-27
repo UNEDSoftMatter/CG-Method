@@ -218,8 +218,8 @@ int main (int argc, char *argv[]) {
   #if __COMPUTE_INTERNAL_ENERGY__
     sprintf(str, "./output/%s.MesoInternalEnergy.dat", filestr);
     oFile.MesoInternalEnergy = fopen(str, "w");
-    sprintf(str, "./output/%s.MesoDerivativeInternalEnergy.dat", filestr);
-    oFile.MesoDerivativeInternalEnergy = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoDerivativeMesoEnergy.dat", filestr);
+    oFile.MesoDerivativeMesoEnergy = fopen(str, "w");
   #endif
     
   #if __COMPUTE_MACRO_ENERGY__
@@ -314,7 +314,7 @@ int main (int argc, char *argv[]) {
   gsl_matrix * MesoVelocity = gsl_matrix_calloc (NNodes,3);
   
   gsl_vector * MesoInternalEnergy = gsl_vector_calloc (NNodes);
-  gsl_vector * MesoDerivativeInternalEnergy = gsl_vector_calloc (NNodes);
+  gsl_vector * MesoDerivativeMesoEnergy = gsl_vector_calloc (NNodes);
   
   // Macroscopic variables
   gsl_vector * MacroMomentumUpper = gsl_vector_calloc(3);
@@ -714,11 +714,11 @@ int main (int argc, char *argv[]) {
       Compute_InternalEnergy(MesoEnergy, MesoMomentum, MesoDensity_2, MesoInternalEnergy);
       PrintInfoWithoutStep( MesoInternalEnergy, oFile.MesoInternalEnergy);
       PrintMsg("Obtaining node derivative internal energies...");
-      Compute_DerivativeInternalEnergy(MesoPi,MesoQ, MesoDerivativeInternalEnergy);
-      PrintInfoWithoutStep(MesoDerivativeInternalEnergy, oFile.MesoDerivativeInternalEnergy);
-      //gsl_matrix_get_col(MesoDerivativeInternalEnergy, MesoQ, 2);
-      //gsl_vector_add(MesoDerivativeInternalEnergy, MesoPi);
-      //PrintInfoWithoutStep(MesoDerivativeInternalEnergy, oFile.MesoDerivativeInternalEnergy);
+      Compute_DerivativeMesoEnergy(MesoPi,MesoQ, MesoDerivativeMesoEnergy);
+      PrintInfoWithoutStep(MesoDerivativeMesoEnergy, oFile.MesoDerivativeMesoEnergy);
+      //gsl_matrix_get_col(MesoDerivativeMesoEnergy, MesoQ, 2);
+      //gsl_vector_add(MesoDerivativeMesoEnergy, MesoPi);
+      //PrintInfoWithoutStep(MesoDerivativeMesoEnergy, oFile.MesoDerivativeMesoEnergy);
     #endif
     
     // MACROSCOPIC INFORMATION
@@ -893,7 +893,7 @@ int main (int argc, char *argv[]) {
 
   #if __COMPUTE_INTERNAL_ENERGY__
   fclose(oFile.MesoInternalEnergy);
-  fclose(oFile.MesoDerivativeInternalEnergy);
+  fclose(oFile.MesoDerivativeMesoEnergy);
   #endif
 
   #if __COMPUTE_MACRO_ENERGY__
@@ -1111,7 +1111,7 @@ int main (int argc, char *argv[]) {
   gsl_matrix_free(MesoMomentum);
   gsl_matrix_free(MesoVelocity);
   gsl_vector_free(MesoInternalEnergy);
-  gsl_vector_free(MesoDerivativeInternalEnergy);
+  gsl_vector_free(MesoDerivativeMesoEnergy);
   
   // Free macro vectors
   gsl_vector_free(MacroMomentumUpper);
