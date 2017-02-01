@@ -178,3 +178,11 @@ double Compute_MacroInternalEnergy(double MacroEnergy, gsl_vector * Momentum, do
 return MacroInternalEnergy;
 }
 
+double Compute_MacroEnergy(double MacroEnergyUpperWall, double MacroEnergyLowerWall)
+{
+    double MacroEnergy;
+    
+    MacroEnergy = MacroEnergyUpperWall + MacroEnergyLowerWall;
+return MacroEnergy;
+}
+

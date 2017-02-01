@@ -10,7 +10,7 @@
 #define NParticles 11025
 
 // Number of snapshots in dump files
-#define NSteps      50
+#define NSteps      5
 
 // Number of nodes you want to create
 #define NNodes        100

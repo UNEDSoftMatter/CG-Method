@@ -227,6 +227,8 @@ int main (int argc, char *argv[]) {
     oFile.MacroEnergyUpperWall = fopen(str, "w");
     sprintf(str, "./output/%s.MacroEnergyLowerWall.dat", filestr);
     oFile.MacroEnergyLowerWall = fopen(str, "w");
+    sprintf(str, "./output/%s.MacroEnergy.dat", filestr);
+    oFile.MacroEnergy = fopen(str, "w");
   #endif
 
   #if __COMPUTE_MACRO_INTERNAL_ENERGY__
@@ -726,6 +728,7 @@ int main (int argc, char *argv[]) {
     #if __COMPUTE_MACRO_ENERGY__
       double MacroEnergyUpper;
       double MacroEnergyLower;
+      double MacroEnergy;
 
       PrintMsg("Computing the energy of upper wall");
       MacroEnergyUpper = Compute_Macro(Energy, Positions, 1, "top");
@@ -734,6 +737,10 @@ int main (int argc, char *argv[]) {
       PrintMsg("Computing the energy of lower wall");
       MacroEnergyLower = Compute_Macro(Energy, Positions, 1, "bottom");
       PrintScalarWithoutIndex(MacroEnergyLower, oFile.MacroEnergyLowerWall); 
+      
+      PrintMsg("Computing the energy of the wall");
+      MacroEnergy = Compute_MacroEnergy(MacroEnergyUpper, MacroEnergyLower);
+      PrintScalarWithoutIndex(MacroEnergy, oFile.MacroEnergy); 
     #endif
 
     #if __COMPUTE_MACRO_MOMENTUM__
@@ -899,6 +906,7 @@ int main (int argc, char *argv[]) {
   #if __COMPUTE_MACRO_ENERGY__
   fclose(oFile.MacroEnergyUpperWall);
   fclose(oFile.MacroEnergyLowerWall);
+  fclose(oFile.MacroEnergy);
   #endif
   
   #if __COMPUTE_MACRO_MOMENTUM__

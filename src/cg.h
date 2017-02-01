@@ -209,6 +209,7 @@ struct OutputFiles
   FILE * MesoDerivativeMesoEnergy;
   FILE * MacroEnergyUpperWall;
   FILE * MacroEnergyLowerWall;
+  FILE * MacroEnergy;
   FILE * MacroMomentumUpperWall;
   FILE * MacroMomentumLowerWall;
   FILE * CenterOfMassUpperWall;
@@ -318,5 +319,7 @@ void Compute_CenterOfMass(gsl_matrix * Positions, int type, char *str, gsl_vecto
 double Compute_TotalMass(gsl_matrix * Positions, int type, char *str);
 
 double Compute_MacroInternalEnergy(double MacroEnergy, gsl_vector * Momentum, double TotalMass);
+
+double Compute_MacroEnergy(double MacroEnergyUpperWall, double MacroEnergyLowerWall);
 
 #endif
