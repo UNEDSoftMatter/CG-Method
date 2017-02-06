@@ -210,6 +210,7 @@ struct OutputFiles
   FILE * MacroEnergyUpperWall;
   FILE * MacroEnergyLowerWall;
   FILE * MacroEnergy;
+  FILE * TotalEnergy;
   FILE * MacroMomentumUpperWall;
   FILE * MacroMomentumLowerWall;
   FILE * CenterOfMassUpperWall;
@@ -321,5 +322,7 @@ double Compute_TotalMass(gsl_matrix * Positions, int type, char *str);
 double Compute_MacroInternalEnergy(double MacroEnergy, gsl_vector * Momentum, double TotalMass);
 
 double Compute_MacroEnergy(double MacroEnergyUpperWall, double MacroEnergyLowerWall);
+
+double Compute_TotalEnergy(gsl_vector * Micro);
 
 #endif

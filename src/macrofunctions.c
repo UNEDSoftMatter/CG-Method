@@ -186,3 +186,13 @@ double Compute_MacroEnergy(double MacroEnergyUpperWall, double MacroEnergyLowerW
 return MacroEnergy;
 }
 
+double Compute_TotalEnergy(gsl_vector * Micro)
+{
+    double TotalEnergy = 0.0;
+    for(int i=0;i<NParticles;i++)
+    {
+        TotalEnergy += gsl_vector_get(Micro, i);
+    }
+    return TotalEnergy;
+}
+
