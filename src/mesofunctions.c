@@ -662,6 +662,30 @@ void Compute_DerivativeMesoEnergy(gsl_vector * Pi, gsl_matrix * Q,
     gsl_vector_free(Die);
 }
 
+void Compute_DerivativeMesoMomentum(gsl_matrix * MesoMomentum, 
+                                      gsl_vector * DerivativeMesoMomentum)
+{
+    double dz = ((float) Lz) / NNodes;
+    gsl_vector_set_zero(DerivativeMesoMomentum);
+    gsl_vector * Dm = gsl_vector_calloc(NNodes);
+
+    for (int mu=0;mu<NNodes;mu++)
+    {
+        if ( mu-1 < 0)
+        {
+            double dev = - gsl_matrix_get(MesoMomentum,mu,2) / dz ; 
+            gsl_vector_set(Dm,mu,dev);
+        }
+        else
+        {
+            double dev = -(gsl_matrix_get(MesoMomentum,mu,2)- gsl_matrix_get(MesoMomentum, mu-1, 2)) / dz ;
+            gsl_vector_set(Dm,mu,dev);
+        }
+    }
+    gsl_vector_add(DerivativeMesoMomentum, Dm);
+
+    gsl_vector_free(Dm);
+}
 
 double zmuij(gsl_vector * z, int mu, double zi, double zj)
 {

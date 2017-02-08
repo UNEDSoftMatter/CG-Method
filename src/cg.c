@@ -204,6 +204,8 @@ int main (int argc, char *argv[]) {
     oFile.MesoMomentum_1 = fopen(str, "w");
     sprintf(str, "./output/%s.MesoMomentum_z.dat", filestr);
     oFile.MesoMomentum_2 = fopen(str, "w");
+    sprintf(str, "./output/%s.MesoDerivativeMesoMomentum.dat", filestr);
+    oFile.MesoDerivativeMesoMomentum = fopen(str, "w");
   #endif
 
   #if __COMPUTE_VELOCITY__
@@ -315,6 +317,7 @@ int main (int argc, char *argv[]) {
   gsl_vector * MesoPi       = gsl_vector_calloc (NNodes);
 
   gsl_matrix * MesoMomentum = gsl_matrix_calloc (NNodes,3);
+  gsl_vector * MesoDerivativeMesoMomentum = gsl_vector_calloc (NNodes);
   gsl_matrix * MesoVelocity = gsl_matrix_calloc (NNodes,3);
   
   gsl_vector * MesoInternalEnergy = gsl_vector_calloc (NNodes);
@@ -563,6 +566,9 @@ int main (int argc, char *argv[]) {
         gsl_vector_view Momentum_2      = gsl_matrix_column(Momentum,2);
         Compute_Meso_Profile(Positions, &Momentum_2.vector, z, &MesoMomentum_2.vector, 2);
         PrintInfoWithoutStep(&MesoMomentum_2.vector, oFile.MesoMomentum_2);
+        
+        Compute_DerivativeMesoMomentum(MesoMomentum, MesoDerivativeMesoMomentum);
+        PrintInfoWithoutStep(MesoDerivativeMesoMomentum, oFile.MesoDerivativeMesoMomentum);
       }
       #endif
       #if __COMPUTE_VELOCITY__
@@ -897,6 +903,7 @@ int main (int argc, char *argv[]) {
   fclose(oFile.MesoMomentum_0);
   fclose(oFile.MesoMomentum_1);
   fclose(oFile.MesoMomentum_2);
+  fclose(oFile.MesoDerivativeMesoMomentum);
   #endif
 
   #if __COMPUTE_VELOCITY__
@@ -1125,6 +1132,7 @@ int main (int argc, char *argv[]) {
   gsl_matrix_free(MesoQ);
   gsl_vector_free(MesoPi);
   gsl_matrix_free(MesoMomentum);
+  gsl_vector_free(MesoDerivativeMesoMomentum);
   gsl_matrix_free(MesoVelocity);
   gsl_vector_free(MesoInternalEnergy);
   gsl_vector_free(MesoDerivativeMesoEnergy);
