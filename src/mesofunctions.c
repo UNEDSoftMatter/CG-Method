@@ -365,7 +365,7 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
             rij[2] -= Lz*round(rij[2]/Lz);
             
             vij[0]  = gsl_matrix_get(Velocities,i,0) + gsl_matrix_get(Velocities,Verlet[j],0);
-            vij[1]  = gsl_matrix_get(Positions,i,1) + gsl_matrix_get(Positions,Verlet[j],1);
+            vij[1]  = gsl_matrix_get(Velocities,i,1) + gsl_matrix_get(Velocities,Verlet[j],1);
             vij[2]  = vzi + vzj;
 
             double * Q2 = malloc(3*sizeof(double));
