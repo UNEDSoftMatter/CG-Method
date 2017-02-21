@@ -686,6 +686,7 @@ int main (int argc, char *argv[]) {
 
       Compute_Meso_Q2(Positions, Velocities, Neighbors, ListHead, List, MesoQ2, z);
       gsl_matrix_add (MesoQ, MesoQ2);
+      PrintMsg("Obtaining node heat flux fluid-fluid (Q2)...");
 
       gsl_vector_view  MesoQ2_0 = gsl_matrix_column(MesoQ2,0);
       PrintInfoWithoutStep(&MesoQ2_0.vector, oFile.MesoQ2_0);

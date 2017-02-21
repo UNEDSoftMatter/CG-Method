@@ -302,13 +302,13 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
 
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
-  #pragma omp parallel num_threads(8)
+  #pragma omp parallel num_threads(1)
   {
     #pragma omp for schedule (static) 
     // For all i particles
     for (int i=0;i<NParticles;i++)
     {
-      // Only for fluid (type 2) particle
+        // Only for fluid (type 2) particle
       if ((int) gsl_matrix_get(Positions,i,0) == 2)
       {
         double zi = gsl_matrix_get(Positions,i,3);
@@ -351,7 +351,7 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
             // loop for particles different from type 2
             double * fij = malloc(3*sizeof(double));
             
-            double eij = Compute_Force_ij (Positions, i, Verlet[j], 2, 2, fij);
+            //double eij = Compute_Force_ij(Positions, i, Verlet[j], 2, 2, fij);
     
             double * rij = malloc(3*sizeof(double));
 
@@ -381,7 +381,6 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
               for (int k=0;k<3;k++)
                 MesoQ2->data[sigma*MesoQ2->tda+k] += Q2[k];
             }
-            
             free(fij);
             free(rij);
             free(Q2);
