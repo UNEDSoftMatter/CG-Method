@@ -302,7 +302,7 @@ void Compute_Meso_Q2 (gsl_matrix * Positions, gsl_matrix * Velocities, gsl_matri
 
   double dv = ((float) Lx * Ly * Lz) / NNodes;
   
-  #pragma omp parallel num_threads(1)
+  #pragma omp parallel num_threads(8)
   {
     #pragma omp for schedule (static) 
     // For all i particles
